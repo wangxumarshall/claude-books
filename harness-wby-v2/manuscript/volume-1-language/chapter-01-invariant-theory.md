@@ -200,6 +200,12 @@ $$\text{TypeInvariant}(A) \Rightarrow \forall o \in \text{Output}(A), \text{Type
 
 **证明**：由类型不变量定义 $\forall o, \text{TypeCheck}_T(o)$ 可知，所有输出必经类型检查。检查通过则输出正确，检查失败则拒绝。故任意错误输出必在检查阶段被捕获。∎
 
+**推论（逆否命题）**：
+
+$$\neg \text{TypeInvariant}(A) \Leftrightarrow \exists o: \text{TypeCheck}(o) \neq \text{True} \land \text{Reject}(o) = \text{False}$$
+
+即：存在未被拒绝的错误输出时，类型不变量必然不成立。这为类型不变量监测提供了逆向验证手段。
+
 **引理2（状态不变量收敛定理）**：在有效状态转移序列上，状态不变量保持成立。
 
 $$\forall s_1, s_2 \in States, \text{ValidTransition}(s_1, s_2) \land \text{StateInvariant}(s_1) \Rightarrow \text{StateInvariant}(s_2)$$

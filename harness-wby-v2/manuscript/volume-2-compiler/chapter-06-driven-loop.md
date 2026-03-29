@@ -123,6 +123,7 @@ tsc --noEmit --format json
 
 ```rust
 use std::collections::{HashMap, VecDeque};
+use std::hash::{Hash, Hasher};
 
 /// 死循环检测器
 struct CompileLoopDetector {
@@ -141,9 +142,11 @@ impl CompileLoopDetector {
     }
 
     fn check(&mut self, error: &str) -> bool {
-        // 使用完整blake3哈希（32字节）而非截断的u64
-        let hash = blake3::hash(error.as_bytes());
-        let hash_u64 = hash.as_u64();
+        // 使用标准库Hasher，避免外部依赖
+        use std::collections::hash_map::DefaultHasher;
+        let mut hasher = DefaultHasher::new();
+        error.hash(&mut hasher);
+        let hash_u64 = hasher.finish();
 
         // 检查该错误的出现次数
         let count = self.error_counts.entry(hash_u64).or_insert(0);

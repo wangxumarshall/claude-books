@@ -19,10 +19,11 @@
 |------|-----|---------|---------|
 | Anthropic Research (2025) | https://www.anthropic.com/research | Agentic Misalignment研究（2025.6.20发布） | ✅ 已核实 |
 | Anthropic C Compiler | https://anthropic.com/engineering/building-c-compiler | 16 Agent, $20K成本，GCC 99%通过率 | ✅ 已核实 |
-| OpenAI Harness Engineering | https://openai.com/index/harness-engineering/ | 100万行代码 | ⚠️ 待访问 |
+| OpenAI Harness Engineering | https://openai.com/index/harness-engineering/ | 100万行代码，1500 PR，0行人类代码 | ✅ 已核实 |
 | MCP Protocol Spec | https://modelcontextprotocol.io | 协议规范（USB-C for AI） | ✅ 已核实 |
-| StrongDM Leash | https://strongdm.com | Leash <1ms开销 | ⚠️ 待核实（页面返回404） |
-| SWE-agent | https://swe-agent.com | 65% on SWE-bench verified | ✅ 已核实 |
+| Cursor Self-Driving | https://cursor.com/blog/self-driving-codebases | ~1000 commits/小时 | ✅ 已核实 |
+| Stripe Minions | https://stripe.com/blog/stripes-one-shot-coding-agents | Blueprint混合编排 | ⚠️ 待核实（URL变更） |
+| StrongDM Leash | https://strongdm.com/blog/policy-enforcement-for-agentic-ai-with-leash | Leash <1ms开销 | ❌ 无法核实（页面404） |
 
 ## C级（第三方验证）
 
