@@ -222,6 +222,21 @@ $$\text{TypeInvariant} \land \text{StateInvariant} \land \text{ExecutionInvarian
 
 **推论（开放世界假设）**：在开放世界假设下，三层不变量提供**检测性保证**而非**预防性保证**——不变量被违反时必定可检测，但无法防止违反本身发生。这与第7章TNR不可能性定理的结论一致。
 
+### 形式化边界定义
+
+**闭合世界假设（CWA）**：
+设U为宇宙（Universe），则：
+- 所有实体都在U内
+- 所有操作都在U内定义
+- 外部效应视为不可观测或不存在
+
+**开放世界假设（OWA）**：
+- 外部实体存在：$\exists e \notin \text{LocalSystem}$
+- 不可逆操作存在：$\exists a \in \text{Actions}: \text{Undo}(a(s)) \neq s$
+- 敌手可能介入：$\exists \text{adv}$ 可在任意时刻介入
+
+在CWA下，三层不变量完备性定理成立；在OWA下，仅提供检测性保证。
+
 ### 理论边界声明
 
 **边界条件1（类型系统局限性）**：类型不变量验证的是**语法结构**而非**语义意图**。Zod Schema验证输出是否为 `string` 类型，但无法判断该字符串是否为恶意指令。这是类型不变量与执行不变量的分工边界：
