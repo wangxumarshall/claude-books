@@ -1,0 +1,848 @@
+
+Writing AI Agent with Rust from Scratch, Deploying to Edge with WebAssembly — OS Week 1
+Dogukan Tuna
+
+Final UI + Testing
+Table of Contents
+
+Introduction
+Writing my first Rust Agent
+Setting Up Packages
+Setting Up Our Crate
+Preparing an UI & Testing Our Agent
+3. Conclusion
+
+Introduction
+Last week, I decided to start a new content series for my Medium account, a series of blog posts to both challenge me and share fresh insights in every article with implementations on a WEEKLY BASIS, if I can keep up with the times. While I anticipate covering areas like large language models, neural networks, AI agents, distributed AI/ML systems, and AI frameworks, I’m open to exploring a broader range of subjects as the series evolves. My aim is to deliver implementation-focused content on a consistent weekly schedule.
+
+Since I have been working with Python for a long time on constructing AI agents and workloads, I have been always wondering how to prepare this experience (but simple) on the Rust programming language side for a while, and frankly, I had never looked at the current ecosystem for the Rust side. First, I did a short ecosystem search and find how far the current ecosystem has come for Rust in AI agents. But instead of using these, I decided to make an AI agent from scratch for the weekly challenge and deploy it to edge (client-side) somehow. I was going to be a little rusty and I’ve been wanting to play with WASM for a long time.
+
+First step in this process was to set up my development environment. I installed the latest version of Rust and familiarized myself quickly with its syntax and features. I also explored WebAssembly (WASM), a powerful IR that allows Rust code to run at near-native speed in web browsers. This would enable me to deploy my AI agent efficiently to edge, so, client-side.
+
+Then, hit the cargo new!
+Writing my first Rust Agent
+
+Cargo crate representation
+What we need to do here is basically: open a new project, construct the AsyncOpenAI client, create a chain structure by defining async traits and custom structures for the Agents, and then bind the top-level interface to the WASM.
+
+We also need to determine how to conceptually construct an agent. To avoid getting bogged down in the agent setup for now, I decided to design an agent that can understand an article from arXiv, interpret it, gather information from various sources using a search engine, and convert this information into an article based on our prompt.
+
+Setting Up Packages
+So, first let’s know the components and crates which we will be use:
+
+AsyncOpenAI:
+
+Rust library for OpenAI platform services with pre-built custom structs.
+Crate: https://docs.rs/async-openai/latest/async_openai/all.html
+AsyncTrait:
+
+In 2023, The Rust Async Working Group is excited to announce major progress towards goal of enabling the use of async fn in traits.
+This crate provides an attribute macro to make async fn in traits work with dyn traits.
+We write an #[async_trait] macro on top of traits and trait impls that contain async fn, and then they work.
+Crate: https://docs.rs/async-trait/latest/async_trait/all.html
+Serde & SerdeJson:
+
+Framework for serializing and deserializing Rust data structures efficiently and generically, and its extension SerdeJson which will be used for the manipulation of JSON object of search data.
+Serde usage from the docs:
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    let point = Point { x: 1, y: 2 };
+
+    // Convert the Point to a JSON string.
+    let serialized = serde_json::to_string(&point).unwrap();
+
+    // Prints serialized = {"x":1,"y":2}
+    println!("serialized = {}", serialized);
+
+    // Convert the JSON string back to a Point.
+    let deserialized: Point = serde_json::from_str(&serialized).unwrap();
+
+    // Prints deserialized = Point { x: 1, y: 2 }
+    println!("deserialized = {:?}", deserialized);
+}
+Crates: https://crates.io/crates/serde & https://crates.io/crates/serde_json
+reqwest:
+
+Convenient, higher-level HTTP Client for Rust.
+We will construct the HTTPClient object for arXiv and Search agent with this library.
+wasm-bindgen:
+
+This crate contains the runtime support necessary for wasm-bindgen the attribute and tool. Crates pull in the #[wasm_bindgen] attribute through this crate and this crate also provides JS bindings through the JsValue interface.
+We will create bindgins with this, and compile.
+Additionally:
+
+dotenv
+tokio
+colored
+pdf-extract
+getrandom
+Setting Up Our Crate
+Now we can start the implementation. We’ll skip the main.rs and lib.rs files for now and focus on modularizing the agents. Let’s create a folder under /src/ called src/agents/.
+
+Get Dogukan Tuna’s stories in your inbox
+Join Medium for free to get updates from this writer.
+
+Enter your email
+Subscribe
+
+Remember me for faster sign in
+
+src/agents/mod.rs
+
+pub mod agent;
+pub mod writer;
+pub mod search_agent;
+pub mod arxiv_agent;
+src/agents/agent.rs
+
+use async_openai::{config::OpenAIConfig, Client as OpenAIClient};
+use async_trait::async_trait;
+
+#[derive(Debug)]
+pub struct ApiError;
+
+#[async_trait]
+pub trait Agent {
+    fn name(&self) -> String;
+    fn client(&self) -> OpenAIClient<OpenAIConfig>;
+    fn system_message(&self) -> String;
+
+    async fn prompt(&self, input: &str, data: String) -> Result<String, ApiError>;
+}
+src/agents/search_agent.rs
+
+use async_openai::{config::OpenAIConfig, Client as OpenAIClient};
+use async_trait::async_trait;
+use dotenv::dotenv;
+use reqwest::header::{HeaderMap, HeaderValue};
+use serde_json::Value;
+use std::env;
+
+use crate::agents::agent::{Agent, ApiError};
+
+#[derive(Clone)]
+pub struct SearchAgent {
+    http_client: reqwest::Client,
+    system: Option<String>,
+    openai_client: OpenAIClient<OpenAIConfig>,
+}
+
+#[async_trait]
+impl Agent for SearchAgent {
+    fn name(&self) -> String {
+        "SearchAgent".to_string()
+    }
+
+    fn client(&self) -> OpenAIClient<OpenAIConfig> {
+        self.openai_client.clone()
+    }
+
+    fn system_message(&self) -> String {
+        if let Some(message) = &self.system {
+            message.to_owned()
+        } else {
+            "You are an agent. You will receive a question that may be quite short or does not have much context. 
+             Your job is to research the Internet and to return with a high-quality summary to the user, assisted by the provided context.
+             The provided context will be in JSON format and contains data about the initial Google results for the website or query.
+             Be concise.
+
+        Question:
+        ".to_string()
+        }
+    }
+
+    async fn prompt(&self, input: &str, data: String) -> Result<String, ApiError> {
+        let input = format!(
+            "{input}
+
+            Provided context:
+            {}
+            ",
+            serde_json::to_string_pretty(&data).map_err(|_| ApiError)?
+        );
+        let res =
+            self.client()
+                .chat()
+                .create(
+                    async_openai::types::CreateChatCompletionRequestArgs::default()
+                        .model("gpt-3.5-turbo")
+                        .messages(vec![
+                        async_openai::types::ChatCompletionRequestMessage::System(
+                            async_openai::types::ChatCompletionRequestSystemMessageArgs::default()
+                                .content(&self.system_message())
+                                .build().map_err(|_| ApiError)?,
+                        ),
+                        async_openai::types::ChatCompletionRequestMessage::User(
+                            async_openai::types::ChatCompletionRequestUserMessageArgs::default()
+                                .content(input)
+                                .build().map_err(|_| ApiError)?,
+                        ),
+                    ])
+                        .build()
+                        .map_err(|_| ApiError)?,
+                )
+                .await
+                .map_err(|_| ApiError)?
+                .choices[0]
+                .message
+                .content
+                .clone()
+                .ok_or(ApiError)?;
+
+        Ok(res)
+    }
+}
+
+impl SearchAgent {
+    pub fn new() -> Self {
+        dotenv().ok();
+        let api_key = env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
+        let serper_api_key = env::var("SERPER_API_KEY").expect("SERPER_API_KEY must be set");
+
+        let config = OpenAIConfig::new().with_api_key(api_key);
+
+        let openai_client = OpenAIClient::with_config(config);
+
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "X-API-KEY",
+            HeaderValue::from_str(&serper_api_key).expect("Invalid SERPER_API_KEY"),
+        );
+        headers.insert("Content-Type", "application/json".parse().unwrap());
+
+        let http_client = reqwest::Client::builder()
+            .default_headers(headers)
+            .build()
+            .unwrap();
+
+        Self {
+            http_client,
+            system: None,
+            openai_client,
+        }
+    }
+
+    pub async fn prepare_data(&self, prompt: &str) -> Result<String, ApiError> {
+        let json = serde_json::json!({
+            "q": prompt
+        });
+
+        let res = self
+            .http_client
+            .post("https://google.serper.dev/search")
+            .json(&json)
+            .send()
+            .await
+            .map_err(|_| ApiError)?;
+
+        let json = res.json::<Value>().await.map_err(|_| ApiError)?;
+        Ok(serde_json::to_string_pretty(&json).map_err(|_| ApiError)?)
+    }
+}
+src/agents/arxiv_agent.rs
+
+use async_openai::{config::OpenAIConfig, Client as OpenAIClient};
+use async_trait::async_trait;
+use dotenv::dotenv;
+use reqwest::Client;
+use std::env;
+
+use crate::agents::agent::{Agent, ApiError};
+
+#[derive(Clone)]
+pub struct ArxivAgent {
+    http_client: reqwest::Client,
+    system: Option<String>,
+    openai_client: OpenAIClient<OpenAIConfig>,
+}
+
+#[async_trait]
+impl Agent for ArxivAgent {
+    fn name(&self) -> String {
+        "ArxivAgent".to_string()
+    }
+
+    fn client(&self) -> OpenAIClient<OpenAIConfig> {
+        self.openai_client.clone()
+    }
+
+    fn system_message(&self) -> String {
+        if let Some(message) = &self.system {
+            message.to_owned()
+        } else {
+            "You are an agent that retrieves and summarizes content from arXiv papers. 
+             You will receive an arXiv paper ID or URL. Your job is to fetch the paper's metadata and abstract,
+             and provide a concise summary of the paper based on this information.
+             Be accurate and focus on the key points of the paper.
+
+             Paper ID or URL:
+             ".to_string()
+        }
+    }
+
+    async fn prompt(&self, input: &str, data: String) -> Result<String, ApiError> {
+        let input = format!(
+            "{input}
+
+            Paper metadata and abstract:
+            {}
+            ",
+            data
+        );
+        let res =
+            self.client()
+                .chat()
+                .create(
+                    async_openai::types::CreateChatCompletionRequestArgs::default()
+                        .model("gpt-3.5-turbo")
+                        .messages(vec![
+                        async_openai::types::ChatCompletionRequestMessage::System(
+                            async_openai::types::ChatCompletionRequestSystemMessageArgs::default()
+                                .content(&self.system_message())
+                                .build().map_err(|_| ApiError)?,
+                        ),
+                        async_openai::types::ChatCompletionRequestMessage::User(
+                            async_openai::types::ChatCompletionRequestUserMessageArgs::default()
+                                .content(input)
+                                .build().map_err(|_| ApiError)?,
+                        ),
+                    ])
+                        .build()
+                        .map_err(|_| ApiError)?,
+                )
+                .await
+                .map_err(|_| ApiError)?
+                .choices[0]
+                .message
+                .content
+                .clone()
+                .ok_or(ApiError)?;
+
+        Ok(res)
+    }
+}
+
+impl ArxivAgent {
+    pub fn new() -> Self {
+        dotenv().ok();
+        let api_key = env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
+
+        let config = OpenAIConfig::new().with_api_key(api_key);
+        let openai_client = OpenAIClient::with_config(config);
+
+        let http_client = Client::new();
+
+        Self {
+            http_client,
+            system: None,
+            openai_client,
+        }
+    }
+
+    pub async fn prepare_data(&self, input: &str) -> Result<String, ApiError> {
+        let arxiv_id = self.extract_arxiv_id(input)?;
+        let api_url = format!("http://export.arxiv.org/api/query?id_list={}", arxiv_id);
+
+        let response = self
+            .http_client
+            .get(&api_url)
+            .send()
+            .await
+            .map_err(|_| ApiError)?
+            .text()
+            .await
+            .map_err(|_| ApiError)?;
+
+        let paper_info = self.parse_arxiv_response(&response)?;
+        Ok(paper_info)
+    }
+
+    fn extract_arxiv_id(&self, input: &str) -> Result<String, ApiError> {
+        let arxiv_id = if input.contains("arxiv.org") {
+            input.split('/').last().unwrap_or("").to_string()
+        } else {
+            input.to_string()
+        };
+
+        if arxiv_id.is_empty() {
+            return Err(ApiError);
+        }
+
+        Ok(arxiv_id)
+    }
+
+    fn parse_arxiv_response(&self, response: &str) -> Result<String, ApiError> {
+        let title = self.extract_tag_content(response, "title")?;
+        let authors = self.extract_tag_content(response, "author")?;
+        let abstract_text = self.extract_tag_content(response, "summary")?;
+
+        let paper_info = format!(
+            "Title: {}\nAuthors: {}\nAbstract: {}",
+            title, authors, abstract_text
+        );
+
+        Ok(paper_info)
+    }
+
+    fn extract_tag_content(&self, xml: &str, tag: &str) -> Result<String, ApiError> {
+        let start_tag = format!("<{}>", tag);
+        let end_tag = format!("</{}>", tag);
+
+        let content = xml
+            .split(&start_tag)
+            .nth(1)
+            .and_then(|s| s.split(&end_tag).next())
+            .ok_or(ApiError)?
+            .trim()
+            .to_string();
+
+        Ok(content)
+    }
+}
+src/agents/writer.rs
+
+use async_openai::{config::OpenAIConfig, Client as OpenAIClient};
+use async_trait::async_trait;
+use colored::Colorize;
+use dotenv::dotenv;
+use std::env;
+
+use crate::agents::agent::{Agent, ApiError};
+
+#[derive(Clone)]
+pub struct Writer {
+    system: Option<String>,
+    client: OpenAIClient<OpenAIConfig>,
+}
+
+impl Writer {
+    pub fn new() -> Self {
+        dotenv().ok();
+        let api_key = env::var("OPENAI_API_KEY").unwrap();
+        let config = OpenAIConfig::new().with_api_key(api_key);
+
+        let client = OpenAIClient::with_config(config);
+        Self {
+            system: None,
+            client,
+        }
+    }
+}
+
+#[async_trait]
+impl Agent for Writer {
+    fn name(&self) -> String {
+        "Writer".to_string()
+    }
+
+    fn client(&self) -> OpenAIClient<OpenAIConfig> {
+        self.client.clone()
+    }
+
+    fn system_message(&self) -> String {
+        if let Some(message) = &self.system {
+            message.to_owned()
+        } else {
+            "You are an agent.
+
+        You will receive some context from another agent about some Google results that a user has searched.
+        Your job is to research the Internet and to write a high-quality article that a user has written. The article must not appear to be AI written. The article should be SEO optimised without overly compromising the
+        quality of the article.
+
+        You are free to be as creative as you wish. However, each paragraph must have the following:
+        - The point you are trying to make
+        - If there is a follow up action point
+        - Why the follow up action point exists (or why the user needs to carry it out)
+
+        Search query:
+".to_string()
+        }
+    }
+
+    async fn prompt(&self, input: &str, data: String) -> Result<String, ApiError> {
+        let input = format!(
+            "{input}
+
+            Provided context:
+            {}
+            ",
+            serde_json::to_string_pretty(&data).map_err(|_| ApiError)?
+        );
+        let res =
+            self.client()
+                .chat()
+                .create(
+                    async_openai::types::CreateChatCompletionRequestArgs::default()
+                        .model("gpt-3.5-turbo")
+                        .messages(vec![
+                        async_openai::types::ChatCompletionRequestMessage::System(
+                            async_openai::types::ChatCompletionRequestSystemMessageArgs::default()
+                                .content(&self.system_message())
+                                .build().map_err(|_| ApiError)?,
+                        ),
+                        async_openai::types::ChatCompletionRequestMessage::User(
+                            async_openai::types::ChatCompletionRequestUserMessageArgs::default()
+                                .content(input)
+                                .build().map_err(|_| ApiError)?,
+                        ),
+                    ])
+                        .build()
+                        .map_err(|_| ApiError)?,
+                )
+                .await
+                .map_err(|_| ApiError)?
+                .choices[0]
+                .message
+                .content
+                .clone()
+                .ok_or(ApiError)?;
+
+        println!(
+            "{}",
+            "================== Writer Agent =================="
+                .bold()
+                .green()
+        );
+        println!("{}\n", res.green());
+
+        Ok(res)
+    }
+}
+Our agents are easily constructured in this way. Further, we should construct the required interfaces in the root directory of our project:
+
+src/agent_invoke.rs
+
+use colored::Colorize;
+
+use crate::agents::agent::{Agent, ApiError};
+use crate::agents::arxiv_agent::ArxivAgent;
+use crate::agents::search_agent::SearchAgent;
+use crate::agents::writer::Writer;
+
+pub struct AgentInvoke {
+    arxiv_agent: ArxivAgent,
+    writer: Writer,
+    search_agent: SearchAgent,
+}
+
+impl AgentInvoke {
+    pub fn new(arxiv_agent: ArxivAgent, writer: Writer, search_agent: SearchAgent) -> Self {
+        Self {
+            arxiv_agent,
+            writer,
+            search_agent,
+        }
+    }
+
+    pub async fn run(&self, arxiv_id: &str, writer_prompt: &str, search_query: &str) -> Result<String, ApiError> {
+        println!(
+            "{}",
+            "================== ENTERING ASSISTANT CHAIN =================="
+                .bold()
+                .red()
+        );
+        println!("{}", format!("arXiv ID: {}\n", arxiv_id).red());
+
+        let arxiv_data = self.arxiv_agent.prepare_data(arxiv_id).await?;
+
+        println!("{}", format!("arXiv Data: {}\n", arxiv_data).red());
+        
+        let search_data = self.search_agent.prepare_data(search_query).await?;
+        
+        println!("{}", format!("Search Data: {}\n", search_data).red());
+
+        let combined_data = format!("{}\n{}", arxiv_data, search_data);
+
+        let result = self.writer.prompt(writer_prompt, combined_data).await?;
+        Ok(result)
+    }
+}
+src/utils.rs
+
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+pub fn console_log(s: &str) {
+    log(s);
+}
+Finally, our last Rust interface for bindings:
+
+src/lib.rs
+
+In Rust, lib.rs is the conventional entry point for a library crate. This file is where the crate's public API is defined. When you’re building a WebAssembly module intended to be used as a library from JavaScript, lib.rs serves as the main entry point for defining the Rust code that will be exposed to JavaScript.
+
+Rust has conventions for the structure of projects:
+
+For binary crates, the main entry point is main.rs.
+For library crates, the main entry point is lib.rs.
+pub mod agents;
+pub mod agent_invoke;
+
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
+use crate::agent_invoke::AgentInvoke;
+use crate::agents::writer::Writer;
+use crate::agents::arxiv_agent::ArxivAgent;
+use crate::agents::search_agent::SearchAgent;
+
+#[wasm_bindgen(start)]
+pub async fn run_agent(arxiv_id: &str, writer_prompt: &str, search_query: &str) -> Result<JsValue, JsValue> {
+    console_error_panic_hook::set_once();
+
+    let arxiv_agent = ArxivAgent::new();
+    let writer = Writer::new();
+    let search_agent = SearchAgent::new();
+    let agent = AgentInvoke::new(arxiv_agent, writer, search_agent);
+    let result = agent.run(arxiv_id, writer_prompt, search_query).await;
+
+    match result {
+        Ok(result) => Ok(JsValue::from_str(&result)),
+        Err(e) => Err(JsValue::from_str(&format!("Error: {}", e))),
+    }
+}
+.env
+
+Define the environment variables for the client requests:
+
+OPENAI_API_KEY=sk-proj-*
+SERPER_API_KEY=serper-key-*
+Before we compile our wasm binaries and JavaScript bindings, you need to ensure that clang / LLVM is installed on your system, if not, please further install the clang.
+
+/* Verify clang */
+
+$ clang --version
+
+/* Installation (for MacOS) */
+
+$ brew install llvm
+$ echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> /Users/user/.zshrc
+$ rustup target add wasm32-unknown-unknown
+$ cargo add wasm-pack
+$ cargo add wasm_bindgen_futures
+$ wasm-pack build --target web
+After this point, WebAssembly binaries should be extracted under pkg/:
+
+
+Preparing an UI & Testing Our Agent
+We can now interact with our compiled WebAssembly binaries through a user interface using JavaScript. These JavaScript calls will access the .wasm files, invoke the agent runner, handle the returned results, and display them in the Web console.
+
+index.js
+
+import init from './pkg/rustageant.js';
+
+async function main() {
+    const wasm_agent = await init("./pkg/rustageant_bg.wasm");
+
+    document.getElementById('run_button').addEventListener('click', async () => {
+        const arxivId = document.getElementById('arxiv_id').value;
+        const writerPrompt = document.getElementById('writer_prompt').value;
+        const searchQuery = document.getElementById('search_query').value;
+
+        try {
+            const result = await wasm_agent.run_agent(arxivId, writerPrompt, searchQuery);
+            console.log(result);
+        } catch (error) {
+            console.error(error);
+        }
+    });
+}
+
+main();
+index.html
+<body>
+    <h1>WASM Agent Chain Interface</h1>
+    <label for="arxiv_id">Arxiv ID:</label>
+    <input type="text" id="arxiv_id" />
+    <br />
+    <label for="writer_prompt">Writer Prompt:</label>
+    <input type="text" id="writer_prompt" />
+    <br />
+    <label for="search_query">Search Query:</label>
+    <input type="text" id="search_query" />
+    <br />
+    <button id="run_button">Run Agent</button>
+    <p id="result"></p>
+</body>
+</html>
+But before prompting, one more thing to do, we need to start a simple HTTP server using Python’s built-in http.server module. This server can be used to serve files from the directory where the command is run. After all this setup, our interface will look like this:
+
+Press enter or click to view image in full size
+
+Finally, type our prompts and invoke our WASM binary, get our answer:
+
+Press enter or click to view image in full size
+
+Press enter or click to view image in full size
+
+Conclusion
+As I wrap up this project, I find myself reflecting on the journey of integrating Rust, WebAssembly, and AI agents. The experience of building this AI agent from scratch and deploying it to client-side with WASM has been both enlightening and rewarding.
+
+While developing the project, I also had the opportunity to experiment with WasmEdge and LlamaEdge between the lines. On top of that, Rust’s potential in terms of speed gain, dependency reduction and deployment is truly incredible for AI agents.
+
+Can’t wait to build with Rust x AI agents, more.
+
+Rust
+AI
+AI Agent
+Large Language Models
+Webassembly
+23
+
+
+2
+
+
+ITNEXT
+Published in ITNEXT
+78K followers
+·
+Last published 6 hours ago
+ITNEXT is a platform for IT developers & software engineers to share knowledge, connect, collaborate, learn and experience next-gen technologies.
+
+
+Follow
+Dogukan Tuna
+Written by Dogukan Tuna
+139 followers
+·
+13 following
+Website: dtunai.blog
+
+
+Follow
+Responses (2)
+
+Write a response
+
+What are your thoughts?
+
+Cancel
+Respond
+See all responses
+More from Dogukan Tuna and ITNEXT
+Mastering Git Worktrees with Claude Code for Parallel Development Workflow
+Dogukan Tuna
+Dogukan Tuna
+
+Mastering Git Worktrees with Claude Code for Parallel Development Workflow
+Most underrated feature in Claude Code could be the ability to create like many different Claude Code instances at once using Git worktrees…
+Jun 23, 2025
+170
+4
+Cursor Is Dying
+ITNEXT
+In
+
+ITNEXT
+
+by
+
+Jacob Ferus
+
+Cursor Is Dying
+Cursor is a great product. It was one of the first great applications of AI in coding, moving past copy-pasting code from chats. But the AI…
+
+Feb 12
+590
+30
+From Cron to Distributed Schedulers: Scaling Job Execution to Thousands of Jobs per Second
+ITNEXT
+In
+
+ITNEXT
+
+by
+
+Animesh Gaitonde
+
+From Cron to Distributed Schedulers: Scaling Job Execution to Thousands of Jobs per Second
+Designing a Distributed Job Scheduler for High-Throughput and Correctness at Scale
+
+Feb 18
+407
+5
+Streaming deepagents and task delegation with real-time output
+Dogukan Tuna
+Dogukan Tuna
+
+Streaming deepagents and task delegation with real-time output
+Using an LLM to call tools in a loop is the simplest form of an agent. This architecture, however, can yield agents that are “shallow” and…
+Oct 21, 2025
+38
+See all from Dogukan Tuna
+See all from ITNEXT
+Recommended from Medium
+The Secret Rust Design Patterns That Make Your Code Bulletproof
+Abhinav
+Abhinav
+
+The Secret Rust Design Patterns That Make Your Code Bulletproof
+Most Rust tutorials teach you the basics. But there are patterns experienced Rust developers use that never show up in beginner guides.
+
+Oct 8, 2025
+188
+4
+Cursor IDE & Claude Code Agentic Collaboration
+AI Coding Tools
+In
+
+AI Coding Tools
+
+by
+
+Reza Rezvani
+
+How Cursor and Claude Code Plugins Turned Me Into a 20x Developer – The Agentic Coding Setup That…
+My Background Agent just submitted a PR that made our senior architect ask, “Who wrote this?”
+
+Oct 14, 2025
+78
+1
+Run Claude Code with Local & Cloud Models in 5 Minutes (Ollama, LM Studio, llama.cpp, OpenRouter)
+Luong NGUYEN
+Luong NGUYEN
+
+Run Claude Code with Local & Cloud Models in 5 Minutes (Ollama, LM Studio, llama.cpp, OpenRouter)
+This post exists because the old guides were written back when using non-Anthropic models in Claude Code required hacks and weird adapters…
+Jan 31
+496
+14
+Rust: Create SVG Images
+Level Up Coding
+In
+
+Level Up Coding
+
+by
+
+Itsuki
+
+Rust: Create SVG Images
+Draw Shape, Path, Text! Transform! Gradient! Pattern! Animate! And more!
+Oct 3, 2025
+8
+Serialization Showdown in Rust: JSON Was Fine Until It Wasn’t
+Manan Shukla
+Manan Shukla
+
+Serialization Showdown in Rust: JSON Was Fine Until It Wasn’t
+I want to tell you about the day I stopped defaulting to serde_json.
+Mar 19
+Conquering Async Rust: Your Step-by-Step Roadmap to High-Performance with Tokio 🚀
+Puneet
+Puneet
+
+Conquering Async Rust: Your Step-by-Step Roadmap to High-Performance with Tokio 🚀
+Alright, fellow code-slingers, let’s talk about something that probably keeps a few of us up at night: those moments when your awesome Rust…
