@@ -5,20 +5,20 @@
 > - `证据等级` 含义见主报告。
 > - `主线结论` 表示该项目是否被用于支撑核心结论。
 
-| 系统 | 类别 | 一手来源 | 已核验的核心事实 | 证据等级 | 主线结论 | 备注 |
-|------|------|----------|------------------|----------|----------|------|
-| OpenViking | Filesystem-like | 官方 GitHub README / 官方站点 | 用 filesystem paradigm 统一 memory/resource/skill；支持层级加载、目录递归检索、retrieval trajectory、session 自迭代；README 明确给出相对 OpenClaw / LanceDB 的项目自报 benchmark | A | 是 | 主项目 AGPLv3，部分子组件 Apache 2.0；不能把局部许可误读为整体许可 |
-| memsearch | Filesystem-like | 官方 GitHub README / 文档 | Markdown 是 source of truth；Milvus 是 shadow index；支持 dense + BM25 + RRF 与三段式 recall | A | 是 | 对 coding agent 场景最清晰 |
-| memU | Filesystem-like | 官方 GitHub README | 面向 24/7 proactive agents；memory as file system；后台 bot 监控与长期主动记忆；强调小上下文成本 | A | 是 | 主动式记忆路线很鲜明，量化指标主要为官方口径 |
-| Acontext | Filesystem-like | 官方 GitHub README / 官方 docs | Skill memory layer；任务完成/失败后蒸馏为 skill files；用工具逐层拉取，不走 embedding top-k | A | 是 | 对“技能即记忆”定义非常清晰 |
-| Voyager | Filesystem-like / Procedural | 原始论文 | 通过 executable code skill library 做长期程序性记忆与复用 | A | 是 | 不是通用 memory product，但程序性记忆价值很强 |
-| Memoria | Filesystem-like / Governance | 官方 GitHub README | Git for AI agent memory；snapshot/branch/merge/rollback；CoW；hybrid retrieval；audit trail | A | 是 | 更偏治理层/基础设施层 |
-| XiaoClaw | 生态弱证据 | 官方站点 / 安装页 | 本质更像 OpenClaw 的一键安装与运行时封装，不是独立 memory architecture | X | 否 | 仅用于说明生态包装层，不用于技术主结论 |
-| ContextLoom | Vector/Graph-like | 官方 GitHub README | Redis-first shared context state；memory from compute decoupling；cold start hydration；cycle hash 检测循环 | B | 是 | 项目较早期，但设计目标明确 |
-| eion | Vector/Graph-like | 官方 GitHub README | shared memory storage + unified knowledge graph；Postgres+pgvector+Neo4j；支持 multi-agent sequential/concurrent/guest access | B | 是 | 多 Agent 与权限模型表达清晰，生态尚早期 |
-| honcho | Vector/Graph-like | 官方 GitHub README / 官方 docs | stateful agents memory library；围绕 entities/peers/session/context/representation 持续建模 | A | 是 | 更偏 entity-aware state modeling |
-| mem0 | Vector/Graph-like | 官方 docs / 官方 repo / 原始论文 | universal self-improving memory layer；抽取、整合、召回；产品化与集成成熟 | A | 是 | 典型通用 memory layer |
-| mem9 | Vector/Graph-like | 官方 GitHub README / 官方站点 | 以 stateless plugins + central memory server 共享 memory pool；TiDB 混合检索；视觉面板 | B | 是 | 适合 coding agent 协作，更多效果是项目自报 |
+| 系统 | 类别 | 一手来源 | 已核验的核心事实 | 公开量化 | 证据等级 | 主线结论 | 备注 |
+|------|------|----------|------------------|----------|----------|----------|------|
+| OpenViking | Filesystem-like | 官方 GitHub README / 官方站点 | 用 filesystem paradigm 统一 memory/resource/skill；支持层级加载、目录递归检索、retrieval trajectory、session 自迭代；README 明确给出相对 OpenClaw / LanceDB 的项目自报 benchmark | `43%-49%` improvement；`83%-91%` input-token reduction；LoCoMo10 `1,540` cases | A | 是 | 主项目 AGPLv3，部分子组件 Apache 2.0；不能把局部许可误读为整体许可 |
+| memsearch | Filesystem-like | 官方 GitHub README / 文档 | Markdown 是 source of truth；Milvus 是 shadow index；支持 dense + BM25 + RRF 与三段式 recall | `4` 平台；`3` 层 recall；默认模型约 `558 MB`；Milvus Lite 单文件 | A | 是 | 对 coding agent 场景最清晰；无公开统一 benchmark |
+| memU | Filesystem-like | 官方 GitHub README | 面向 24/7 proactive agents；memory as file system；后台 bot 监控与长期主动记忆；强调小上下文成本 | one-click install `<3 min`；官方自报 comparable usage 约 `~1/10` | A | 是 | 主动式记忆路线很鲜明，量化指标主要为官方口径 |
+| Acontext | Filesystem-like | 官方 GitHub README / 官方 docs | Skill memory layer；任务完成/失败后蒸馏为 skill files；用工具逐层拉取，不走 embedding top-k | `2` SDK；学习延迟 `10-30s`；默认 task/SOP agent 最大迭代均为 `4` | A | 是 | 对“技能即记忆”定义非常清晰；更像 context+skills 平台 |
+| Voyager | Filesystem-like / Procedural | 原始论文 | 通过 executable code skill library 做长期程序性记忆与复用 | `3.3x` 更多独特物品；`15.3x` 更快里程碑 | A | 是 | 不是通用 memory product，但程序性记忆价值很强 |
+| Memoria | Filesystem-like / Governance | 官方 GitHub README | Git for AI agent memory；snapshot/branch/merge/rollback；CoW；hybrid retrieval；audit trail | `2` 种部署；`6` 类 agent/client 图标；`4` 类版本操作主语义 | A | 是 | 更偏治理层/基础设施层 |
+| XiaoClaw | 生态弱证据 | 官方站点 / 安装页 | 本质更像 OpenClaw 的一键安装与运行时封装，不是独立 memory architecture | 无可靠官方 benchmark | X | 否 | 仅用于说明生态包装层，不用于技术主结论 |
+| ContextLoom | Vector/Graph-like | 官方 GitHub README | Redis-first shared context state；memory from compute decoupling；cold start hydration；cycle hash 检测循环 | `4` 个框架 wrapper；官方宣称 sub-millisecond retrieval | B | 是 | 项目较早期，但设计目标明确 |
+| eion | Vector/Graph-like | 官方 GitHub README | shared memory storage + unified knowledge graph；Postgres+pgvector+Neo4j；支持 multi-agent sequential/concurrent/guest access | `4` 个 memory tools + `4` 个 knowledge tools；`384` 维 embeddings | B | 是 | 多 Agent 与权限模型表达清晰，生态尚早期 |
+| honcho | Vector/Graph-like | 官方 GitHub README / 官方 docs / 官方 blog | stateful agents memory library；围绕 entities/peers/session/context/representation 持续建模 | 官方自报 `90.4%` LongMem S、`89.9%` LoCoMo、约 `60%` cost reduction；`10_000` token context 示例 | B | 是 | 更偏 entity-aware state modeling；benchmark 主要来自官方自报 |
+| mem0 | Vector/Graph-like | 官方 docs / 官方 repo / 原始论文 | universal self-improving memory layer；抽取、整合、召回；产品化与集成成熟 | `+26%`、`91%` faster、`90%` fewer tokens；GitHub `53.1k` stars | A | 是 | 典型通用 memory layer |
+| mem9 | Vector/Graph-like | 官方 GitHub README / 官方站点 | 以 stateless plugins + central memory server 共享 memory pool；TiDB Cloud Starter 混合检索；视觉面板；集中控制 | `3` 原生插件 + HTTP；`5` tools；`25 GiB / 250M RU` 免费层 | B | 是 | 适合 coding agent 协作，更多效果是项目自报或产品口径 |
 
 ## 旁系参照（用于完善判断，不作为本专题主清单）
 

@@ -55,6 +55,9 @@
 - 官方仓库：<https://github.com/memodb-io/Acontext>
 - 官方文档：<https://docs.acontext.io/>
 - 官方站点：<https://acontext.io/>
+- 仪表盘文档：<https://docs.acontext.io/observe/dashboard>
+- API 引导：<https://docs.acontext.io/api-reference/introduction>
+- Runtime 配置：<https://docs.acontext.io/settings/runtime>
 
 本轮主要使用内容：
 
@@ -127,6 +130,7 @@
 - 官方仓库：<https://github.com/plastic-labs/honcho>
 - 官方文档：<https://docs.honcho.dev/>
 - 官方应用：<https://app.honcho.dev/>
+- 官方 benchmark blog：<https://blog.plasticlabs.ai/research/Benchmarking-Honcho>
 
 本轮主要使用内容：
 
@@ -149,14 +153,15 @@
 ### mem9
 
 - 官方仓库：<https://github.com/mem9-ai/mem9>
-- OpenClaw 入口页：<https://mem9.ai/openclaw-memory>
+- 官方站点：<https://mem9.ai/>
 
 本轮主要使用内容：
 
 - persistent memory for AI agents
 - stateless plugins + central memory server
-- TiDB hybrid vector + keyword search
+- TiDB Cloud Starter hybrid vector + keyword search
 - shared memory pool across sessions and machines
+- visual dashboard / auditability / access controls
 
 ---
 
