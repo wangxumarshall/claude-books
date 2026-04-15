@@ -1,4 +1,4 @@
-# Filesystem-like 与 Vector/Graph-like Agent Memory 深度研究报告
+# Filesystem-like 与 Vector/Graph-like Agent Memory研究
 
 > 目录定位：`AgentOS-Memory/fs-vector-graph/`
 >
@@ -8,7 +8,7 @@
 > 1. `filesystem-like agent memory`
 > 2. `vector/graph-like agent memory`
 >
-> 研究目标：融合 report_v2 / report_v3 / report_v4，结合 2026-04-15 前可核验的一手材料，回答：
+> 研究目标：回答
 > - 这些 memory 方案解决了哪些关键问题，当前解决到什么程度，业界 SOTA 是什么，还有哪些空间
 > - 核心实现机制和原理是什么
 > - 分别面向哪些关键场景
@@ -20,7 +20,7 @@
 
 ### 0.1 研究范围
 
-本报告聚焦 **external memory augmentation**，即模型外的持久化记忆系统，不把 Transformer 原生记忆、参数编辑、KV-cache 机制本身当作主线。
+报告聚焦 **external memory augmentation**，即模型外的持久化记忆系统，不把 Transformer 原生记忆、参数编辑、KV-cache 机制本身当作主线。
 
 纳入主研究对象的标准是同时具备三点：
 
@@ -96,7 +96,7 @@
 | **记忆写错/被污染/过时后的治理** | Filesystem-like 当前更强 | 仍是行业短板，但方向清晰 | Memoria 在 snapshot / branch / rollback / quarantine / provenance 上最完整 | 需要成为行业默认能力，而不是少数系统特性 |
 | **记忆遗忘/过期/知识更新** | Vector/graph-like 略强 | 远未解决 | LongMemEval 已把 knowledge update / abstention 纳入 benchmark；Graphiti、TiMem、Honcho 有方向性优势 | 缺安全遗忘、置信度衰减和策略化淘汰机制 |
 
-### 1.2 已解决的问题：详细补充
+### 1.2 已解决/解决部分的问题
 
 #### 问题一：跨会话失忆，记忆不可读
 
@@ -138,9 +138,9 @@
 
 ContextLoom、eion、mem9、UltraContext、Honcho 都是在解决这个问题。
 
-**当前状态**：多 agent 共享脑是真需求，但 industry 还没统一范式。ContextLoom、mem9、eion、UltraContext 都表明多 agent 系统无法只靠每个 agent 各自的本地 session 状态运行，必须有共享状态或共享上下文层。但这个方向目前仍缺权限与命名空间标准、冲突与并发写策略、标准 benchmark。
+**当前状态**：多agent共享脑是真需求，但industry还没统一范式。ContextLoom、mem9、eion、UltraContext 都表明多agent系统无法只靠每个agent各自的本地 session 状态运行，必须有共享状态或共享上下文层。但这个方向目前仍缺权限与命名空间标准、冲突与并发写策略、标准 benchmark。
 
-### 1.3 待解决的问题：详细补充
+### 1.3 待解决的问题
 
 #### 待解决问题一：记忆资产化——从记"事实"到记"技能/策略"
 
