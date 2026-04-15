@@ -168,6 +168,10 @@
 - MemGPT / Letta：<https://arxiv.org/abs/2310.08560> / <https://docs.letta.com/>
 - LongMemEval：<https://arxiv.org/abs/2410.10813>
 - LoCoMo：<https://arxiv.org/abs/2402.17753> / <https://snap-research.github.io/locomo/>
+- TiMem：<https://arxiv.org/abs/2601.02845>
+- LiCoMemory：<https://arxiv.org/abs/2511.01448>
+- MIRIX：<https://arxiv.org/abs/2507.07957> / <https://docs.mirix.io/>
+- EverMemOS：<https://arxiv.org/abs/2601.02163>
 
 ---
 
