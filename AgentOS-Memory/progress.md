@@ -18,3 +18,19 @@
 - `task_plan.md` — 任务规划
 - `findings.md` — 研究发现框架
 - `progress.md` — 进度日志
+
+## Session 2 - 2026-04-15
+
+### 已完成
+- [x] Phase 6: 模型记忆范式重构 — 三大子范式批判性研究
+  - 全网检索 Memorizing Transformers (ICLR 2022, arXiv:2203.08913)、MSA (arXiv:2603.23516)、MemoryLLM (ICML 2024, arXiv:2402.04624)、M+ (arXiv:2502.001)
+  - 系统性梳理 KV cache 优化工作：H2O、SnapKV、StreamingLLM、Scissorhands、PyramidKV、RazorAttention、KVzip、DynamicKV
+  - 提出三大子范式分类 + 批判性审视
+  - 更新 findings.md 三大范式详细分析
+  - 更新报告：分类树、2.2.2节重构、全景表更新、方法论注释
+
+### 发现
+- KV缓存压缩不是记忆系统（无跨会话持久性）
+- MSA的"端到端"是训练层面，推理仍是三阶段
+- MemoryLLM的"百万次更新"仅限受控训练环境
+- 混合架构是最终方向：参数记忆+KV优化+外部记忆
