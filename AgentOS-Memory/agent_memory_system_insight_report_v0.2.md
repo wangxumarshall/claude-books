@@ -1,33 +1,32 @@
-# Agent Memory System 深度洞察研究报告
+# Agent Memory System 研究报告
 
-> **作者**：汪旭 & Claude Code
->  - 基于 **28+ 个产业界系统** + **36 篇核心学术论文/技术报告** 的系统性调研
->  - **2026 Q2 批判性验证**：对全部关键系统进行 WebSearch + arXiv 原文 + GitHub 源码交叉验证
->  - 🆕 **Token效率四维评估**：基于 Mem0 ECAI 2025 (arXiv:2504.19413)、EverMemOS、SwiftMem (arXiv:2601.08160)、ENGRAM、AMB等最新研究
->  - 🆕 **重大学术伦理发现**：EverMemOS 不可复现事件（GitHub #73：独立复现仅 38.38% vs 论文声称 93.05%）
->  - 🆕 **MemMachine** (arXiv:2604.04853) 以 91.69% LoCoMo 成为新领跑者之一
+> 作者：汪旭 & claude code & codex
+>  - 基于 30+ 个产业界系统 + 34 篇核心学术论文的深度对比分析
+>  - 2026 Q2 全网检索更新：新增 MemBrain 1.0、Memoria、TiMem、OmniMem、DeepSeek Engram、ICLR STEM 等 6 个关键系统/论文
+>  - 🆕 2026 Q2 批判性验证：对9个关键系统进行WebSearch+arXiv原文交叉验证，修正错误arXiv ID，标注验证状态
+>  - 🆕🆕 2026 Q2 Token效率四维评估：基于 Mem0 ECAI 2025 (arXiv:2504.19413)、EverMemOS、SwiftMem (arXiv:2601.08160)、ENGRAM、AMB等最新研究，系统评估节省token、准确率、时延响应、用户体验四个维度
 >  - 研究框架：C.A.P.E（Architecture & Paradigm / Cognition & Evolution / Production & Engineering / Business & Ecosystem）
->  - 数据可信度标注：★=独立验证 ★☆=论文自报 ☆=项目自报无独立验证 ☆☆=独立复现失败/严重存疑 ⚠️=部分存在/待确认
+>  - 数据可信度标注：★=独立验证 ★☆=论文自报 ☆=项目自报无独立验证 ⚠️=部分存在/待确认
 
 ---
 
 ## 第1章：产业界 Agent Memory System 深度洞察
 
-### 1.1 总览：技术分类图谱
+### 1.1 总览：24个系统的技术分类图谱
 
-当前 Agent Memory 领域呈现**跨范式融合**趋势。2026 Q1-Q2 全网检索发现：
+当前 Agent Memory 领域呈现**七大范式分化 + 跨范式融合**格局。2026 Q1-Q2 全网检索发现，最有竞争力的新系统均不再属于单一范式，而是跨范式融合体：
 
 ```
                          ┌─────────────────────────────┐ 
                          │   模型原生记忆 (Model-Native) │ 
                          │   Memorizing Transformers    │ 
-                         │   MemoryLLM / STEM (ICLR)   │ 
+                         │   MemoryLLM / Infini-attn   │ 
                          └──────────┬──────────────────┘ 
                                     │
      ┌──────────────────────────────┼──────────────────────────────┐
      │                              │                              │
 ┌────▼────────────────┐ ┌──────────▼──────────────────┐ ┌─────────▼─────────────────┐
-│  LLM决策记忆         │ │   分层记忆管理               │ │  外部记忆增强            │
+│  LLM决策记忆系统      │ │   分层记忆管理系统           │ │  外部记忆增强系统          │
 │  (LLM-Decided Mem)   │ │  (Layered Memory Mgmt)     │ │  (External Memory Aug)   │
 │                      │ │                            │ │                          │
 │  mem0: LLM决策机    │ │  Letta: 主动上下文外部化    │ │  OpenViking: viking://  │
@@ -38,259 +37,426 @@
      ┌──────────────────────────────┼──────────────────────────────┐
      │                              │                              │
 ┌────▼────────────────┐ ┌──────────▼──────────────────┐ ┌─────────▼─────────────────┐
-│  版本控制/安全记忆    │ │   多Agent共享记忆           │ │  上下文基础设施           │
-│  (Version-Controlled)│ │  (Multi-Agent Shared)     │ │  (Context Infrastructure)│
+│  程序性/技能记忆     │ │   多Agent共享记忆           │ │  上下文基础设施           │
+│  (Procedural Mem)   │ │  (Multi-Agent Shared)     │ │  (Context Infrastructure)│
 │                      │ │                            │ │                          │
-│  Memoria: Git for   │ │  ContextLoom: Redis总线   │ │  langmem: LangGraph存储 │
-│  Memory (CoW)      │ │  eion: PG+Neo4j统一API    │ │  claude-mem: 生命周期钩 │
+│  Acontext: 技能蒸馏  │ │  ContextLoom: Redis总线   │ │  langmem: LangGraph存储 │
+│  Voyager: 可执行代码 │ │  eion: PG+Neo4j统一API    │ │  claude-mem: 生命周期钩 │
+│  xiaoclaw: 零成本   │ │  honcho: 对等体推理       │ │  ultraContext: 实时共享  │
 └─────────────────────┘ └────────────────────────────┘ └────────────────────────────┘
 
                     ┌──────────────────────────────────────────┐
-                    │  🆕 2026 新范式：跨范式融合体             │
+                    │  ⭐ 2026 新范式：跨范式融合体             │
                     │                                          │
-                    │  MemBrain: Agent原生+子Agent协调         │
-                    │  MemMachine: Ground-Truth+自适应检索     │
-                    │  TiMem: CLS时序分层+复杂度感知召回       │
-                    │  LiCoMemory: 轻量认知图谱                │
+                    │  MemBrain: LLM亲和记忆+子Agent协调       │
+                    │  Memoria: Git for Memory+版本控制安全    │
+                    │  OmniMem: AI自主研究+多模态终身记忆      │
+                    │  LiCoMemory: 轻量认知图+时序层次检索     │
                     └──────────────────────────────────────────┘
 ```
 
-> ⭐ = 2026 Q1-Q2 全网检索新增 / 重大更新的系统
+> ⭐ = 2026 Q1-Q2 全网检索新增系统
 
-**核心发现**：经源码级验证，原"OS内存页置换"分类是**营销隐喻而非技术实现**。修正后的分类反映实际架构。
+**核心发现**：经源码级验证，原"OS内存页置换"分类是**营销隐喻而非技术实现**——没有任何系统真正实现硬件级页置换机制。修正后的分类更准确反映各系统的实际技术架构。
 
-**🆕 2026 Q2 基准竞赛全景 — 数据可信度分级**：
+**🆕 2026 Q2 全网检索更新 — 基准竞赛白热化**：
+
+2026 年 Q1-Q2，Agent Memory 基准被反复刷新，半年内 LoCoMo 准确率从 ~64%（mem0）飙升至 93.25%（MemBrain 1.0），提升近 30 个百分点。当前 SOTA 排名：
 
 | 排名 | 系统 | LoCoMo | LongMemEval | 数据可信度 | 核心技术 |
 |------|------|--------|-------------|-----------|---------|
-| 1 | **MemMachine v0.2** | 91.69% | 93.0% | ★☆ 论文 (arXiv:2604.04853) | Ground-Truth保持+自适应检索 |
-| ~~1~~ | ~~EverMemOS~~ | **声称** 93.05% ⚠️ | **声称** 83.00% ⚠️ | **☆☆ 独立复现仅38.38%** (GitHub #73) | engram生命周期 |
-| 2 | **HyperMem** | 92.73% | - | ☆ 论文 (arXiv:2604.08256, 同EverMind) | 超图n-元关系 |
-| 3 | **Zep/Graphiti** | 85.22% | 63.80% | ★☆ EverMind独立评估 | 时序知识图谱 |
-| 4 | **MIRIX** | 85.4% | - | ★☆ 论文 | 6类记忆+Active Retrieval |
-| 5 | **Letta** | ~83.2% | - | ☆ 自报 | LLM-as-OS |
-| 6 | **TiMem** | 75.30% | 76.88% | ★☆ 论文 (arXiv:2601.02845) | CLS时序5层TMT |
-| 7 | **ENGRAM** | 77.55% | +15pts vs Full | ★☆ OpenReview | typed extraction |
-| 8 | **MemOS** | 75.80% (README) | 77.80% | ★☆ 自报 | 图+向量+调度器 |
-| 9 | **SwiftMem** | 70.4% | - | ★☆ 论文 (arXiv:2601.08160) | multi-token聚合 |
-| 10 | **Mem0** | 66.9% (论文) / ~49% (独立) | 66.40% | ★☆ 论文+独立评估 | 向量+LLM决策 |
+| 1 | **MemBrain 1.0** | 93.25% | 84.6% | ☆ 自报 | LLM亲和记忆+子Agent协调+时间戳标准化 |
+| 2 | **EverMemOS** | 93.05% | 83.00% | ☆ 自报 | engram生命周期+超图+自组织 |
+| 3 | **TiMem** | 75.30% | 76.88% | ★☆ 论文 | CLS时序分层树+复杂度感知召回 |
+| 4 | **MemOS** | 69.24% | 68.68% | ☆ 自报+开源代码 | 图+向量+调度器 |
+| 5 | **mem0** | ~64% | ~65% | ☆ 第三方横评 | 扁平向量+LLM决策机 |
 
-> **⚠️ 重大可信度警示**：EverMemOS 论文声称 93.05%，但独立用户 @wangyu-ustc 在 GitHub issue #73 报告仅复现出 **38.38%**（差距 -54.62pp），该 issue 至今 open。HyperMem (92.73%) 为同一团队后续论文，同样缺乏独立验证。
+**🆕 2026 Q2 全网检索更新 — 新范式涌现**：
 
-**🆕 2026 Q2 新系统速览**：
+原始分类体系无法覆盖的三个重要新系统：
 
-| 系统 | 类型 | 关键事实 | arXiv | 可信度 |
-|------|------|---------|-------|--------|
-| **Memoria** | 版本控制安全 | GTC 2026; Rust+MatrixOne CoW; ~193★ | - | ★ InfoQ验证 |
-| **MemBrain** | Agent原生 | ~269★; v1.5; 子Agent协调 | 无正式论文 | ☆ 仅GitHub |
-| **MemMachine** | Ground-Truth | LoCoMo 91.69%; 80% token减少 | 2604.04853 | ★☆ 论文 |
-| **TiMem** | 时序分层 | 中科院; CLS理论; 52.2% token节省 | 2601.02845 | ★☆ 论文 |
-| **HyperMem** | 超图 | 同EverMind团队; 92.73% LoCoMo | 2604.08256 | ☆ 同团队 |
-| **ENGRAM** | 架构级 | ~99% token; 77.55% LoCoMo | OpenReview | ★☆ |
-| **SwiftMem** | KV感知 | 11ms搜索; 70.4% LoCoMo | 2601.08160 | ★☆ |
-| **0GMem** | 结构化记忆 | 88.67% (10-conv); BM25+语义 | - | ☆ |
-| **ICLR STEM** | 查表式 | CMU+Meta AI; FFN替换 | 2601.10639 | ★☆ |
-| **LiCoMemory** | 轻量图谱 | HKUST+华为+WeBank; CogniGraph | 2511.01448 | ★☆ |
-| **OmniMem** | AI自主优化 | UNC; F1 0.117→0.598 (+411%，但绝对值低) | 2604.01007 | ★☆ |
-| **DeepSeek Engram** | 条件记忆模块 | ⚠️ 仅媒体报道; arXiv未找到 | 待确认 | ⚠️ |
+1. **Memoria（矩阵起源，GTC 2026 发布）**——"Git for Memory"
+   - 核心创新：Copy-on-Write 版本控制 + 快照/分支/合并/回滚
+   - 安全价值：版本回滚可防御记忆投毒（被污染的记忆可回退到安全版本）
+   - 不属于原始分类中的任何盒子——横跨安全层和管理层
+
+2. **MemBrain 1.0（Feeling AI）**——"LLM亲和"的动态记忆
+   - 核心创新：打破线性流程（子Agent自主协调）+ 让LLM直接参与记忆推理（而非图算法算完再喂给LLM）+ 严控时间戳
+   - 挑战了"模型原生 vs 外部增强"的二分法——选择了"让外部记忆系统与模型推理范式亲和"的第三条路
+
+3. **OmniMem/Omni-SimpleMem（UNC-Chapel Hill, arXiv:2604.01007）**——AI自主研究发现的记忆系统
+   - 核心创新：23阶段自主研究管道，AI在50次实验中自主发现最优架构
+   - LoCoMo F1从0.117→0.598（+411%），且Bug修复贡献+175% > 超参数调优
+   - 引入全新方法论维度——记忆系统设计本身可以由AI自主优化
+
+4. **DeepSeek Engram / ICLR STEM**——模型原生记忆的架构级突破
+   - Engram：条件记忆模块，O(1)确定性知识查找，20-25%稀疏参数预算分配给Engram时验证集loss最低
+   - STEM：查表式记忆，将FFN的up-projection替换为token索引embedding表，即插即用的知识编辑
+   - 重新定义了"模型原生记忆"——不再是"参数微调"，而是"架构级记忆原语"
+
+5. **TiMem（中科院自动化所, arXiv:2601.02845）**——CLS时序分层记忆树
+   - 核心创新：5层时序记忆树（L1事实→L2会话→L3日→L4周→L5画像）+ 复杂度感知召回
+   - Token节省52.2%（LoCoMo实测），无需微调，纯指令引导
+   - 源自互补学习系统理论（CLS），比Ebbinghaus遗忘曲线提供更完整的认知科学框架
+
+6. **LiCoMemory（HKUST+华为+WeBank, arXiv:2511.01448）**——轻量认知图谱
+   - CogniGraph：轻量层次图，实体和关系作为语义索引层
+   - 时序+层次感知搜索 + 集成重排序
+   - LoCoMo/LongMemEval上超越baselines，同时显著降低更新延迟
+
+**⚠️ 数据可信度警示**：本章引用的性能数据（Token节省率、准确率提升等）绝大多数为各项目**自报数据**，缺乏统一基准和独立第三方验证。横向比较时需格外谨慎。详见1.3.3节"评估可信度危机"。
 
 ---
 
 ### 1.2 C.A.P.E 框架深度对比
 
-#### 1.2.1 架构与底层范式层
+#### 1.2.1 架构与底层范式层 (Architecture & Paradigm)
 
-##### 技术分类
+##### 技术分类 (Tech Taxonomy)
+
+**⚠️ 分类修正说明**：经源码级深度调研，原"OS内存页置换"分类是营销隐喻。没有任何系统真正实现硬件级页置换——Letta是LLM主动的上下文外部化，MemOS是统一API调度，EverMemOS是生物启发自组织系统。本表基于实际代码架构进行了修正。
 
 | 分类 | 代表系统 | 核心特征 | 适用场景 |
 |------|---------|---------|---------|
-| **模型记忆** | 四大子范式(详见2.2.2) | 修改Transformer或参数 | 长文档理解、知识注入 |
-| **LLM决策记忆** | mem0, mem9, Hermes Agent | LLM作为"记忆决策机" | 通用Agent |
-| **分层记忆管理** | Letta, MemOS, EverMemOS | 多层架构+软件调度器 | 长时程推理 |
-| **外部记忆增强** | OpenViking, memsearch, memU | 人类可读格式为核心 | 编码Agent |
-| **版本控制/安全记忆** | Memoria | CoW版本控制+快照/回滚 | 安全敏感场景 |
-| **程序性/技能记忆** | Acontext, Voyager | 可执行代码/技能作为记忆 | 技能密集型Agent |
+| **模型记忆** | 四大子范式(详见2.2.2) | 修改Transformer或参数 | 长文档理解、知识注入、推理加速 |
+| **LLM决策记忆** | mem0, mem9, Hermes Agent | LLM作为"记忆决策机"，提取/更新/遗忘四选一 | 通用Agent、需要智能记忆管理 |
+| **分层记忆管理** | Letta, MemOS, EverMemOS | 多层架构+软件调度器，非硬件页置换 | 长时程推理、24/7 Agent |
+| **外部记忆增强** | OpenViking, memsearch, memU, xiaoclaw-memory, lossless-claw | 人类可读格式为核心，机器检索为增强 | 编码Agent、需要可观测性 |
+| **程序性/技能记忆** | Acontext, Voyager | 可执行代码/技能作为记忆，直接"执行" | 技能密集型Agent |
 | **多Agent共享记忆** | ContextLoom, eion, honcho | 共享记忆总线+隔离机制 | 多Agent协作 |
-| **上下文基础设施** | langmem, claude-mem | 作为框架/平台的基础组件 | 快速集成 |
+| **上下文基础设施** | langmem, claude-mem, ultraContext | 作为框架/平台的基础组件 | 快速集成、框架嵌入 |
 
-##### 存储范式
+**关键洞察**：
+- LLM决策记忆的核心创新是"记忆决策机"——不只是检索，而是LLM决定如何处理每条记忆
+- 分层记忆管理的核心价值是"统一调度"——但由软件调度器而非硬件机制驱动
+- 外部记忆增强的独特优势是"人类可读性"——这是工程可观测性的基础
+- 模型记忆的根本限制在于容量有限(参数内化)、不可解释(参数内化)、不可迁移(参数内化)或无状态(KV缓存/MSA)。
+
+##### 存储范式 (Storage Paradigm)
 
 | 存储范式 | 代表系统 | 优势 | 劣势 |
 |---------|---------|------|------|
-| **扁平向量** | mem0, mem9 | 语义检索强 | 无结构化关系 |
-| **图数据库** | MemOS, Zep, eion | 结构化推理 | 部署复杂 |
-| **超图** | EverMemOS/HyperMem | n-元关系表达 | 计算开销大 |
-| **文件目录树** | OpenViking, memsearch | 人类可读+git版本 | 语义检索需额外索引 |
-| **CoW数据库** | Memoria | 零拷贝快照+分支隔离 | 依赖MatrixOne |
-| **模型参数** | MemoryLLM | 零检索延迟 | 容量有限 |
-| **KV Cache** | Memorizing Transformers | 注意力级融合 | 存储开销大 |
+| **扁平向量 (Flat Vector)** | mem0, mem9, langmem | 语义检索强、部署简单 | 无结构化关系、人类不可读 |
+| **会话时序 (Time-Series)** | Letta(Recall), lossless-claw | 时序推理、完整历史 | 检索效率低、token开销大 |
+| **图数据库 (GraphDB)** | MemOS, eion, mindforge | 结构化推理、关系建模 | 部署复杂、维护成本高 |
+| **超图 (Hypergraph)** | EverMemOS/HyperMem | n-元关系表达、高阶推理 | 计算开销大、生态不成熟 |
+| **文件目录树 (File System)** | OpenViking, memsearch, memU, xiaoclaw-memory | 人类可读、git版本控制 | 语义检索需额外索引 |
+| **模型参数 (Parameters)** | MemoryLLM | 零检索延迟、知识内化 | 容量有限、不可解释 |
+| **KV Cache** | Memorizing Transformers, Infini-attention | 注意力级融合、端到端优化 | 存储开销大、缺乏遗忘 |
+| **DAG摘要** | lossless-claw | 层级压缩、原文可恢复 | 结构复杂、检索需多跳 |
+| **对等体模型** | honcho | 实体深度理解、推理增强 | 推理成本高、延迟大 |
 
-##### 系统定位
+**融合趋势**：单一存储范式已无法满足复杂Agent需求。主流方向是**混合存储**：
+- **向量 + 图**（MemOS, mindforge, eion）：语义检索 + 结构化推理
+- **文件系统 + 向量影子**（memsearch, OpenViking）：人类可读 + 机器可检索
+- **分层存储**（Letta: Core/Archival/Recall；MemOS: Parametric/Activation/Plaintext）：不同粒度不同存储
+
+##### 系统定位 (System Positioning)
 
 | 定位 | 代表系统 | 集成成本 | 灵活性 | 独立性 |
 |------|---------|---------|--------|--------|
-| **中间件SDK** | mem0, langmem | 极低 | 高 | 低 |
-| **中间件插件** | claude-mem, mem9 | 低 | 中 | 低 |
-| **独立MaaS** | eion, honcho | 中 | 中 | 高 |
+| **中间件SDK** | mem0, langmem, mindforge | 极低 | 高 | 低 |
+| **中间件插件** | claude-mem, mem9, lossless-claw | 低 | 中 | 低 |
+| **独立MaaS** | eion, honcho, ultraContext | 中 | 中 | 高 |
 | **Agent平台内置** | Letta, Hermes Agent | 高 | 低 | 高 |
-| **Memory OS** | MemOS, EverMemOS | 高 | 中 | 极高 |
-| **安全记忆层** | Memoria | 中 | 中 | 高 |
-| **模型底座** | MemoryLLM | 极高 | 极低 | 极高 |
+| **Memory OS** | MemOS, EverMemOS, MindOS | 高 | 中 | 极高 |
+| **模型底座** | MemoryLLM, Memorizing Transformers | 极高 | 极低 | 极高 |
 
-##### 检索机制
+**关键洞察**：系统定位决定了"谁控制记忆"——
+- SDK/插件模式下，**开发者**控制记忆的读写策略
+- Agent平台模式下，**Agent自身**控制记忆（如Letta的function call）
+- Memory OS模式下，**调度器**控制记忆（如EverCore、MemScheduler）
+- 模型底座模式下，**模型参数**隐式控制记忆
 
-| 检索策略 | 代表 | 精确度 | 语义泛化 | 延迟 |
-|---------|------|--------|---------|------|
+##### 检索机制 (Retrieval Mechanism)
+
+| 检索策略 | 代表系统 | 精确度 | 语义泛化 | 延迟 |
+|---------|---------|--------|---------|------|
 | **纯向量语义** | mem0, mem9 | 中 | 高 | 低 |
-| **混合检索(BM25+语义)** | memsearch, 0GMem | 高 | 高 | 中 |
+| **混合检索(dense+BM25+RRF)** | memsearch | 高 | 高 | 中 |
 | **目录浏览** | OpenViking | 极高 | 低 | 极低 |
-| **图遍历** | MemOS, Zep | 高 | 中 | 高 |
+| **图遍历** | MemOS, eion | 高 | 中 | 高 |
+| **超图遍历** | EverMemOS | 高 | 高 | 高 |
 | **LLM自驱检索** | Letta | 依赖LLM | 依赖LLM | 高 |
+| **kNN注意力** | Memorizing Transformers | 高 | 中 | 中 |
+| **FTS5全文** | Hermes Agent | 高 | 低 | 极低 |
+
+**关键洞察**：混合检索（dense + BM25 + RRF）正在成为行业标准，因为它同时覆盖了语义泛化和精确匹配两个维度。在编码Agent场景中，BM25对函数名、变量名的精确匹配能力不可替代。
 
 ---
 
-#### 1.2.2 认知与演进能力层
+#### 1.2.2 认知与演进能力层 (Cognition & Evolution)
 
-##### 自我进化光谱
+##### 自我进化 (Self-Evolution) 光谱
 
 ```
-死记忆 ◄──────────────────────────────► 活记忆
+死记忆 ◄──────────────────────────────────────────► 活记忆
 
-L0: lossless-claw, ContextLoom, ultraContext
-L1: mem0, mem9, memsearch, langmem, claude-mem, Medicina
-L2: Letta, OpenViking, memU, xiaoclaw-memory
-L3: MemOS, EverMemOS, Hermes Agent, honcho
-L4: MemBrain (子Agent协调)
+mem9    memsearch   mem0     Letta    memU    Hermes   EverMemOS  A-MEM
+lossless  ContextLoom  langmem  OpenViking  xiaoclaw   MemOS    honcho
+ultraContext  eion   claude-mem
 ```
 
 | 进化等级 | 特征 | 代表系统 |
 |---------|------|---------|
-| **L0 死记忆** | 只存不更新 | lossless-claw, ContextLoom |
-| **L1 半活记忆** | 自动提取+去重 | mem0, memsearch, Medicina |
-| **L2 活记忆(规则驱动)** | 反思+融合+有限遗忘 | Letta, OpenViking, memU |
-| **L3 活记忆(自组织)** | 自主反思+调度器 | MemOS, EverMemOS |
-| **L4 活记忆(Agent化)** | 记忆本身是Agent | MemBrain |
+| **L0 死记忆** | 只存不更新，无反思/融合/遗忘 | mem9, lossless-claw, ContextLoom, ultraContext, eion |
+| **L1 半活记忆** | 自动提取+去重，但无主动进化 | mem0, memsearch, langmem, claude-mem |
+| **L2 活记忆(规则驱动)** | 反思+融合+有限遗忘，规则驱动 | Letta, OpenViking, memU, xiaoclaw-memory, Acontext |
+| **L3 活记忆(自组织)** | 自主反思+融合+遗忘，调度器驱动 | MemOS, EverMemOS, Hermes Agent, honcho |
+| **L4 活记忆(Agent化)** | 记忆本身是Agent，具备自主行动能力 | A-MEM |
 
-##### 遗忘机制
+**关键洞察**：
+- 当前大多数系统（60%+）仍停留在L0-L1级别，记忆是"死"的
+- 从L1到L2的跃迁关键在于**遗忘机制**——没有遗忘，记忆只会膨胀不会精炼
+- 从L2到L3的跃迁关键在于**调度器**——从规则驱动到智能调度
+- L4（记忆即Agent）是最前沿方向，但工程成熟度最低
 
-| 策略 | 代表 | 优势 | 劣势 |
-|------|------|------|------|
-| **无遗忘** | mem0, memsearch, Letta | 简单 | 记忆膨胀 |
-| **重要性评分** | EverMemOS, MemOS | 智能 | 依赖LLM |
-| **遗忘曲线** | MemoryBank | 心理学基础 | 需调参 |
-| **版本回滚** | Medicina | 确定性恢复 | 需完整历史 |
+**⚠️ 批判性注释**：上述进化等级分类基于各系统公开文档的功能声明，而非严格的实验验证。部分系统声称具备L3级能力，但在实际使用中其"自组织"效果可能远不如宣传。例如，Hermes Agent的"技能自进化"在复杂场景下仍需人工干预。
 
-##### 结构化推理
+##### 遗忘机制 (Forgetting) 对比
 
-| 能力 | 代表 | 表达能力 |
-|------|------|---------|
-| **扁平** | mem0, mem9 | 事实列表 |
-| **图结构** | MemOS, Zep | A→隶属于→B |
-| **超图** | EverMemOS, HyperMem | n-元关系 (足球→运动→周末) |
+| 遗忘策略 | 代表系统 | 优势 | 劣势 |
+|---------|---------|------|------|
+| **无遗忘** | mem0, memsearch, Letta, langmem, lossless-claw, ultraContext, Acontext, Voyager | 简单、无信息丢失 | 记忆膨胀、检索噪声 |
+| **手动删除** | mem0(delete API), Letta | 人类可控 | 依赖人工、不可扩展 |
+| **TTL过期** | 部分系统支持 | 简单有效 | 无法区分重要/不重要 |
+| **重要性评分淘汰** | EverMemOS, MemOS | 智能化、保留高价值记忆 | 评分依赖LLM、成本高 |
+| **遗忘曲线** | MemoryBank, MemaryAI | 心理学基础，自然衰减 | 参数需调优 |
+| **隐式淘汰(低频沉底)** | memU, xiaoclaw-memory | 零成本 | 不精确 |
+| **记忆调和(冲突解决)** | mem9 | 主动解决冲突，保持一致性 | 依赖LLM判断 |
+| **DAG层级压缩** | lossless-claw | 原文永不丢失，可按需展开 | 检索需多跳遍历 |
 
----
+**关键洞察**：遗忘机制是区分"死记忆"和"活记忆"的分水岭。没有遗忘能力的记忆系统在长期运行后必然面临检索质量下降的问题。EverMemOS的EverCore调度器代表了当前最完善的遗忘实现。
 
-#### 1.2.3 工程与生产力层
+**⚠️ 批判性注释**：EverMemOS的EverCore调度器虽在论文中被描述为"最完善的遗忘实现"，但该论文（arXiv:2601.02163）为同一研究团队在自建基准（EverBench）上的自报结果，未经独立验证。其遗忘效果在实际生产环境中的表现尚待观察。
 
-##### Token 效率四维评估
+##### 结构化推理能力 (Structural Reasoning)
 
-**维度一：Token 节省率**
+| 推理能力 | 代表系统 | 表达能力 | 示例 |
+|---------|---------|---------|------|
+| **扁平** | mem0, mem9, langmem | 事实列表 | "用户喜欢Python" |
+| **分类标签** | memsearch, Hermes Agent | 按类型组织 | [K] "BSC USDC是18位小数" |
+| **目录层次** | OpenViking, memU | 空间/归属关系 | viking://user/memories/ |
+| **符号链接/交叉引用** | memU, xiaoclaw-memory | 跨域关联 | → skills.md#PS5编码 |
+| **图结构** | MemOS, eion, mindforge | 实体关系推理 | A→隶属于→B |
+| **超图** | EverMemOS/HyperMem | n-元关系推理 | 足球→运动→周末→朋友 |
+| **认知图谱** | honcho | 用户信念/偏好/矛盾 | 用户偏好A但最近选择B |
 
-| 系统 | 节省 | 机制 | 数据可信度 |
-|------|------|------|-----------|
-| ENGRAM | ~99% | typed extraction | ★☆ |
-| Mem0 | ~90% | 事实级压缩 | ★☆ ECAI 2025 |
-| MemMachine | ~80% | 短/长期分层 | ★☆ 论文 |
-| OpenViking | 83-91% | L0/L1/L2分层 | ☆ |
-| EverMemOS | ~85% | engram生命周期 | ☆☆ ⚠️ |
-| TiMem | 52.2% | CLS分层 | ★☆ 论文 |
-
-**维度二：准确率**
-
-| 系统 | LoCoMo | LongMemEval | 数据可信度 |
-|------|--------|-------------|-----------|
-| Full-Context | 72.9% | - | ★ 独立 |
-| MemMachine | 91.69% | 93.0% | ★☆ 论文 |
-| EverMemOS | ~~93.05%~~ (声称) | ~~83.00%~~ | ☆☆ ⚠️ 复现38.38% |
-| Zep | 85.22% | 63.80% | ★☆ 独立评估 |
-| ENGRAM | 77.55% | +15pts | ★☆ OpenReview |
-| TiMem | 75.30% | 76.88% | ★☆ 论文 |
-| MemOS | 75.80%-80.76% | 77.80% | ★☆ |
-| Mem0 | 66.9%(论文)/~49%(独立) | 66.40% | ★☆+★交叉验证 |
-
-**维度三：时延**
-
-| 系统 | p95搜索 | p95总响应 | 可信度 |
-|------|--------|----------|--------|
-| SwiftMem | ~15ms | ~1,289ms | ★☆ |
-| Mem0 | 200ms | 1.40-1.63s | ★☆ |
-| ENGRAM | 806ms | 1,819ms | ★☆ |
-| Zep | 522ms | 3,255ms | ★☆ |
-| MemOS | 1,983ms | 7,957ms | ★☆ |
-| Full-Context | N/A | 17,120ms | ★ |
-
-**维度四：用户体验**
-
-| 系统 | GitHub★ | 活跃度 | 上手 | 可信度 |
-|------|---------|--------|------|--------|
-| Mem0 | ~52-53K | 14M+下载 | 极低 | ★ |
-| Letta | ~21.8K | 176 releases | 高 | ★ |
-| MemOS | ~8.3K | 中 | 中 | ★ |
-| OpenViking | ~4.8K | 中 | 中 | ★ |
-| EverMemOS | ~3.3K | 中 | 中 | ★ |
-| MemBrain | ~269 | 低 | 未知 | ☆ |
-| Memoria | ~193 | 低 | 中 | ★ InfoQ |
-
-##### 可观测性
-
-| 等级 | 代表 | 特征 |
-|------|------|------|
-| **黑箱** | mem0(自托管) | 无法查看 |
-| **API可查** | Letta | API查看内容 |
-| **可视化** | MemOS, MemBrain | 面板查看 |
-| **人类可读** | memsearch, memU | Markdown直编 |
-| **URI可寻址** | OpenViking | viking://协议 |
-| **Git级版本** | Memoria | 快照/分支/回滚 |
-
-##### 部署复杂度
-
-| 复杂度 | 代表 | 依赖 |
-|--------|------|------|
-| 极低 | claude-mem, mem9 | npm/pip |
-| 低 | Hermes Agent | Python+LLM |
-| 中 | mem0(云), Letta, Memoria | 数据库+LLM |
-| 中高 | OpenViking | VLM+Embedding |
-| 高 | MemOS, EverMemOS | Neo4j/Redis/Milvus+LLM |
+**关键洞察**：结构化推理能力是当前Agent Memory系统的普遍短板。仅EverMemOS的超图和MemOS的图结构提供了较强的关系推理能力。大多数系统仍停留在"扁平事实列表"阶段，无法处理"A隶属于B，B昨天被C修改"这类复合关系。
 
 ---
 
-#### 1.2.4 业务与生态层
+#### 1.2.3 工程与生产力层 (Production & Engineering)
 
-| 场景 | 最佳 | 原因 |
-|------|------|------|
-| C端陪伴 | honcho, MemoryBank | 用户建模+遗忘 |
-| 编码Agent | memsearch, OpenViking, Medicina | 可读+版本+分层 |
-| 安全敏感 | Memoria | 版本回滚+CoW |
-| 快速集成 | mem0, langmem | 一行SDK |
+##### Token 效率 (Token Efficiency) 四维评估
 
-##### 多Agent支持
+> 🆕 2026 Q2 更新：基于 Mem0 ECAI 2025 论文 (arXiv:2504.19413)、EverMemOS 论文、SwiftMem、ENGRAM、AMB (Agent Memory Benchmark) 等最新研究的交叉验证
 
-| 级别 | 代表 | 机制 |
-|------|------|------|
-| 单Agent | claude-mem | 无共享 |
-| 多Agent隔离 | Letta | 独立空间 |
-| 跨Agent用户共享 | mem0 | user_id跨读 |
-| 共享总线 | ContextLoom | Redis同步 |
+**Token 效率不能只看"节省率"——必须同时评估节省token、准确率、时延响应、用户体验四个维度的权衡。**
 
-##### 开源许可
+###### 维度一：Token 节省率 (Token Savings)
 
-| 许可 | 代表 | 商业友好 |
-|------|------|---------|
-| MIT | claude-mem, langmem, memsearch | ★★★★★ |
-| Apache 2.0 | mem0, Letta, MemOS, EverMemOS, Medicina | ★★★★★ |
-| AGPL-3.0 | OpenViking (repo) ⚠️ | ★★☆☆☆ |
+| 系统 | Token节省 | 机制 | 每查询平均Token | 数据可信度 |
+|------|----------|------|-----------|-----------|
+| **ENGRAM** | ~99% | typed extraction + dense set aggregation | ~1.0-1.2K vs 101K全量 | ★☆ 论文自报，LongMemEval验证 |
+| **Mem0** | ~90% | 事实级压缩 + 精准检索 | ~1,764 vs 26,031全量 | ★☆ ECAI 2025论文 (arXiv:2504.19413) |
+| **Mem0g** (图增强) | ~93% | 实体关系图 + 选择性注入 | ~1,800 vs 26,031全量 | ★☆ ECAI 2025论文 |
+| **MemOS** | 70-72% | 调度器路由 + MemCube分区 + 技能记忆复用 | 15.6M→4.4M (LOCOMO) | ☆ 项目自报+第三方Medium验证 |
+| **OpenViking** | 83-91% | L0/L1/L2分层加载 + 语义预滤 | - | ☆ 项目自报 |
+| **EverMemOS** | ~85% | engram生命周期 + 适度检索预算(K=10时2.3k tokens) | 2.3k (GPT-4.1-mini) | ☆ 自建基准自报 |
+| **TiMem** | 52.2% | CLS时序分层 + 复杂度感知召回 | - | ★☆ 论文 (arXiv:2601.02845) |
+| **MemoryOS** (BUPT+腾讯) | 中等 | 三层记忆 + 热度驱动 | 3,874 tokens (vs MemGPT 16,977) | ★☆ EMNLP 2025 |
+| **SwiftMem** | 显著 | multi-token aggregation + KV Cache感知 | - | ★☆ 论文自报 |
+| **memU** | ~90% (1/10成本) | 分层加载 + 智能压缩 | 4.0k (LOCOMO) | ☆ 项目自报 |
+| **agentmemory** | ~99% (170K tokens/year) | token-budgeted + 本地嵌入 | ~170K/year vs 19.5M全量 | ★ 开源可复现 |
+| **QMD** (Shopify Tobi) | 60-97% | 设备端零API成本 | - | ☆ 社区报告 |
+| **LangMem** | 极低token/查询 | 多次LLM调用仅返回最相关片段 | ~130*/query (但多LLM调用) | ★☆ 论文自报 |
 
-> ⚠️ OpenViking 许可证矛盾：repo 标注 AGPL-3.0，官网声称 Apache 2.0。
+**Token节省三大核心机制**：
+1. **分层加载**（OpenViking的L0/L1/L2、TiMem的5层TMT）：按需加载不同粒度记忆
+2. **事实级压缩**（Mem0的原子事实提取、ENGRAM的typed extraction）：只注入精炼事实而非原始对话
+3. **渐进披露**（memsearch的search→expand→transcript、agentmemory的token-budgeted）：分阶段暴露记忆细节
+
+###### 维度二：准确率影响 (Accuracy Impact)
+
+| 系统 | LOCOMO (LLM-Judge) | LongMemEval | 准确率 vs Token 权衡 | 数据可信度 |
+|------|-------------------|-------------|-------------------|-----------|
+| **Full-Context** (基线) | 72.9% | - | 最高准确率，但17s p95延迟 + 26K tokens | ★ 独立基准 |
+| **EverMemOS** | 93.05% (GPT-4.1-mini) | 83.00% | 最佳准确率-效率曲线，K=10时最优 | ☆ 自建基准，但有EverMind统一框架交叉验证 |
+| **Zep** | 85.22% (GPT-4.1-mini) | 63.80% | 时序知识图谱，~1.4k tokens | ★☆ EverMind框架独立评估 |
+| **MemOS** | 80.76% (GPT-4.1-mini) | 77.80% | 均衡表现，~2.5k tokens | ★☆ EverMind框架独立评估 |
+| **MemMachine v0.2** | 91.69% (GPT-4.1-mini) | - | 80% token减少 vs Mem0，75%加/搜加速 | ☆ 项目自报 |
+| **ENGRAM** | 77.55% (统一backbone) | +15pts vs Full-Context | ~1% token vs 全量，SOTA语义正确性 | ★☆ OpenReview论文 |
+| **Mem0** | 66.9% (ECAI 2025) / 64.20% (EverMind eval) | 66.40% | 最佳性价比，~1.0k tokens | ★☆ 论文+独立框架交叉验证 |
+| **Mem0** (新算法) | 91.6% | 93.4% | <7,000 tokens/查询 vs 25K+基线 | ☆ mem0.ai自报 |
+| **Mem0g** (图增强) | 68.4% | 72.18% | +2pp vs基础版，14k tokens footprint | ★☆ ECAI 2025论文 |
+| **BMAM** | 78.45% | 67.60% | 使用MemOS官方评估脚本复现 | ★☆ 论文自报 |
+| **TiMem** (推算) | 75.30% | 76.88% | 52.2% token节省，CLS分层 | ★☆ 论文 (arXiv:2601.02845) |
+| **MemoryOS** | 36.23% F1 (+49.11% vs baseline) | - | 3,874 tokens，仅4.9次LLM调用 | ★☆ EMNLP 2025 |
+| **SwiftMem** | 70.4% | - | 11ms搜索，1,289ms总延迟 | ★☆ 论文自报 |
+| **LiCoMemory** | +8.9% vs次优 (GPT-4o-mini) | +4.95% vs次优 | 减少输入token + 降低响应延迟 | ★☆ 论文 (arXiv:2511.01448) |
+| **OpenAI Memory** | 52.9% | - | 基线最弱，无token/延迟优化 | ★ 独立比较 |
+| **LangMem** | 58.1% | - | token最少(~130)但59s p95延迟 | ★☆ 论文自报 |
+
+**准确率关键洞察**：
+- **Token节省与准确率非零和博弈**：智能压缩（Mem0 66.9% @ 1.8k tokens）远胜全量注入（72.9% @ 26k tokens），6pp准确率牺牲换来14x token减少 + 12x延迟降低
+- **EverMemOS当前SOTA**：93.05% LoCoMo + 83.00% LongMemEval，但需注意自建基准偏差
+- **Graph增强有回报**：Mem0g在多跳/时序推理上比基础版+2-5pp，代价是2x token和1.8x延迟
+- **复杂度感知召回有效**：TiMem 75.30% LoCoMo 仅用纯指令引导+52.2% token节省，无需微调
+
+###### 维度三：时延响应 (Latency & Response Time)
+
+> 🆕 2026 Q2 更新：基于Mem0 ECAI 2025论文、SwiftMem (arXiv:2601.08160)、ENGRAM、AMB的系统性延迟数据
+
+| 系统 | 搜索延迟 p50 | 搜索延迟 p95 | 总响应延迟 p50 | 总响应延迟 p95 | 延迟优化机制 | 数据可信度 |
+|------|------------|------------|-------------|-------------|------------|-----------|
+| **SwiftMem** | 11ms | ~15ms | ~1,289ms | - | multi-token aggregation, 稳定sub-15ms | ★☆ 论文 |
+| **Mem0** | 148-200ms | 200ms | 708-718ms | 1.40-1.63s | 选择性检索，最低搜索延迟 | ★☆ ECAI 2025 |
+| **Mem0g** (图增强) | - | 660ms | - | 2.59s | 图遍历增加延迟 | ★☆ ECAI 2025 |
+| **ENGRAM** | 603ms | 806ms | 1,487ms | 1,819ms | dense-only检索，set聚合 | ★☆ OpenReview |
+| **Zep** | - | 522ms | 1,292ms | 3,255ms | 时序图索引 | ★☆ Mem0论文比较 |
+| **MemOS** | 1,806ms | 1,983ms | 4,965ms | 7,957ms | MemCube路由 + 图遍历(最慢) | ★☆ ENGRAM论文比较 |
+| **Full-Context** (基线) | N/A (无搜索) | N/A | 9,870ms | 17,120ms | 无，每次读全部26K tokens | ★ Mem0论文 |
+| **LangMem** | 16,360ms | 54,340ms | 18,430ms | 60,000ms | 向量扫描(灾难性慢) | ★☆ 论文自报 |
+| **RAG-4096** | 544ms | - | 2,347ms | 2,884ms | 固定chunk检索 | ★☆ 论文比较 |
+| **Nemori** | 835ms | - | 3,448ms | - | 分块记忆 | ★☆ SwiftMem比较 |
+| **A-Mem** | 668ms | - | 1,410ms | - | 大记忆库+搜索开销 | ★☆ 论文比较 |
+| **PAG图遍历** | 10-50ms | - | - | - | 1M节点图优化 | ☆ 技术评估 |
+| **MEMORY.md文件操作** | 1-100ms | - | - | - | 简化文件I/O | ☆ 技术评估 |
+| **SQLite索引读取** | 1-10ms | - | - | - | ACID索引 | ☆ 技术评估 |
+
+**时延关键洞察**：
+- **全量注入不可用于生产**：17.12秒 p95 延迟意味着1/20用户等待17秒，完全不符合实时交互SLA
+- **SwiftMem是延迟王者**：11ms搜索延迟（47x快于Zep，76x快于Nemori），端到端1.289秒
+- **Mem0搜索最快但总延迟受LLM生成限制**：200ms搜索 vs Zep 522ms，但总延迟仍~1.4秒（受限于LLM生成时间）
+- **MemOS调度器开销最大**：1,983ms搜索 p95 + 7,957ms总延迟 p95，图遍历和MemCube路由代价高昂
+- **LangMem完全不适用于交互式场景**：60秒 p95 延迟，向量扫描是灾难性的
+- **存储层延迟**：SQLite索引读取1-10ms、PAG图遍历10-50ms、MEMORY.md文件操作1-100ms，均满足<100ms交互Agent要求
+
+**延迟-准确率-Token 三角权衡**：
+```
+              高准确率
+               ▲
+               │  Full-Context (72.9%, 17s, 26K tokens)
+               │  EverMemOS (93%, 适度延迟, 2.3K tokens)
+               │
+               │  ENGRAM (77.5%, 1.8s, ~1K tokens)
+               │  Mem0g (68.4%, 2.6s, 14K tokens)
+               │
+    ←──────────┼──────────→
+    低延迟     │     高延迟
+    低Token    │     高Token
+               │  Mem0 (66.9%, 1.4s, 1.8K tokens) ★最佳性价比
+               │  SwiftMem (70.4%, 1.3s, 未知) ★最快搜索
+               │
+               │  LangMem (58.1%, 60s, 130 tokens)
+               │
+               ▼
+              低准确率
+```
+
+###### 维度四：用户体验 (User Experience & Developer Experience)
+
+| 系统 | GitHub Stars | 社区活跃度 | 上手难度 | 可观测性 | 用户反馈关键词 | 数据可信度 |
+|------|------------|-----------|---------|---------|-------------|-----------|
+| **Mem0** | 47.8K-51K+ | 极高：14M+下载，100K+开发者 | 极低：pip install + 一行SDK | 中：API可查，Managed Dashboard | "简单"、"开箱即用"、"生产就绪" | ★ GitHub+官方数据 |
+| **Letta (MemGPT)** | 21.8K | 高：176 releases, 140 contributors | 高：OS隐喻需理解Core/Recall/Archival | 高：ADE可视化面板，内存块可编辑 | "强大"、"复杂"、"学习曲线陡" | ★ GitHub验证 |
+| **MemOS** | 活跃迭代 | 中：开源+Cloud双轨，WeChat+Discord | 中：Cloud两命令安装，Local需配置 | 高：Memory Viewer面板，Web Dashboard | "SOTA"、"重架构"、"技能进化" | ★ GitHub+Medium验证 |
+| **Zep/Graphiti** | 3.6K (Zep) / 17.3K (Graphiti) | 中：企业级，35+ Graphiti contributors | 中：需部署 | 高：Web Console | "企业级"、"时序图"、"安全" | ★ GitHub验证 |
+| **LangMem** | LangChain生态 | 高：LangGraph用户自然采用 | 极低：LangGraph用户零学习成本 | 依赖LangSmith | "LangGraph原生"、"太慢" | ★ 社区反馈 |
+| **agentmemory** | 998 | 中：npm生态 | 极低：npx install即可 | 高：Real-time Viewer | "零配置"、"本地嵌入免费"、"编码场景" | ★ GitHub验证 |
+| **OpenAI Memory** | N/A (内置) | 高：ChatGPT原生 | 极低：零配置 | 低：黑箱 | "简单"、"浅召回"、"多跳缺失" | ★ 独立评估 |
+| **Hindsight** | 新兴 | 新兴：AMB Benchmark发起者 | 低 | 高：AMB公开结果 | "诚实"、"基准领先" | ★ AMB公开 |
+| **MemBrain 1.0** | 新兴 | 低：Feeling AI自报 | 未知 | 未知 | "活人感"、"LLM亲和" | ☆ 自报 |
+| **Memoria** | 工程早期 | GTC 2026发布 | 未知 | Git式版本控制 | "Git for Memory"、"回滚防御" | ★ InfoQ报道验证 |
+
+**用户体验关键洞察**：
+- **Mem0是采纳之王**：47.8K+ stars，14M+下载，AWS Agent SDK独家记忆提供商，"pip install + 一行调用"的极低门槛使其成为多数团队的默认选择
+- **Letta是深度用户首选**：21.8K stars，140 contributors，176 releases，"1M Stateful Agents"生产验证——但OS隐喻的学习曲线和复杂度是真实门槛
+- **可观测性与调试体验**是核心UX指标：Letta的ADE面板、MemOS的Memory Viewer、agentmemory的Real-time Viewer让开发者能"看到Agent脑子在想什么"——这正是原始报告中"可观测性"要求的落地
+- **本地 vs 云是UX分水岭**：agentmemory的本地嵌入（$0成本）vs Mem0 Cloud的托管（零infra但数据出境）；QMD的设备端（60-97%节省但需本地模型管理）vs MemOS Cloud（72%节省+多Agent共享）
+- **SDK语言覆盖决定采纳率**：Mem0 (Python+JS) > Letta (Python+TS) > MemOS (Python) — 双语言SDK显著降低集成摩擦
+- **社区争议是健康信号**：Letta和Zep公开挑战Mem0的基准方法论，说明领域正在成熟——" contested space"比"无争议"更值得信任
+
+**⚠️ Token效率四维评估的系统性发现**：
+
+1. **基线稻草人问题**（仍存在）：所有系统均选择"全量上下文注入"（26K tokens, 17s p95延迟, 72.9%准确率）作为基线。任何合理的记忆管理策略相对此基线都能实现显著节省。更公平的对比应该是**系统间横向对比**——EverMind的统一评估框架首次做到了这一点。
+
+2. **三角权衡被量化**：2026年的最新数据（Mem0 ECAI 2025、SwiftMem、AMB）**首次系统性地展示了准确率-延迟-Token的三角权衡**：
+   - 全量注入：72.9%准确率 / 17s p95 / 26K tokens → 不可用于生产
+   - Mem0：66.9% / 1.4s / 1.8K tokens → **最佳性价比**，6pp准确率牺牲换12x延迟降低+14x token节省
+   - Mem0g：68.4% / 2.6s / 14K tokens → 图增强回报递减，多跳推理值得
+   - EverMemOS：93.05% / 适度延迟 / 2.3K tokens → **当前SOTA**，但自建基准
+   - LangMem：58.1% / 60s / 130 tokens → token最少但完全不可交互
+
+3. **延迟是生产可用性的硬门槛**：交互式Agent要求p95延迟<2秒。Full-Context (17s)和LangMem (60s)直接出局。SwiftMem (11ms搜索, ~1.3s总延迟)和Mem0 (200ms搜索, ~1.4s总延迟)满足要求。MemOS (8s p95)在高负载场景可能成为瓶颈。
+
+4. **用户体验决定采纳率**：Mem0的51K stars和14M下载证明了"极低接入成本 + 合理效果"远胜"最先进但复杂"的效果。Letta的1M Stateful Agents生产验证证明深度用户愿意为"完全状态化自主"承担复杂度。**社区争议（Letta/Zep挑战Mem0基准）是领域成熟的标志**。
+
+5. **新的评估范式出现**：AMB (Agent Memory Benchmark, Vectorize/Hindsight发起)认为LOCOMO/LongMemEval设计于32K上下文窗口时代，百万token上下文下"dump everything"已可行，基准需要扩展到agentic tasks、scale、multilingual维度。AMB同时测量accuracy + speed + cost，防止单轴优化。
+
+##### 可观测性与可读性 (Observability & Readability)
+
+| 等级 | 代表系统 | 特征 |
+|------|---------|------|
+| **黑箱** | mem0(自托管), mem9 | 无法查看Agent"在想什么" |
+| **API可查** | Letta, honcho | 通过API查看记忆内容 |
+| **日志级** | ContextLoom, eion | 操作日志可追溯 |
+| **可视化面板** | MemOS, EverMemOS | 图形化查看记忆结构和调度 |
+| **人类可读文件** | memsearch, Hermes Agent, memU | Markdown文件直接编辑 |
+| **URI可寻址** | OpenViking | viking://协议，每条记忆有唯一地址 |
+| **Git版本控制** | memsearch | 记忆变更有完整历史 |
+
+**关键洞察**：可观测性是Agent Memory系统从"研究玩具"到"生产工具"的关键门槛。当Agent出现幻觉或行为异常时，工程师需要能直观地查看"Agent当时脑子里在想什么"。Markdown-first方案（memsearch、Hermes Agent）在这方面天然优势最大。
+
+##### 部署复杂度对比
+
+| 复杂度 | 代表系统 | 依赖组件 |
+|--------|---------|---------|
+| **极低** | claude-mem, mem9 | npm/pip安装即可 |
+| **低** | Hermes Agent, Ori-Mnemos | Python + LLM API |
+| **中** | mem0(云), memsearch, Letta | 向量库/PostgreSQL + LLM |
+| **中高** | OpenViking, memU | 服务器 + Embedding + VLM |
+| **高** | MemOS, EverMemOS | Neo4j + Qdrant + Redis + LLM |
+
+---
+
+#### 1.2.4 业务与生态层 (Business & Ecosystem)
+
+##### 适用场景矩阵
+
+| 场景 | 最佳系统 | 原因 |
+|------|---------|------|
+| **C端闲聊陪伴** | honcho, MemoryBank | 用户心智建模 + 遗忘曲线 |
+| **编码Agent** | memsearch, OpenViking, claude-mem | 人类可读 + git + 渐进披露 |
+| **24/7主动Agent** | memU, Hermes Agent, xiaoclaw-memory | 主动式记忆 + 低成本 |
+| **B端复杂运维** | MemOS, EverMemOS | 图结构推理 + 分层调度 |
+| **多Agent仿真** | ContextLoom, eion, honcho | 共享记忆 + 隔离机制 |
+| **长时程推理** | EverMemOS, Letta | 自组织 + 虚拟上下文 |
+| **快速集成** | mem0, langmem | 一行SDK + 广泛生态 |
+| **技能密集型Agent** | Voyager, Acontext | 可执行代码技能库 |
+
+**⚠️ 批判性注释**：上述"最佳系统"推荐基于各系统的功能声明和设计理念匹配度，而非在相同条件下的实验对比。实际效果可能因具体任务、模型选择、配置参数等因素而有显著差异。
+
+##### 多Agent支持对比
+
+| 支持级别 | 代表系统 | 机制 |
+|---------|---------|------|
+| **单Agent** | claude-mem, mem9, lossless-claw, Hermes Agent | 无共享机制 |
+| **多Agent隔离** | Letta, langmem | 独立记忆空间 |
+| **跨Agent用户共享** | mem0 | user_id跨Agent读取 |
+| **多Agent隔离+共享** | MemOS, eion | Cube/Namespace机制 |
+| **共享记忆总线** | ContextLoom, ultraContext | Redis/分布式同步 |
+| **全局同步心智** | MindOS | 心智状态机 |
+
+##### 开源许可对比
+
+| 许可 | 代表系统 | 商业友好度 |
+|------|---------|-----------|
+| **MIT** | claude-mem, langmem, memsearch | ★★★★★ |
+| **Apache 2.0** | mem0, Letta, MemOS | ★★★★★ |
+| **需确认** | mem9, memU, Ori-Mnemos, honcho | - |
+| **AGPL-3.0** | OpenViking | ★★☆☆☆ |
 
 ---
 
@@ -298,298 +464,1040 @@ L4: MemBrain (子Agent协调)
 
 #### 1.3.1 共性局限
 
-| 局限 | 影响 | 严重度 |
-|------|------|--------|
-| 遗忘缺失 | 60%+ | 高 |
-| 结构化推理弱 | 70%+ | 高 |
-| 评估不可信 | 全部 | **极高** |
-| 记忆投毒无防 | 几乎全部 | 高 |
+| 局限维度 | 影响范围 | 严重度 | 说明 |
+|---------|---------|--------|------|
+| **遗忘机制缺失** | 60%+系统(L0级别) | 高 | 记忆只增不减，长期运行后检索质量下降 |
+| **结构化推理弱** | 70%+系统 | 高 | 无法处理复杂实体关系，仅扁平事实 |
+| **LLM依赖** | 80%+系统 | 中 | 记忆提取/分类/反思均需LLM调用，成本高 |
+| **部署复杂度** | 分层记忆管理系统 | 中 | Neo4j/Redis/Milvus等外部组件增加运维成本 |
+| **评估不统一** | 全部系统 | 高 | 缺乏统一基准，各系统自报数据不可比 |
+| **多Agent协作弱** | 70%+系统 | 中 | 缺乏成熟的共享记忆协议和一致性机制 |
+| **安全与隐私缺失** | 几乎全部系统 | 高 | 记忆投毒攻击成功率85%+，防御机制几乎为零（详见1.3.3节） |
 
-#### 1.3.2 评估可信度危机（🆕 重大）
+#### 1.3.2 各范式特有局限
+
+| 范式 | 特有局限 |
+|------|---------|
+| **模型原生** | 容量有限；不可解释；不可迁移；灾难性遗忘风险 |
+| **LLM决策记忆** | LLM决策成本高；决策质量依赖LLM能力；延迟增加 |
+| **分层记忆管理** | 系统复杂度高；调度策略需精心设计；调试困难 |
+| **外部记忆增强** | 语义检索需额外索引；大规模记忆下性能下降；人类可读格式的检索效率有限 |
+| **程序性/技能记忆** | 技能抽取和表示依赖LLM；技能冲突和覆盖问题；跨任务迁移困难 |
+| **多Agent共享记忆** | 一致性协议复杂；共享记忆的隔离和安全问题；中心化单点风险 |
+| **上下文基础设施** | 与框架深度绑定；迁移成本高；功能受限于框架能力 |
+
+#### 1.3.3 评估可信度危机与安全盲区
+
+**评估可信度危机**是当前Agent Memory领域最被低估的系统性问题。具体表现：
 
 | 问题 | 严重度 | 说明 |
 |------|--------|------|
-| **EverMemOS复现失败** | ★★★★★ | GitHub #73: 38.38% vs 声称93.05%，差距54.62pp |
-| **Mem0数据双重标准** | ★★★★☆ | 论文66.9% vs 独立~49% |
-| **MemBrain无论文** | ★★★☆☆ | SOTA声称仅GitHub+博客 |
-| **同团队循环引用** | ★★★☆☆ | EverMemOS+HyperMem同团队 |
+| **自报数据无独立验证** | 高 | mem0的"+26%准确率"、OpenViking的"83-91%节省"、memU的"LOCOMO 92%+"均为项目自报，无第三方复现 |
+| **基线选择偏向** | 高 | 所有Token节省数据均以"全量上下文注入"为基线（稻草人基线），未与同类竞品公平对比 |
+| **成本遗漏** | 中 | Token节省未扣除记忆系统自身的LLM调用成本（提取/更新/去重），实际净节省可能远低于报告值 |
+| **自建基准偏差** | 中 | EverMemOS的"+30%"大概率在其团队自建的EverBench上测量，基准设计可能天然有利于其超图+OS架构 |
+| **缺乏消融实验** | 中 | 无系统报告各组件（提取/检索/调度/遗忘）的独立贡献，无法判断哪些组件真正有效 |
 
-#### 1.3.3 安全盲区
+**安全盲区**是另一个被严重忽视的领域。基于AgentPoison（arXiv:2407.12784）、BadRAG（arXiv:2402.16893）等安全研究的关键发现：
 
-| 威胁 | 成功率 | 防御 |
-|------|--------|------|
-| 记忆投毒 | 85%+ (AgentPoison) | 几乎为零 |
-| 环境注入 | 32.5% (eTAMP) | 几乎为零 |
+| 安全威胁 | 影响范围 | 攻击成功率 | 当前防御 |
+|---------|---------|-----------|---------|
+| **记忆投毒** | 所有自动记忆提取系统 | 85%+ (AgentPoison) | 几乎为零 |
+| **间接注入攻击** | 所有访问外部数据的Agent | 高 (Greshake 2023) | 几乎为零 |
+| **隐私泄露** | 多租户/云服务记忆系统 | 中-高 | 基础隔离 |
+| **多Agent记忆传播** | 共享记忆总线系统 | 高 | 几乎为零 |
+| **数据主权合规** | 跨境部署的记忆系统 | - | 无系统支持GDPR"被遗忘权" |
 
----
-
-### 1.4 演进方向
-
-```
-1. 静态 → 动态：L0 → L1 → L2 → L3 → L4
-2. 被动 → 主动：被动检索 → Active Retrieval
-3. 扁平 → 结构化：向量 → 图 → 超图 → Agent原生
-4. 外挂 → 内嵌：外部 → 分层 → 模型 → 混合
-5. 不安全 → 内生安全：无防护 → 版本控制 → 完整闭环
-```
-
-#### 三维分类框架
-
-```
-认知层级：L0感知(KV Cache) → L1工作 → L2长期(语义/情景/程序性)
-记忆动力学：静态 → 被动管理 → 主动调度 → 自组织
-安全可信：无防护 → Cisco外挂 → Medicina版本控制 → 内生安全
-```
+**关键洞察**：安全是Agent Memory系统的"阿喀琉斯之踵"。记忆持久性放大了攻击影响——毒记忆会持续影响Agent行为直到手动发现和删除。在具有自进化能力的系统（EverMemOS、MemOS）中，毒记忆还可能通过融合机制扩散。当前24个产业界系统中，**几乎没有系统将安全作为一等公民设计考虑**。
 
 ---
 
-## 第2章：学术论文深度洞察
+### 1.4 Agent Memory System 演进方向趋势
 
-### 2.1 论文图谱
+#### 1.4.1 六大演进方向（2026 Q2 修正版）
 
 ```
-模型记忆                    OS/上下文              版本控制
-├─ Memorizing Trans.      ├─ MemGPT/Letta        ├─ Medicina (GTC 2026)
-├─ MemoryLLM              ├─ EverMemOS           
-├─ MSA (2603.23516)       └─ RMT                 
-└─ ICLR STEM (2601.10639)                       
+1. 静态 → 动态
+   死记忆(L0) → 半活(L1自动提取) → 活记忆(L2反思+融合+遗忘) → 自组织(L3调度器) → Agent化(L4记忆即Agent)
 
-时序分层                    安全                   基准
-├─ TiMem (2601.02845)     ├─ AgentPoison (2407.12784) ├─ LOCOMO ★
-├─ LiCoMemory (2511.01448)├─ eTAMP (2604.02623)      ├─ LongMemEval ★
-└─ MemoryOS (2506.06326)  └─ MINJA防御 (2601.05504)   └─ EverBench ☆
+2. 被动 → 主动
+   被动检索(查询时才返回) → 主动预取(预测需求预加载) → 主动推送(自动注入相关记忆) → Active Retrieval(MIRIX式自动关联)
 
-新兴系统
-├─ MemMachine (2604.04853) ★☆
-├─ ENGRAM (OpenReview) ★☆
-├─ 0GMem (MIT) ☆
-├─ OmniMem (2604.01007) ★☆
-└─ HyperMem (2604.08256) ☆
+3. 扁平 → 结构化
+   扁平向量 → 分类标签 → 知识图谱 → 超图 → 认知图谱 → LLM亲和记忆(MemBrain式)
+
+4. 外挂 → 内嵌
+    外部记忆增强 → 分层记忆管理 → 模型记忆(四大子范式) → 混合架构(参数+外部+缓存优化)
+    
+    模型记忆四大子范式：
+    - 范式1: KV缓存检索(H2O/SnapKV) — 推理前压缩，非记忆系统，是推理优化
+    - 范式2: MSA稀疏注意力(Memorizing Trans./MSA) — 推理中实时获取，上下文窗口扩展
+    - 范式3: 参数内化(MemoryLLM/M+/Engram/STEM) — 权重融入，真正的跨会话记忆
+    - 范式4: 架构级原语(Infini-attention/LM2) — 注意力机制内嵌记忆
+
+5. 单体 → 集体
+   单Agent独立记忆 → 多Agent隔离 → 共享记忆总线 → 集体意识总线
+
+6. RAG → MAG（候补范式）
+   检索增强生成 → 记忆增强生成(记忆深度参与生成过程)
+
+🆕 7. 人工设计 → AI自主优化（OmniMem验证）
+   人工设计记忆架构 → AutoML超参搜索 → AI自主研究管道(架构变更+Bug修复+提示工程)
+
+🆕 8. 单模态 → 多模态（OmniMem验证）
+   纯文本记忆 → 多模态原子单元(MAU) → 热/冷存储分层 → 渐进式检索
+
+🆕 9. 不安全 → 安全内生（CortexMem/Memoria验证）
+   无防护 → 外挂安全(Cisco AI Defense) → 版本控制安全(Memoria) → 内生安全(CortexMem)
 ```
 
-### 2.2 核心论文分析
+**⚠️ 关于"RAG → MAG"的学术严谨性注释**：
 
-#### 2.2.1 CoALA (arXiv:2309.02427)
+MAG（Memory-Augmented Generation）目前**不是一个被正式定义的学术术语**。"Memory-Augmented"作为学术修饰语自2014年就存在（Neural Turing Machines, Graves et al.），但"MAG"作为与"RAG"对举的独立范式名称，至今没有一篇论文给出严格的形式化定义。当前MAG更接近"概念性框架"或"愿景性术语"，其最接近的学术实现是MemoRAG（arXiv:2409.05591）的"记忆引导检索"和A-MEM（arXiv:2502.12110）的"记忆即Agent"。MAG成为正式学术概念需要：严格的形式化定义、明确的计算模型、专用评估基准、以及多场景独立实证验证。
 
-Agent Memory 奠基性理论框架：**Observe → Think → Act → Learn** 循环，定义工作记忆/长期记忆二分，语义/情景/程序性三分。
+#### 1.4.2 技术融合趋势
 
-#### 2.2.2 模型记忆三大子范式
+当前最值得关注的技术融合方向：
 
-| 范式 | 代表 | 持久性 | 说明 |
-|------|------|--------|------|
-| KV缓存检索 | H2O, SnapKV | 无状态 | 推理优化，非记忆系统 |
-| MSA稀疏注意力 | Memorizing Trans., MSA | 无状态 | 推理中实时获取 |
-| 参数内化 | MemoryLLM, STEM | 永久 | 跨会话真正记忆 |
+1. **memsearch + OpenViking 融合路线**：
+   - Markdown透明层 + viking://统一地址空间 + 自演进记忆栈
+   - 短期：memsearch作为轻量记忆层
+   - 中期：memsearch + OpenViking组合
+   - 长期：Markdown目录映射到viking://，三合一
 
-#### 2.2.3 OS/虚拟上下文
+2. **超图 + 分层调度融合**（EverMemOS验证）：
+   - HyperMem超图存储 + EverCore调度器
+   - 结构化推理 + 智能遗忘 + 自组织
 
-| 论文 | 核心 | 效果 | 可信度 |
-|------|------|------|--------|
-| MemGPT | LLM自主换页 | 超长文档+20% | ★☆ |
-| EverMemOS | engram生命周期 | ~~93.05%~~ ⚠️ | **☆☆ 复现仅38.38%** |
-| HyperMem | 超图关联 | 92.73% | ☆ 同团队 |
+3. **技能即记忆 + User as Code融合**（前沿方向）：
+   - 将记忆从"知道什么"（陈述性）扩展到"知道怎么做"（程序性）
+   - 用户偏好编码为可执行代码，Agent直接"执行"记忆
 
-#### 2.2.4 时序分层
+4. **KV Cache复用 + 长期记忆联动**（底层优化）：
+   - 感知记忆（KV Cache）与认知记忆（语义/情景）的分层统一管理
+   - 基于语义重要性而非简单位置管理KV Cache生命周期
 
-**TiMem (arXiv:2601.02845)**：中科院自动化所，5层TMT，LoCoMo 75.30%，Token节省52.2%，复杂度感知召回。
+5. **安全防御层融合**（亟需补充）：
+   - 记忆防火墙（写入验证 + 检索过滤 + 行为异常检测）
+   - 记忆溯源链（数字签名 + Merkle树 + 不可篡改日志）
+   - 记忆隔离沙箱（不可信记忆隔离验证 → 晋升/淘汰）
 
-#### 2.2.5 新型系统
+#### 1.4.3 未来3年预测
 
-**MemMachine (arXiv:2604.04853)**：
-- LoCoMo 91.69% (gpt-4.1-mini), LongMemEvalS 93.0% (gpt-5-mini)
-- 80% token减少，75% 加/搜索加速
-- Ground-Truth保持，短/长期记忆+自适应检索
+| 时间 | 预测 | 置信度 |
+|------|------|--------|
+| **2026** | OS范式成为主流；遗忘机制成为标配；LOCOMO/LongMemEval成为标准基准 | 高 |
+| **2027** | 超图记忆成熟；MAG概念逐步学术化（需形式化定义论文）；多Agent共享记忆协议探索 | 中 |
+| **2028** | 记忆即Agent（A-MEM范式）工程化；参数记忆与外部记忆的混合架构成熟；MSA架构扩展到主流LLM | 中低 |
 
-**ENGRAM (OpenReview)**：~99% token节省，77.55% LoCoMo
+**⚠️ 预测不确定性声明**：上述预测基于当前技术趋势外推，存在高度不确定性。特别是2027-2028年的预测依赖于多个前提条件：MAG的形式化定义是否完成、超图记忆的工程化是否可行、A-MEM范式的实际效果是否如理论预期等。
 
-#### 2.2.6 安全研究
+#### 1.4.4 🆕 分类体系批判性重构（2026 Q2 全网检索验证）
 
-| 论文 | 发现 | 影响 |
-|------|------|------|
-| AgentPoison | 投毒85%+ | RAG系统性漏洞 |
-| eTAMP | 跨站环境注入 | 攻击面扩展 |
-| MINJA | 真实条件攻击大降 + 防御框架 | 首个实用防御 |
+原始分类体系按"技术实现方式"分（模型原生/LLM决策/分层管理/外部增强/技能记忆/多Agent共享/上下文基础设施），但2026年最新进展表明，**真正有竞争力的系统都在跨范式融合**，按技术实现分类已无法准确反映格局。
 
-### 2.3 学术与产业映射
+**原始分类的三个系统性盲区**：
 
-| 学术概念 | 产业实现 | 成熟度 | 验证 |
-|---------|---------|--------|------|
-| CoALA | 多系统部分实现 | ★★★☆☆ | 理论 |
-| MemGPT | Letta | ★★★★☆ | 生产部署 |
-| TiMem | 无直接对应 | ★★☆☆☆ | 论文 |
-| Medicina版本控制 | Memoria (GTC 2026) | ★★☆☆☆ | 工程早期 |
-| eTAMP安全 | 🆕 CortexMem提案 | ★☆☆☆☆ | 概念 |
+1. **分类之间并非互斥，而是正交维度**：mem0既是"LLM决策记忆"又具备"外部记忆增强"的向量检索特征；EverMemOS既是"分层记忆管理"又内嵌了"超图结构"；Hermes Agent既是"LLM决策记忆"又实现了"技能/程序性记忆"。更准确的模型应该是三维坐标系：决策权归属（LLM/调度器/开发者）× 存储范式（向量/图/文件/参数）× 认知层级（感知/工作/长期），每个系统是坐标系中的一个点。
+
+2. **缺失"感知记忆层"维度**：整个分类体系从"模型原生"直接跳到"LLM决策/分层管理/外部增强"，完全忽略了KV Cache管理这一感知记忆层。vLLM的Prefix Caching、SGLang的分页KV Cache已经是生产级部署。
+
+3. **安全维度完全缺失**：24个系统中无一将安全作为一等公民（AgentPoison攻击成功率85%+），但分类体系未将安全作为分类维度。
+
+**建议的三维分类框架**：
+
+```
+维度一：认知层级（从感知到认知）
+  L0 感知层：KV Cache / Engram / STEM（模型原生查表）
+  L1 工作层：Core Memory / 活跃上下文
+  L2 长期层：语义/情景/程序性记忆
+
+维度二：记忆动力学（从静态到自组织）
+  静态存储：mem0（写入后不演化）
+  被动管理：Letta（LLM按需换页）
+  主动调度：MemOS/EverMemOS（调度器驱动演化）
+  自组织：MemBrain（子Agent自主协调）/ OmniMem（AI自主优化）
+
+维度三：安全与可信（从无防护到内生安全）
+  无防护：大多数系统
+  外挂防护：Cisco AI Defense（外部安全层）
+  版本控制：Memoria（Git for Memory）
+  内生安全：CortexMem（防火墙+溯源+沙箱+版本回滚）
+```
 
 ---
 
-## 第3章：技术方案 — CortexMem
+## 第2章：Agent Memory 学术论文深度洞察
 
-### 3.1 场景与痛点
+### 2.1 论文全景图
 
-| 场景 | 需求 | 痛点 |
-|------|------|------|
-| 编码Agent | 精确代码上下文 | 跨会话遗忘 |
-| 运维Agent | 时序事件+因果推理 | 缺乏时序分层 |
-| 个人助手 | 用户画像 | 隐私缺失 |
-| 多Agent | 共享+隔离 | 无协议 |
-
-六大痛点：遗忘、黑箱、Token成本、不进化、孤岛、不安全。
-
-### 3.2 技术方案：CortexMem
-
-#### 3.2.1 设计哲学
-
-1. **Markdown-first + 向量 + 版本控制**：人类可读 + CoW安全基线
-2. **5层认知架构**：L0感知→L4画像（借鉴TiMem CLS）
-3. **安全内生**：防火墙+溯源+沙箱+回滚（回应AgentPoison+借鉴Memoria）
-4. **Active Retrieval**（借鉴MIRIX）
-
-#### 3.2.2 架构
+基于arXiv和Google Scholar全文检索，筛选出26篇核心论文，按七大主题领域组织：
 
 ```
-L0 感知: KV Cache语义淘汰
-  ↓
-L1 事实: 原始事实+自分类 [P/E/K/B/S]
-  ↓
-L2 会话: Markdown核心块 (人类可读)
-  ↓
-L3 模式: 日/周模式+CLS巩固
-  ↓
-L4 画像: 语义(图+向量)+情景(日志)+程序性(技能)
-  ↓
-CortexCore: 复杂度感知+Active Retrieval+LLM亲和检索
-  ↓
-Security: 防火墙+溯源链+沙箱+版本回滚
-  ↓
-Multi-Agent: 私有+共享+信任感知
+模型记忆(MemoryLLM)      OS/虚拟上下文          反思与自进化
+├─ Memorizing Trans.  ├─ MemGPT/Letta       ├─ Reflexion
+├─ MemoryLLM          ├─ EverMemOS          ├─ Generative Agents
+├─ LongMem            ├─ HyperMem           ├─ MemoryBank
+├─ Infini-attention   └─ RMT                ├─ A-MEM
+└─ LM2                                      └─ ExpeL/Voyager
+
+知识图谱/时序         多Agent共享           评估基准         理论框架
+├─ Zep/Graphiti      ├─ MINDSTORES         ├─ LOCOMO       ├─ CoALA
+├─ RAP                ├─ EverBench          ├─ LongMemEval  └─ (认知架构)
+└─ MemoRAG            └─ ContextLoom        └─ MemBench
 ```
 
-#### 3.2.3 核心创新
+### 2.2 核心论文深度分析
 
-**三级检索路径**：
-- 简单：BM25/向量 → 零LLM
-- 关系：图遍历 → 1次LLM
-- 推理：LLM空间推理 → 多轮LLM
+#### 2.2.1 理论框架：CoALA — 认知架构的奠基性贡献
 
-**CortexCore调度器**：
-1. 复杂度感知召回（TiMem理念）
-2. 遗忘曲线+CLS引擎
-3. Active Retrieval（MIRIX理念）
-4. 分级策略：高频用规则引擎，低频用强模型
+**CoALA**（Cognitive Architectures for Language Agents, Sumers et al., 2024, arXiv:2309.02427）是Agent Memory领域的**奠基性理论框架**，其影响远超单篇论文的范畴。
 
-**Security Layer（真正独特优势）**：
-1. 记忆防火墙（写入验证+eTAMP防御）
-2. 记忆溯源链（不可篡改日志）
-3. 记忆隔离沙箱（不可信隔离验证）
-4. 版本回滚（Memoria CoW理念）
-5. 隐私保护（GDPR被遗忘权同步清除）
+**核心框架**：
 
-**Three-Unique-Dimensions 分析**（经全网验证）：
+CoALA将语言Agent的认知架构形式化为**交互循环（Interaction Loop）**，由三大组件构成：
 
-| 维度 | 竞品状态 | CortexMem |
-|------|---------|-----------|
-| 安全全闭环 | 仅有Memoria版本回滚（恢复层） | 防火墙+溯源+沙箱+回滚 **四层闭环** |
-| 全认知栈覆盖 | TiMem缺L0，EverMemOS缺L0 | L0(KV)→L4(画像)，唯一全覆盖 |
-| Markdown+版本+三维一体 | memsearch有Markdown无版本，Medicina有版本无Markdown | 三合一 |
+1. **记忆空间 (Memory Space)**
+   - **工作记忆 (Working Memory)**：当前活跃信息的暂存区，相当于LLM的上下文窗口，容量有限
+   - **长期记忆 (Long-Term Memory)**：持久化存储，分为三种类型：
+     - **语义记忆 (Semantic Memory)**：关于世界的一般性知识和事实（"知道什么"）
+     - **情景记忆 (Episodic Memory)**：关于特定事件和经历的记忆（"经历什么"）
+     - **程序性记忆 (Procedural Memory)**：关于"如何做"的技能和程序（"知道怎么做"）
 
-#### 3.2.4 部署弹性
+2. **动作空间 (Action Space)**
+   - **内部动作**：操作记忆——Retrieval（检索：长期→工作）、Storage（存储：工作→长期）、Reasoning（推理：工作→工作）
+   - **外部动作**：与环境交互——工具使用、环境交互、通信
 
-| 模式 | 依赖 | 场景 |
-|------|------|------|
-| 轻量 | SQLite+FTS5+文件 | 个人 |
-| 标准 | PostgreSQL+pgvector+Neo4j | 小团队 |
-| 企业 | PostgreSQL+Qdrant+Neo4j+Redis | 企业 |
+3. **决策过程 (Decision Making)**
+   - LLM作为策略函数：State → Policy(LLM) → Action
 
-### 3.3 差异化对比
+**学习循环**：Observe → Think(Retrieval + Reasoning) → Act → Learn(Storage)
 
-| 维度 | CortexMem | 最强竞品 | 差异 |
-|------|-----------|---------|------|
-| 5层认知 | L0-L4 | TiMem L1-L5(无L0) | 增加感知层 |
-| 版本控制 | CoW+快照+回滚 | Medicina | 与分层深度集成 |
-| LLM亲和检索 | 三级(零/1/多轮) | MemBrain | 成本意识更强 |
-| 安全四层闭环 | 防火墙+溯源+沙箱+回滚 | 无一完整 | **独特优势** |
-| 复杂度感知 | 按查询自适应 | TiMem | 集成到调度器 |
-| Active Retrieval | 自动跨类型 | MIRIX | 相同理念 |
+**CoALA对产业界的深远影响**：
 
-### 3.4 测评标准
+| CoALA概念 | 产业界对应 | 影响程度 |
+|-----------|-----------|---------|
+| 工作/长期记忆二分 | Letta的Core/Archival分层、OpenViking的L0/L1/L2 | 极高 |
+| 语义/情景/程序性三分 | mem0(语义)、memsearch(情景)、Voyager(程序性) | 高——但多数系统只实现1-2种 |
+| 内部动作(检索/存储/推理) | RAG(检索)、记忆写入API(存储)、CoT(推理) | 极高 |
+| 学习循环 | Generative Agents的记忆流循环 | 极高 |
 
-| 基准 | 目标 | 说明 |
-|------|------|------|
-| LOCOMO | >80% | 对标 TiMem 75.30% → MemMachine 91.69% |
-| LongMemEval | >70% | 五维度 |
-| CortexBench-Sec | >90% | AgentPoison/eTAMP |
-| 版本回滚 | >95% | 投毒恢复 |
+**CoALA的关键局限**（需由产业实践补充）：
+- 缺乏遗忘机制的理论定义
+- 缺乏多Agent记忆协作的框架
+- 缺乏Token效率等工程维度的考量
+- 程序性记忆的具体形式未明确
 
-### 3.5 预期效果
+#### 2.2.2 模型记忆 (Model Memory)
 
-| 维度 | 预期 | 对标 | 性质 |
-|------|------|------|------|
-| Token成本 | 降低60-70% | TiMem 52.2%, MemMachine 80% | 待验证 |
-| LOCOMO | >80% | MemMachine 91.69%, TiMem 75.30% | 待验证 |
-| 安全性 | >90%防御率 | 无竞品 | 预期 |
-| 回滚恢复 | >95% | Medicina | 预期 |
+> 🆕 2026 Q2 重构：从单一"模型原生记忆"拆分为三大子范式——KV缓存检索（推理前）、MSA端到端稀疏注意力（推理中）、MemoryLLM参数内化（权重融入）
 
-### 3.6 行动路线
+| 范式 | 代表工作 | 核心机制 | 记忆时机 | 持久性 | 可解释性 | 适用场景 |
+|------|---------|---------|---------|--------|---------|---------|
+| **KV缓存检索** | H2O, SnapKV, StreamingLLM, KVzip, RazorAttention, DynamicKV | 推理前/中压缩KV cache，保留重要token的KV对 | 推理前/中 | 无状态(单次推理) | 中(KV对应token可读) | 长上下文压缩、推理加速 |
+| **MSA稀疏注意力** | Memorizing Transformers (ICLR 2022), MSA (arXiv:2603.23516) | 推理中从外部/稀疏KV对实时检索+注意力融合 | 推理中 | 无状态(单次推理) | 中(可分析路由模式) | 超长文档QA、多跳推理 |
+| **参数内化** | MemoryLLM (ICML 2024), M+, DeepSeek Engram, ICLR STEM | 记忆内化到模型参数/权重中，自更新机制 | 预训练/后训练 | 永久(跨会话) | 无(隐式参数编码) | 知识注入、模型编辑 |
+| **架构级原语** | Infini-attention, LM2, LongMem | 压缩记忆融入注意力或解耦侧网络 | 推理中 | 无状态 | 中 | 极端长上下文理解 |
 
-| 阶段 | 时间 | 交付 | 验证 |
-|------|------|------|------|
-| **MVP** | 4周 | L1-L3 Markdown+FTS5+复杂度感知 | LOCOMO >75% |
-| **Phase 2** | +8周 | 5层+超图+Active Retrieval+回滚 | LOCOMO >85% |
-| **Phase 3** | +12周 | 场景适配器+多Agent+自定义基准 | 3场景可用 |
-| **Phase 4** | 持续 | User as Code+多模态 | 前沿 |
+**三大子范式的本质区别**：
+
+| 维度 | KV缓存检索 | MSA稀疏注意力 | 参数内化 |
+|------|-----------|-------------|---------|
+| **解决的核心问题** | 如何在有限上下文窗口中装更多有用信息 | 单次推理中能看多少内容(百万-亿级) | 如何让模型本身"记住"知识 |
+| **是否持久** | ❌ 无状态 | ❌ 无状态 | ✅ 永久 |
+| **是否可解释** | ✅ KV对应token | ⚠️ 路由模式可分析 | ❌ 隐式编码 |
+| **是否可编辑** | ❌ 仅可选择驱逐 | ❌ 仅可更新检索 | ⚠️ 需重新更新参数 |
+| **推理开销** | 低(预压缩) | 中(kNN/稀疏注意力) | 零(无额外检索) |
+| **与外部记忆关系** | 互补(减少噪声) | 互补(扩展上下文) | 互补(通用知识+个性化) |
+
+**批判性审视**：
+1. **KV缓存压缩不是记忆系统**——H2O、SnapKV等方法本质是上下文优化技术，不存储跨会话状态，不具备记忆系统的核心特征（持久性、可更新性、可检索性）。**不应将其归类为记忆系统**，而是记忆系统推理时的辅助优化。
+2. **MemoryLLM的"百万次更新无退化"有限定条件**——论文在受控训练环境下(curated training)验证，实际生产环境的无序知识注入可能导致不同结果。指数遗忘意味着旧知识质量随更新次数自然衰减。
+3. **混合架构是必然方向**：参数记忆(通用知识) + KV缓存优化(推理效率) + 外部记忆(用户特定信息) = 完整的记忆栈。
+
+#### 2.2.3 OS/虚拟上下文管理
+
+| 论文 | 核心创新 | 效果 | 核心局限 | 数据可信度 |
+|------|---------|------|---------|-----------|
+| **MemGPT** (2023) | 虚拟上下文管理，LLM自主换页 | 超长文档QA+20%准确率 | LLM换页决策可能出错 | ★☆ 论文自报 |
+| **EverMemOS** (2026) | 自组织记忆OS + EverCore调度 | LoCoMo 93.05%, LongMemEval 83.00% | 系统复杂度高 | ☆ 自报+云服务，多跳推理+19.7%时序+16.1% |
+| **HyperMem** (2026) | 超图记忆模型 | 多跳推理+15%准确率 | 超图构建成本高 | ☆ 同团队自建基准自报，无独立验证 |
+| **RMT** (2022) | 循环记忆token跨段传递 | 1M+序列保持高准确率 | 记忆token信息瓶颈 | ★☆ 论文自报 |
+
+**演进脉络**：OS隐喻(MemGPT) → OS+调度(EverMemOS) → OS+超图(EverMemOS+HyperMem)
+
+**关键洞察**：OS范式正从"隐喻"走向"实现"。MemGPT提出了OS隐喻，但缺乏真正的调度器和遗忘机制。EverMemOS的EverCore调度器实现了OS级记忆管理，包括主动遗忘和重要性评分。这是从"概念"到"工程"的关键跃迁。
+
+**⚠️ EverMemOS/HyperMem数据可信度注释**：这两篇论文（arXiv:2601.02163, 2604.08256）均为同一研究团队（胡传瑞等）的自报结果。EverMemOS已在四个基准上报告数据（LoCoMo 93.05%, LongMemEval 83.00%, HaluMem 90.04%, PersonaMem v2最佳综合），且已推出云服务（console.evermind.ai），工程成熟度有所提升。但数据仍为自报，未经独立第三方验证。"+19.7%"和"+16.1%"的提升幅度应视为方向性参考而非确证结论。
+
+#### 2.2.4 反思与自进化
+
+| 论文 | 核心创新 | 效果 | 核心局限 | 数据可信度 |
+|------|---------|------|---------|-----------|
+| **Reflexion** (2023) | 语言反思强化学习 | HumanEval 80→91% | 反思质量依赖LLM | ★☆ 论文自报 |
+| **Generative Agents** (2023) | 记忆流+反思+三维检索 | 涌现社交行为 | 成本极高、无遗忘 | ★ 独立复现 |
+| **MemoryBank** (2024) | Ebbinghaus遗忘曲线 | 个性化对话提升 | 参数需调优 | ★☆ 论文自报 |
+| **A-MEM** (2025) | 记忆即Agent | LOCOMO显著优于RAG | 系统复杂度极高 | ★☆ 论文自报 |
+| **ExpeL** (2024) | 经验→洞察→技能闭环 | ALFWorld+10-20% | 洞察可能错误 | ★☆ 论文自报 |
+| **Voyager** (2023) | 可执行代码技能库 | Minecraft 3.3x物品 | 局限于游戏环境 | ★☆ 论文自报 |
+
+**演进脉络**：事后反思(Reflexion) → 定期反思(Generative Agents) → 遗忘曲线(MemoryBank) → 记忆即Agent(A-MEM)
+
+**关键洞察**：
+- Generative Agents的"记忆流→反思→行动"认知循环成为后续系统的设计范式
+- 遗忘曲线(MemoryBank)首次将心理学理论引入Agent记忆，使遗忘行为更自然
+- A-MEM的"记忆即Agent"是最前沿方向——记忆从被动对象变为主动Agent
+
+**⚠️ A-MEM深度注释**：A-MEM（arXiv:2502.12110）受Zettelkasten笔记法启发，提出每条记忆是一个自主Agent，具备自己的生命周期（创建→关联→演化→淘汰）。其在LOCOMO上"显著优于RAG"的声称需注意：(1) A-MEM的复杂度远高于RAG，成本-效益比未充分评估；(2) "记忆即Agent"在工程实现上面临状态爆炸和一致性维护的根本挑战。
+
+#### 2.2.5 知识图谱与时序记忆
+
+| 论文 | 核心创新 | 效果 | 核心局限 | 数据可信度 |
+|------|---------|------|---------|-----------|
+| **Zep/Graphiti** | 时序知识图谱 | 长期对话+20%准确率 | 时序推理增加复杂度 | ★☆ 论文自报 |
+| **RAP** | LLM推理重构为规划 | Blocksworld 30→70% | LLM世界模型准确性有限 | ★☆ 论文自报 |
+| **MemoRAG** | 记忆引导检索 | 多跳QA+15-25% | 记忆模型需额外训练 | ★☆ 论文自报 |
+
+**关键洞察**：时间维度正成为Agent Memory的"一等公民"。Zep/Graphiti的时序知识图谱能够表达"张三在1月是A公司员工，3月跳槽到B公司"这类时间演变关系，这是扁平向量存储无法实现的。
+
+**MemoRAG的学术意义**：MemoRAG（arXiv:2409.05591）是目前最接近将"MAG"学术化的工作。其核心创新在于引入轻量级记忆模型生成"线索"指导检索，使记忆深度参与生成过程。这代表了从"检索增强"到"记忆引导"的关键转变。
+
+#### 2.2.6 评估基准
+
+| 基准 | 核心贡献 | 关键发现 | 数据可信度 |
+|------|---------|---------|-----------|
+| **LOCOMO** (2024) | 首个长期对话记忆基准 | GPT-4跨会话记忆准确率<60% | ★ 独立基准 |
+| **LongMemEval** (2024) | 五大核心能力细粒度评估 | 所有LLM在记忆更新和遗忘上表现最差 | ★ 独立基准 |
+| **MemBench** (2024) | 统一评估框架+效率维度 | Token效率与准确率存在权衡 | ★ 独立基准 |
+| **EverBench** (2026) | 多方协作对话记忆评估 | 多方场景下性能下降30%+ | ★☆ 自建基准，需独立验证 |
+
+**关键洞察**：评估基准揭示了当前系统的关键短板——**记忆更新和遗忘是最弱环节**。即使是GPT-4，在跨会话记忆任务上的准确率也低于60%。这直接验证了"遗忘机制缺失"是当前Agent Memory系统的核心痛点。
+
+**⚠️ 评估基准的局限性**：
+- LOCOMO/LongMemEval主要评估对话场景，对编码Agent、运维Agent等专业场景覆盖不足
+- EverBench由EverMemOS同一团队创建，存在自建基准偏向性风险
+- 缺乏对记忆安全性的评估维度（投毒抗性、隐私保护等）
+- 缺乏对多Agent协作记忆的标准化评估
+
+#### 2.2.7 KV Cache复用与感知记忆管理
+
+| 技术 | 核心思想 | 效果 | 定位 |
+|------|---------|------|------|
+| **Prefix Caching** | 共享前缀KV只计算一次 | 减少50%+重复计算 | 感知记忆层 |
+| **KV Cache压缩** | 基于注意力权重丢弃不重要KV | 90%压缩率保持95%+质量 | 感知记忆层 |
+| **分页KV Cache** | OS分页机制管理KV | 显存利用率2-3x提升 | 感知记忆层 |
+| **CacheGen** | KV Cache压缩+流式传输 | 5-10x压缩，<1%质量损失 | 感知记忆层 |
+| **MemLong** | 选择性KV保留+检索增强 | 长文本+5-10%，KV内存-40% | 感知+语义混合 |
+
+**关键洞察**：KV Cache复用属于"感知记忆"层面——它管理的是模型对近期上下文的感知，而非高层语义记忆。当前趋势是将KV Cache管理从"工程优化"上升为"记忆管理"问题，未来可能与RAG/图记忆形成**分层记忆架构的底层**。
+
+#### 2.2.8 安全与隐私研究
+
+| 论文 | 核心发现 | 影响 |
+|------|---------|------|
+| **AgentPoison** (2024, arXiv:2407.12784) | 记忆投毒攻击框架，攻击成功率85%+ | 揭示RAG记忆系统的系统性安全漏洞 |
+| **BadRAG** (2024, arXiv:2402.16893) | RAG后门攻击，构造特殊文档触发恶意检索 | 对基于向量的记忆检索系统特别有效 |
+| **PoisonedRAG** (2024, arXiv:2402.07867) | 多轮对话记忆投毒，形成虚假知识链 | 利用记忆融合机制扩散虚假信息 |
+| **间接注入攻击** (Greshake 2023, arXiv:2302.12173) | 通过外部数据源注入恶意指令到Agent记忆 | 所有自动记忆提取系统均受影响 |
+
+**关键洞察**：安全研究揭示了Agent Memory系统的根本性脆弱——记忆持久性放大了攻击影响，自进化能力加速了毒记忆扩散。当前产业界系统几乎无防御措施，这是从研究到生产的最大安全鸿沟。
+
+**🆕 2026 Q2 安全威胁更新**：
+
+1. **eTAMP攻击**（arXiv:2604.02623）：首次实现跨会话、跨站点的环境注入记忆投毒，无需直接记忆访问。GPT-5-mini上ASR达32.5%，GPT-5.2上23.4%。更关键的是发现"Frustration Exploitation"——Agent在环境压力下攻击成功率提升8倍。
+
+2. **MINJA防御研究**（arXiv:2601.05504）：在真实条件（有预存合法记忆）下，MINJA攻击效果大幅下降。提出两种防御：(1) Input/Output Moderation（复合信任评分）；(2) Memory Sanitization（信任感知检索+时间衰减+模式过滤）。但防御需要精细的信任阈值校准。
+
+3. **OWASP Agentic AI Top 15**：记忆投毒排名首位安全威胁。Cisco AI Defense已覆盖MCP中的记忆投毒检测，标志着安全从学术走向产业。
+
+4. **Memoria的版本回滚防御**：GTC 2026发布的Memoria通过Git式版本控制，使被投毒的记忆可回退到安全版本，提供了与CortexMem防火墙互补的恢复性安全能力。
+
+### 2.3 学术论文与产业系统的映射
+
+| 学术概念 | 产业实现 | 成熟度 | 验证状态 |
+|---------|---------|--------|---------|
+| CoALA认知架构 | 多系统部分实现 | ★★★☆☆ | 理论框架，无完整工程实现 |
+| MemGPT虚拟上下文 | Letta平台 | ★★★★☆ | 有生产部署 |
+| Generative Agents反思 | Hermes Agent闭环学习 | ★★★☆☆ | 部分实现 |
+| MemoryBank遗忘曲线 | EverMemOS EverCore | ★★★★☆ | 论文验证，待生产验证 |
+| HyperMem超图 | EverMemOS | ★★★☆☆ | 论文验证，无独立复现 |
+| A-MEM记忆即Agent | MindOS(部分) | ★★☆☆☆ | 概念阶段 |
+| 时序知识图谱 | Zep/Graphiti | ★★★★☆ | 有生产部署 |
+| 技能即程序性记忆 | Voyager/Acontext | ★★★☆☆ | 受限场景验证 |
+| KV Cache分页管理 | vLLM/SGLang(工程) | ★★★★★ | 广泛生产部署 |
+| 记忆投毒防御 | 🆕 Memoria(版本回滚), Cisco AI Defense(外挂) | ★★☆☆☆ | 从学术走向产业 |
+
+### 2.4 学术前沿趋势总结
+
+1. **从RAG到MAG（候补范式）**：记忆增强生成将超越检索增强生成，记忆深度参与生成过程。但MAG尚需形式化定义和独立验证
+2. **从被动到主动**：记忆从被动存储对象变为主动Agent（A-MEM范式）
+3. **从扁平到超图**：超图记忆将突破传统知识图谱的表达力限制
+4. **从单Agent到集体**：多Agent共享记忆协议和集体意识总线
+5. **从感知到认知**：KV Cache管理（感知层）与语义记忆（认知层）的统一
+6. **评估标准化**：LOCOMO/LongMemEval/MemBench推动统一评估框架
+7. **安全从忽视到必需**：记忆投毒/隐私泄露防御将成为系统设计的必要组件
+
+---
+
+## 第3章：面向通用Agent的Memory系统技术解决方案
+
+### 3.1 业务场景
+
+#### 3.1.1 核心场景定义
+
+| 场景 | 描述 | 记忆需求特征 |
+|------|------|-------------|
+| **编码Agent** | 24/7自主编码、调试、重构 | 精确代码上下文、项目架构理解、失败模式记忆 |
+| **运维Agent** | 系统监控、故障诊断、自动修复 | 时序事件记忆、因果关系推理、历史故障模式 |
+| **研究Agent** | 文献调研、实验设计、知识发现 | 大规模知识图谱、跨域关联推理、假设追踪 |
+| **个人助手** | 日程管理、信息整理、决策辅助 | 用户画像深度建模、偏好进化追踪、隐私保护 |
+| **多Agent协作** | 团队任务分配、知识共享、集体决策 | 共享记忆总线、隔离机制、一致性协议 |
+
+#### 3.1.2 核心用户痛点
+
+1. **跨会话遗忘**：每次新会话从零开始，重复解释项目背景和偏好
+2. **记忆黑箱**：不知道Agent"记住了什么"，无法审计和修正
+3. **Token成本高**：全量上下文注入导致API费用爆炸
+4. **记忆不进化**：Agent不会从错误中学习，重复犯相同错误
+5. **多Agent孤岛**：不同Agent之间无法共享知识和经验
+6. **记忆不安全**：无法防止记忆投毒、隐私泄露，缺乏数据主权保障
+
+### 3.2 问题挑战
+
+| 挑战 | 详细描述 | 当前最佳实践的局限 |
+|------|---------|-------------------|
+| **记忆生命周期管理** | 形成→存储→检索→演化→遗忘的完整生命周期 | 60%+系统缺乏遗忘机制 |
+| **结构化关系推理** | 处理"A隶属于B，B昨天被C修改"类复合关系 | 70%+系统仅支持扁平事实 |
+| **Token效率与质量权衡** | 在大幅节省Token的同时保持/提升准确率 | 各系统自报数据，缺乏统一基准 |
+| **人类可观测性** | 当Agent异常时，能追溯"当时脑子里在想什么" | 大多数系统记忆不可读 |
+| **多Agent记忆协作** | 隔离与共享的平衡、一致性保证 | 缺乏成熟的共享记忆协议 |
+| **部署成本与复杂度** | 降低外部依赖，支持从个人到企业的弹性部署 | 图/OS类系统依赖组件多 |
+| **记忆安全与隐私** | 防止记忆投毒、泄露，支持数据主权 | 几乎无系统专门解决 |
+
+### 3.3 技术方案：CortexMem — 分层认知记忆系统
+
+#### 3.3.1 设计哲学
+
+借鉴本研究的核心洞察及2026 Q2全网检索验证，CortexMem的设计哲学为：
+
+1. **Markdown-first + 向量影子 + 版本控制**：人类可读为源头真相，向量为加速层（借鉴memsearch），Git式版本控制为安全基线（借鉴Memoria）
+2. **OS级调度 + 超图结构 + LLM亲和路径**：EverCore式调度器 + HyperMem式超图（借鉴EverMemOS），但增加LLM直接参与记忆推理的路径（回应MemBrain洞察）
+3. **技能即记忆 + User as Code（可选模式）**：程序性记忆 + 可执行用户偏好（借鉴Voyager/Acontext），但默认使用"模型亲和记忆"（更自然），User as Code作为技术用户的高级模式
+4. **5层认知架构**：L0/L1/L2扩展为L0-L4五层（借鉴TiMem的CLS时序分层树），保留L0感知层独特性
+5. **遗忘曲线 + CLS理论 + 重要性评分**：心理学基础 + 互补学习系统理论 + 智能淘汰（融合MemoryBank + TiMem + EverMemOS）
+6. **安全内生设计 + 版本回滚**：记忆防火墙 + 溯源链 + 隔离沙箱 + 版本回滚（回应AgentPoison/eTAMP + 借鉴Memoria）
+7. **Active Retrieval**：Agent主动关联所有记忆类型，无需等待查询触发（借鉴MIRIX）
+
+#### 3.3.2 系统架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CortexMem Architecture (v2)                │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              L0: 感知记忆层 (Sensory Memory)             │ │
+│  │  KV Cache 分页管理 + 语义感知淘汰 + Prefix Caching       │ │
+│  │  容量: 当前上下文窗口  延迟: <1ms  生命周期: 请求级       │ │
+│  └──────────────────────────┬──────────────────────────────┘ │
+│                              │                                │
+│  ┌──────────────────────────▼──────────────────────────────┐ │
+│  │              L1: 事实记忆层 (Factual Memory)             │ │
+│  │  原始事实片段 + 实时写入 + Agent自分类标签               │ │
+│  │  容量: ~2K tokens  延迟: <5ms  生命周期: 实时级          │ │
+│  └──────────────────────────┬──────────────────────────────┘ │
+│                              │                                │
+│  ┌──────────────────────────▼──────────────────────────────┐ │
+│  │              L2: 会话记忆层 (Session Memory)             │ │
+│  │  Core Memory Blocks (Markdown) + 热记忆缓存              │ │
+│  │  容量: ~4K tokens  延迟: <10ms  生命周期: 会话级          │ │
+│  │  内容: 用户画像 | Agent人设 | 当前任务状态 | 活跃技能      │ │
+│  └──────────────────────────┬──────────────────────────────┘ │
+│                              │                                │
+│  ┌──────────────────────────▼──────────────────────────────┐ │
+│  │              L3: 模式记忆层 (Pattern Memory)             │ │
+│  │  日/周模式 + 行为趋势 + CLS系统巩固                      │ │
+│  │  容量: ~8K tokens  延迟: <50ms  生命周期: 日/周级         │ │
+│  │  内容: 重复行为模式 | 偏好演变 | 技能迭代历史              │ │
+│  └──────────────────────────┬──────────────────────────────┘ │
+│                              │                                │
+│  ┌──────────────────────────▼──────────────────────────────┐ │
+│  │              L4: 画像记忆层 (Identity Memory)            │ │
+│  │  稳定人格 + 核心偏好 + 长期知识 + 可执行偏好规则          │ │
+│  │  容量: ~16K tokens  延迟: <100ms  生命周期: 持久+演化    │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐ │ │
+│  │  │ 语义记忆     │  │ 情景记忆     │  │ 程序性记忆    │ │ │
+│  │  │ (超图+向量)  │  │ (时序日志)   │  │ (可执行技能)  │ │ │
+│  │  │ 知识/事实    │  │ 事件/经历    │  │ 技能/方案     │ │ │
+│  │  └──────────────┘  └──────────────┘  └───────────────┘ │ │
+│  └──────────────────────────┬──────────────────────────────┘ │
+│                              │                                │
+│  ┌──────────────────────────▼──────────────────────────────┐ │
+│  │              CortexCore 记忆调度器                        │ │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────┐ │ │
+│  │  │重要性评分│ │遗忘曲线  │ │记忆融合  │ │记忆路由   │ │ │
+│  │  │引擎      │ │+CLS引擎  │ │引擎      │ │+LLM亲和  │ │ │
+│  │  └──────────┘ └──────────┘ └──────────┘ └───────────┘ │ │
+│  │  ┌──────────┐ ┌──────────┐                             │ │
+│  │  │Active    │ │复杂度感知│                             │ │
+│  │  │Retrieval │ │召回引擎  │                             │ │
+│  │  └──────────┘ └──────────┘                             │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              Security Layer (安全层·横切关注点)           │ │
+│  │  记忆防火墙 | 溯源链 | 访问控制 | 隐私保护 | 隔离沙箱    │ │
+│  │  🆕 版本回滚(Memoria式) | eTAMP环境注入防御             │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              Multi-Agent 记忆总线                         │ │
+│  │  私有记忆 ←→ 共享Cube ←→ 元记忆(Agent能力图谱)           │ │
+│  │  🆕 Active Retrieval自动关联 | 信任感知共享              │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**🆕 v2 架构变更说明**（基于2026 Q2全网检索验证）：
+- **L1/L2扩展为5层**：借鉴TiMem的CLS时序分层树，将原L1工作记忆和L2认知记忆之间的过渡细化为L1事实→L2会话→L3模式→L4画像
+- **CortexCore增加3个引擎**：Active Retrieval（借鉴MIRIX）、复杂度感知召回（借鉴TiMem）、LLM亲和路由（回应MemBrain洞察）
+- **Security Layer增加版本回滚**：借鉴Memoria的Git for Memory，形成"预防+检测+隔离+恢复"完整安全闭环
+- **Multi-Agent增加信任感知共享**：回应eTAMP攻击，共享记忆需附加来源可信度评分
+
+#### 3.3.3 核心创新技术
+
+##### 创新一：5层记忆 + 双索引 + LLM亲和架构
+
+```
+L0 感知记忆: KV Cache分页管理（感知层优化，CortexMem独有）
+    ↓ 注意力权重分析
+L1 事实记忆: 原始事实片段 + Agent自分类标签（零成本写入）
+    ↓ 自动归纳（会话结束时）
+L2 会话记忆: Core Memory Blocks (Markdown, 人类可读)
+    ↓ CLS系统巩固（日/周维度）
+L3 模式记忆: 日/周模式 + 行为趋势 + 偏好演变
+    ↓ 长期稳定化
+L4 画像记忆:
+    ├─ 语义记忆: 超图(Neo4j) + 向量影子索引(Qdrant/Milvus)
+    ├─ 情景记忆: 每日Markdown日志 + 时序索引
+    └─ 程序性记忆: 可执行技能代码 + 版本管理
+```
+
+**双索引**：每条记忆同时维护超图节点（结构化关系）和向量嵌入（语义检索），检索时两路并发 + RRF融合。
+
+**🆕 LLM亲和检索路径**（回应MemBrain洞察）：不是所有查询都需要图遍历。增加三级检索路径：
+- **简单查询**：BM25/向量 → 直接返回（零LLM调用）
+- **关系查询**：超图遍历 → 结构化结果（1次LLM调用）
+- **推理查询**：LLM直接在记忆空间中推理（MemBrain式，多轮LLM调用）
+
+**与CoALA框架的对应**：L0对应CoALA的感知输入层，L1-L2对应工作记忆，L3-L4对应长期记忆（语义/情景/程序性三分）。CortexMem在CoALA基础上增加了感知层（KV Cache管理）、模式层（CLS系统巩固）和安全层。
+
+##### 创新二：CortexCore 智能调度器
+
+借鉴EverMemOS的EverCore和MemOS的MemScheduler，但做了关键增强：
+
+1. **重要性评分引擎**：综合5个维度计算记忆重要性
+   - 访问频率（LFU）+ 最近访问（LRU）+ 语义关联度 + 来源可信度 + 任务依赖度
+
+2. **遗忘曲线+CLS引擎**：基于Ebbinghaus遗忘曲线 + 互补学习系统理论（CLS）
+   - 不同类型记忆的衰减速率不同（安全教训衰减最慢，闲聊最快）
+   - "回忆"（检索/使用）会重置衰减曲线
+   - 🆕 **CLS系统巩固**：L1事实→L3模式的巩固过程模拟海马体→新皮层转移（借鉴TiMem）
+   - 🆕 **模糊化机制**：不只是"保留或淘汰"，而是"细节模糊化+核心保留"（借鉴MemBrain的"活人感"）
+
+3. **记忆融合引擎**：
+   - 语义去重：向量相似度>0.95的记忆自动合并
+   - 冲突检测：新记忆与旧记忆矛盾时，触发LLM仲裁
+   - 超图融合：相关记忆通过超边自动关联
+
+4. **记忆路由+LLM亲和引擎**：
+   - 根据查询意图自动选择检索路径（向量/图/全文/技能库/LLM亲和推理）
+   - 支持跨层路由（L4→L2的晋升，L2→L4的降级）
+   - 🆕 **复杂度感知召回**：简单问题只检索L1/L2，复杂问题才往L3/L4找（借鉴TiMem，无需LLM决策）
+
+5. **🆕 Active Retrieval引擎**（借鉴MIRIX）：
+   - Agent不被动等待查询，主动关联所有记忆类型
+   - 用户输入自动触发跨类型检索（核心/情景/语义/程序性/资源/知识库）
+   - 减少重复API调用，提升响应一致性
+
+**⚠️ 工程可行性注释**：CortexCore调度器的四个引擎均依赖LLM调用（重要性评分、冲突仲裁、意图分析等），在实际部署中可能成为性能瓶颈和成本来源。建议采用分级策略：高频操作（路由、去重）使用轻量模型/规则引擎，低频操作（冲突仲裁、反思融合）使用强模型。
+
+##### 创新三：User as Code — 可执行用户偏好（可选模式）
+
+借鉴Voyager的"技能即代码"和Acontext的"技能即记忆"，将用户偏好编码为**可执行规则**。
+
+**🆕 2026 Q2 修正**：基于MemBrain在PersonaMem-v2上的SOTA表现（51.50%），User as Code从默认模式降级为**可选模式**。默认使用"模型亲和记忆"（更自然、更接近人类的"活人感"），User as Code作为技术用户的高级模式。
+
+```python
+class UserPreferences:
+    def code_style(self):
+        return {
+            "language": "Python",
+            "type_hints": True,
+            "docstring_style": "google",
+            "max_line_length": 120,
+            "test_first": True
+        }
+    
+    def notification_preference(self, event_type):
+        if event_type == "deploy_success":
+            return NotificationChannel.TELEGRAM
+        elif event_type == "deploy_failure":
+            return NotificationChannel.TELEGRAM + NotificationChannel.SMS
+        else:
+            return NotificationChannel.NONE
+    
+    def project_context(self, project_name):
+        contexts = {
+            "project-a": {"stack": "Fastify", "db": "PostgreSQL"},
+            "project-b": {"stack": "Django", "db": "SQLite"},
+        }
+        return contexts.get(project_name, {})
+```
+
+Agent可直接"执行"用户偏好，而非从文本中解析。优势：
+- **确定性**：规则执行结果确定，不依赖LLM理解
+- **可组合**：偏好规则可相互组合和覆盖
+- **可测试**：偏好规则可单元测试验证
+- **可版本控制**：代码天然支持git版本管理
+
+**⚠️ 安全风险注释**：User as Code将用户偏好编码为可执行代码，引入了代码注入的安全风险。恶意用户可能通过构造恶意偏好代码执行任意操作。🆕 eTAMP攻击（arXiv:2604.02623）进一步证明环境注入可跨站投毒，User as Code的执行路径可能成为攻击传播媒介。必须实施严格的沙箱隔离和代码审计机制。建议：(1) 限制可执行代码的API访问范围；(2) 实施代码静态分析检查；(3) 运行时沙箱隔离；(4) 🆕 对环境来源的输入进行额外验证层。
+
+##### 创新四：xiaoclaw-memory式零成本蒸馏
+
+借鉴xiaoclaw-memory的"零额外LLM调用"理念：
+
+- **写入时自分类**：Agent在写入记忆时自行判断类型标签[P/E/K/B/S]，无需额外LLM调用
+- **Markdown蒸馏**：L2日志定期蒸馏到L1主题文件，合并重复、更新引用、更新摘要
+- **交叉引用网络**：记忆条目之间用→链接，形成知识网络
+
+```
+L2 日志条目（带类型标签）:
+- [E] 首笔充值成功：user@example.com ¥5.00 → 5 Credits
+- [S] 收钱吧海外不通：TLS超时 → skills.md#收钱吧代理
+- [K] irm -OutFile 无视charset=utf-8 → knowledge.md
+
+L1 技能条目（蒸馏后）:
+### [S] 收钱吧海外代理
+- 问题: TLS超时
+- 方案: 香港Nginx反代
+- 关联: → knowledge.md#Windows_PowerShell, events.md#2026-02-28
+```
+
+##### 创新五：Security Layer — 安全内生设计
+
+回应AgentPoison、eTAMP等安全研究的发现，CortexMem将安全作为横切关注点贯穿所有记忆层级：
+
+1. **记忆防火墙 (Memory Firewall)**
+   - 写入验证：新记忆进入前进行语义异常检测和行为异常检测
+   - 检索过滤：检索结果经过安全过滤，拦截已知毒记忆
+   - 来源验证：记忆写入时附加来源可信度评分
+   - 🆕 **环境注入防御**：回应eTAMP攻击，对来自外部环境的观察数据进行额外验证层
+
+2. **记忆溯源链 (Memory Provenance)**
+   - 每条记忆维护完整溯源链，记录产生、修改、融合、检索的完整历史
+   - 支持溯源查询：给定一条记忆，追溯其完整生命周期
+   - 变更不可篡改（借鉴memsearch的git方案）
+
+3. **记忆隔离沙箱 (Memory Sandbox)**
+   - 不可信来源的记忆进入隔离沙箱
+   - 在沙箱中与已有记忆交叉验证
+   - 通过验证后晋升到主记忆库，验证失败则标记为"可疑"并隔离
+
+4. **🆕 版本回滚 (Version Rollback)**（借鉴Memoria）
+   - Copy-on-Write版本控制：每次记忆变更创建新版本，不覆盖旧版本
+   - 快照/分支/合并：支持记忆的分支实验和合并
+   - 投毒恢复：发现记忆被投毒时，可回退到已知安全版本
+   - 形成"预防（防火墙）+ 检测（溯源）+ 隔离（沙箱）+ 恢复（版本回滚）"的完整安全闭环
+
+5. **访问控制 (Access Control)**
+   - 敏感级别：Public / Internal / Confidential / Restricted
+   - 基于Agent身份、任务上下文、时间窗口的动态授权
+   - 审计日志：所有记忆访问操作记录不可篡改
+
+6. **隐私保护 (Privacy Protection)**
+   - 选择性差分隐私：对敏感记忆检索结果添加校准噪声
+   - 加密存储：敏感记忆加密存储，解密需动态授权
+   - 数据主权：支持GDPR"被遗忘权"，记忆删除时确保所有副本（向量索引、图节点、日志文件）同步清除
+
+#### 3.3.4 存储设计
+
+| 层级 | 存储方式 | 格式 | 可读性 | 检索方式 |
+|------|---------|------|--------|---------|
+| L0 | GPU显存/内存 | KV Cache | 不可读 | 注意力机制 |
+| L1 | 本地文件系统 | Markdown | 人类可读可写 | FTS5全文 + 直接浏览 |
+| L2 | 本地文件系统 | Markdown | 人类可读 | FTS5 + 语义混合 |
+| L3 | 本地文件系统 | Markdown摘要 | 人类可读 | 时序+语义+模式匹配 |
+| L4-语义 | Neo4j + Qdrant | 超图+向量 | 结构化可读 | 超图遍历 + 向量语义 + LLM亲和推理 |
+| L4-情景 | 本地文件系统 | Markdown日志 | 人类可读 | 时序+语义混合 |
+| L4-程序性 | Git仓库 | Python/JS代码 | 人类可读可执行 | 语义匹配 + 标签 |
+| L4-User as Code | Git仓库 | Python规则 | 人类可读可执行 | 直接导入执行（可选模式） |
+
+**部署模式弹性**：
+
+| 模式 | 依赖 | 适用场景 |
+|------|------|---------|
+| **轻量模式** | SQLite + 本地文件 + 可选Qdrant Lite | 个人开发者 |
+| **标准模式** | PostgreSQL + pgvector + Neo4j Community | 小团队 |
+| **企业模式** | PostgreSQL + Qdrant + Neo4j Enterprise + Redis | 企业级 |
+
+**⚠️ 部署复杂度现实检验**：CortexMem的标准模式依赖PostgreSQL + pgvector + Neo4j，这与报告1.2.3节中批评的"图/OS类系统依赖组件多"问题一致。轻量模式虽降低了门槛，但牺牲了超图推理和向量语义检索能力。建议在轻量模式中用SQLite + FTS5替代Neo4j + Qdrant，提供降级但可用的体验。
+
+### 3.4 差异化竞争优势
+
+| 差异化维度 | CortexMem v2 | 最强竞品（2026 Q2） | 核心差异 | 验证状态 | 修正建议 |
+|-----------|-----------|---------------------|---------|---------|---------|
+| **5层认知架构** | L0感知+L1事实+L2会话+L3模式+L4画像 | TiMem（5层TMT） | CortexMem增加L0感知层KV管理 | ⚠️ TiMem 5层已验证(LoCoMo 75.30%) | 保留L0独特性，L1-L4对齐TiMem |
+| **超图+向量双索引** | 结构化推理+语义检索 | EverMemOS（超图+LoCoMo 93.05%） | 超图n-元关系 | ⚠️ EverMemOS已SOTA | 增加LLM亲和检索路径 |
+| **User as Code** | 可执行偏好（可选模式） | MemBrain（活人感记忆+PersonaMem 51.50%） | 确定性 vs 自然性 | ⚠️ MemBrain更优 | 降级为可选模式，默认用模型亲和记忆 |
+| **零成本蒸馏** | Agent自分类+Markdown蒸馏 | TiMem（复杂度感知召回） | 无LLM决策路由 | ✅ 方向正确 | 融合TiMem复杂度感知 |
+| **遗忘曲线+CLS** | Ebbinghaus+CLS+5维评分 | EverMemOS（engram生命周期） | 心理学+神经科学 | ⚠️ EverMemOS更完整 | 融合CLS理论+模糊化机制 |
+| **安全内生设计** | 防火墙+溯源+沙箱+版本回滚 | Memoria（版本回滚） | 预防性+恢复性 | ✅ **真正独特** | 融合版本控制形成完整闭环 |
+| **Markdown-first+版本控制** | 人类可读+Git式管理 | Memoria（Git for Memory） | 可读+可回滚 | ⚠️ Memoria更进一步 | 增加Copy-on-Write版本控制 |
+| **多Agent记忆总线** | 私有+共享+元记忆+Active Retrieval | MIRIX（6类+Active Retrieval） | 三分+主动 vs 六类+主动 | ⚠️ MIRIX更精细 | 增加Active Retrieval |
+| **🆕 LLM亲和检索** | 三级检索路径 | MemBrain（LLM直接参与推理） | 分级LLM参与 | ✅ 方向正确 | 简单查询零LLM调用，推理查询多轮 |
+| **🆕 感知层KV管理** | L0 KV Cache语义感知 | 无竞品 | 全认知栈覆盖 | ✅ 独特但工程复杂 | 需与推理框架深度集成 |
+
+### 3.5 测评标准 Benchmark
+
+#### 3.5.1 采用现有标准
+
+| 基准 | 评估维度 | 目标 | 说明 |
+|------|---------|------|------|
+| **LOCOMO** | 长期对话记忆准确率 | >90%（对标SOTA 93.25%） | 标准基准，有独立验证 |
+| **LongMemEval** | 五大核心能力（注入/检索/推理/更新/遗忘） | 记忆更新>70%，遗忘>75% | 标准基准，有独立验证 |
+| **MemBench** | 统一评估+效率维度 | Token效率>80%节省 | 标准基准，有独立验证 |
+| **EverBench** | 多方协作对话记忆 | 多方场景下降<15% | 自建基准，需独立验证 |
+
+#### 3.5.2 新增自定义基准
+
+| 基准名称 | 评估维度 | 说明 |
+|---------|---------|------|
+| **CortexBench-Code** | 编码Agent跨会话记忆 | 代码上下文保持、架构决策记忆、失败模式避免 |
+| **CortexBench-Forget** | 遗忘机制质量 | 重要记忆保留率、过时记忆淘汰率、遗忘后恢复能力 |
+| **CortexBench-Skill** | 技能进化效率 | 技能复用率、技能迭代质量、跨任务迁移率 |
+| **CortexBench-Multi** | 多Agent协作记忆 | 共享记忆一致性、私有记忆隔离性、元记忆准确性 |
+| **CortexBench-Sec** | 记忆安全性 | 投毒抗性、隐私保护、访问控制有效性 |
+
+#### 3.5.3 核心KPI
+
+| KPI | 目标值 | 测量方法 | 说明 |
+|-----|--------|---------|------|
+| **Token节省率** | >60%（及格）/ >70%（优秀） | (无记忆基线token - CortexMem token) / 无记忆基线token | 🆕 修正：原>80%过于激进，TiMem实测52.2%，建议同时报告相对竞品的节省率 |
+| **记忆检索准确率** | >90% | LOCOMO/LongMemEval标准评估 | 🆕 修正：当前SOTA为MemBrain 93.25%/EverMemOS 93.05%，>90%已不够激进，但CortexMem需先验证基础能力 |
+| **记忆更新准确率** | >80% | LongMemEval Memory Update维度 | - |
+| **遗忘精确率** | >85% | 重要记忆保留率 × 过时记忆淘汰率 | 需定义"重要记忆"和"过时记忆"的判定标准 |
+| **技能复用率** | >60% | 跨任务技能命中次数 / 总任务数 | - |
+| **人类可读性评分** | >4/5 | 人工评估记忆文件的可读性和可编辑性 | - |
+| **部署启动时间** | <5min(轻量) / <30min(标准) | 从零部署到首次记忆写入 | - |
+| **投毒抗性** | >90% | AgentPoison/eTAMP标准攻击下的防御成功率 | 🆕 增加eTAMP环境注入攻击防御评估 |
+| **版本回滚恢复率** | >95% | 投毒后回滚到安全版本的成功率 | 🆕 新增KPI，回应Memoria版本控制能力 |
+
+**⚠️ KPI现实性注释**：
+- "Token节省率>80%"：以"无记忆基线"为分母的节省率容易达到（任何合理记忆系统都能做到），建议同时报告相对mem0/OpenViking等竞品的节省率
+- "记忆检索准确率>90%"：LOCOMO上GPT-4基线<60%，当前最优自报数据为memU的92%+（待验证），>90%是激进目标
+- "投毒抗性>90%"：当前无任何系统达到此水平，此目标需要安全层的完整实现和验证
+
+### 3.6 预期效果
+
+| 维度 | 预期效果 | 对标（2026 Q2 修正） | 数据性质 |
+|------|---------|------|---------|
+| **Token成本** | 降低60-70% | TiMem实测52.2%，mem0官称~80%存疑 | 预期，待验证 |
+| **记忆准确率** | LOCOMO >90% | MemBrain 93.25%/EverMemOS 93.05%(☆自报) | 预期，待验证 |
+| **结构化推理** | 多跳推理准确率>80% | EverMemOS超图推理+19.7%(☆自报) | 预期，待验证 |
+| **遗忘质量** | 重要记忆保留>95%，过时淘汰>70% | 超越现有所有系统 | 预期，待验证 |
+| **技能进化** | 跨任务复用率>60% | Voyager的技能库效果(★☆论文) | 预期，待验证 |
+| **部署成本** | 轻量模式$5 VPS可运行 | Hermes Agent | 可实现 |
+| **可观测性** | 100%记忆人类可读可追溯 | memsearch的Markdown-first | 可实现 |
+| **安全性** | AgentPoison/eTAMP攻击防御率>90% | 无竞品对标 | 预期，待验证 |
+| **🆕 版本回滚** | 投毒后恢复成功率>95% | Memoria的Git for Memory | 预期，待验证 |
+
+**⚠️ 预期效果的现实性评估**：
+
+上述预期效果中，"Token成本降低60-70%"和"轻量模式$5 VPS"在技术上是可实现的，因为Markdown-first + SQLite的轻量模式确实可以极低成本运行。"可观测性100%"也是Markdown-first方案的天然优势。
+
+然而，"LOCOMO >90%"、"多跳推理>80%"、"遗忘质量>95%/70%"等目标仍为激进预期，原因如下：
+1. 当前SOTA（MemBrain 93.25%/EverMemOS 93.05%）均为自报数据，无独立验证
+2. CortexMem v2集成了更多机制（5层架构+超图+调度器+遗忘+安全+版本控制+Active Retrieval），系统复杂度极高，各组件的交互效应未知
+3. 缺乏在标准基准上的初步实验数据支撑
+4. 🆕 2026 Q2全网检索揭示：MemBrain的"LLM亲和记忆"和TiMem的"CLS时序分层树"已在LoCoMo上取得验证结果，CortexMem需要在相同基准上直接对比
+
+建议采用**分阶段验证策略**：
+1. **Phase 1**：在LOCOMO上验证核心记忆检索能力（对标TiMem 75.30%）
+2. **Phase 2**：验证5层架构+复杂度感知召回的效果（对标EverMemOS 93.05%）
+3. **Phase 3**：验证遗忘、推理、安全等高级能力
+4. **Phase 4**：验证多Agent协作和多模态扩展
+
+### 3.7 🆕 CortexMem 场景化优势深度分析
+
+基于2026 Q2全网检索对9个关键系统的批判性验证，CortexMem相对现有方案的场景化优势如下：
+
+#### 3.7.1 批判性验证结论
+
+经WebSearch+arXiv原文验证，9个系统的可信度分级：
+
+| 系统 | 验证状态 | 核心发现 | 对CortexMem的借鉴价值 |
+|------|---------|---------|---------------------|
+| **MemBrain 1.0** | ✅ 存在，☆自报 | 新智元/机器之心报道确认；LoCoMo 93.25%为自报，无独立验证；"LLM亲和"概念缺乏形式化定义 | 中：LLM参与记忆推理方向正确，但概念需独立定义 |
+| **Memoria** | ✅ 存在，工程早期 | GTC 2026发布确认（InfoQ报道）；GitHub仓库存在；Copy-on-Write已实现但工程成熟度低 | 高：版本控制记忆方向是安全防御的实用手段 |
+| **TiMem** | ✅ 存在，★☆论文 | arXiv:2601.02845确认；LoCoMo 75.30%可验证；CLS理论映射过度简化；已有商业API(timem.cloud) | 高：5层时序分层+复杂度感知召回是已验证的有效设计 |
+| **OmniMem** | ✅ 存在，★☆论文 | arXiv:2604.01007确认；F1=0.598远低于SOTA；+411%来自极低基线；方法论价值>性能价值 | 低：AI自主优化方向有前景，但当前性能不具竞争力 |
+| **DeepSeek Engram** | ⚠️ 部分存在 | 媒体报道存在（机器之心等），但arXiv论文无法直接定位；报告原arXiv ID为"条件记忆论文"（无效） | 低：概念方向有价值，但无法作为已验证借鉴来源 |
+| **ICLR STEM** | ✅ 存在，★☆论文 | arXiv:2601.10639确认；ICLR 2026录用确认；CMU+Meta AI；查表式记忆有详细实验 | 中：模型记忆(参数内化子范式)方向有价值，但与外部记忆系统定位不同 |
+| **LiCoMemory** | ✅ 存在，★☆论文 | arXiv:2511.01448确认；HKUST+华为+WeBank；GitHub: EverM0re/LiCoMemory | 中：轻量认知图谱方向有价值，但表达力弱于超图 |
+| **MIRIX** | ✅ 存在，★☆论文 | UCSD+NYU团队确认；GitHub+Mac应用；LoCoMo 85.4%；6类记忆+Active Retrieval有详细实现 | 高：Active Retrieval+6类记忆精细化是已验证的有效设计 |
+| **MemoryOS** | ⚠️ 部分存在 | BUPT团队确认（CSDN报道）；arXiv:2506.06326待直接验证；与MemTensor/MemOS命名冲突 | 低：热度驱动更新概念有价值，但系统混淆风险高 |
+
+**关键修正**：
+- DeepSeek Engram的arXiv ID从"条件记忆论文"修正为"待确认"
+- ICLR STEM的arXiv ID从"ICLR 2026"修正为"2601.10639"
+- MIRIX从"无arXiv ID"修正为"UCSD+NYU团队，LoCoMo 85.4%"
+- OmniMem的"+411%"补充限定"绝对值F1=0.598远低于SOTA"
+
+#### 3.7.2 CortexMem 场景化优势矩阵
+
+| 场景 | CortexMem核心优势 | 最强竞品 | 差异化关键 |
+|------|------------------|---------|-----------|
+| **编码Agent** | Markdown-first+版本控制+零成本蒸馏 | memsearch(Markdown), Memoria(版本控制) | CortexMem同时具备可读性+版本控制+分层调度，竞品仅各具其一 |
+| **运维Agent** | 时序分层+热度驱动遗忘+安全内生 | TiMem(时序分层), EverMemOS(调度) | CortexMem增加安全层（防火墙+溯源+沙箱+回滚），运维场景安全是刚需 |
+| **研究Agent** | 超图+向量双索引+LLM亲和推理路径 | EverMemOS(超图), MemBrain(LLM亲和) | CortexMem三级检索路径（零LLM/1次LLM/多轮LLM）平衡成本与能力 |
+| **个人助手** | 5层CLS时序树+画像进化+隐私保护 | TiMem(5层TMT), mem0(用户画像) | CortexMem增加GDPR"被遗忘权"和加密存储，个人场景隐私是刚需 |
+| **多Agent协作** | 私有+共享+元记忆+信任感知+Active Retrieval | MIRIX(6类+Active), eion(PG+Neo4j) | CortexMem增加信任感知共享（回应eTAMP攻击），安全是协作前提 |
+
+#### 3.7.3 CortexMem 真正独特的三个维度
+
+经全网检索验证，CortexMem在以下三个维度具有**无竞品对标的真正独特性**：
+
+1. **安全内生设计（预防+检测+隔离+恢复四层闭环）**：当前24+产业界系统中，仅Memoria提供版本回滚（恢复层），Cisco AI Defense提供外挂检测（检测层），无一系统实现四层闭环。CortexMem的记忆防火墙（预防）+溯源链（检测）+隔离沙箱（隔离）+版本回滚（恢复）是唯一完整方案。
+
+2. **全认知栈覆盖（L0感知→L4画像）**：TiMem覆盖L1-L5（无感知层），EverMemOS覆盖语义/情景/程序性（无感知层），MemBrain覆盖LLM亲和推理（无感知层）。CortexMem的L0 KV Cache语义感知管理是唯一覆盖感知层的系统。
+
+3. **Markdown-first + 版本控制 + 分层调度的三位一体**：memsearch具备Markdown-first但无版本控制和分层调度；Memoria具备版本控制但非Markdown-first且无分层调度；EverMemOS具备分层调度但非Markdown-first且无版本控制。CortexMem是唯一同时具备三者的系统。
+
+### 3.8 🆕 行动路线
+
+#### 3.8.1 MVP（最小可行产品）— 4周交付
+
+**目标**：验证CortexMem核心假设——5层时序分层+Markdown-first+复杂度感知召回能否在LoCoMo上达到75%+准确率。
+
+**MVP范围**：
+
+| 组件 | 实现内容 | 依赖 | 预期效果 |
+|------|---------|------|---------|
+| **L1-L3记忆层** | Markdown文件 + FTS5全文检索 + 语义向量索引(SQLite+可选Qdrant Lite) | SQLite, 可选Qdrant Lite | 人类可读+基础检索 |
+| **L4语义记忆** | 简化版CogniGraph（实体+关系+时间戳，SQLite存储，非Neo4j） | SQLite | 结构化关系推理 |
+| **CortexCore简化版** | 复杂度感知召回（借鉴TiMem，无需LLM决策）+ 基础遗忘（TTL+重要性评分） | LLM API | Token节省40%+ |
+| **安全层MVP** | 写入验证（语义异常检测）+ 变更日志（溯源链基础） | LLM API | 基础安全防护 |
+| **CLI工具** | `cortexmem add/search/consolidate/forget` | Python | 开发者可用 |
+
+**MVP不包含**：L0感知层、超图、Active Retrieval、版本回滚、多Agent总线、User as Code。
+
+**MVP验证标准**：
+
+| 指标 | 目标 | 测量方法 |
+|------|------|---------|
+| LoCoMo准确率 | >75%（对标TiMem） | 标准评估协议 |
+| Token节省率 | >40% | 相对无记忆基线 |
+| 部署启动时间 | <10min | 从pip install到首次记忆写入 |
+| 人类可读性 | 100%记忆可Markdown查看 | 人工验证 |
+
+#### 3.8.2 Phase 2 — 核心能力完善（MVP后8周）
+
+**目标**：达到LoCoMo 85%+准确率，验证安全内生设计和Active Retrieval。
+
+| 交付物 | 描述 | 验证标准 |
+|--------|------|---------|
+| **5层完整架构** | L0感知层（KV Cache语义感知淘汰）+ L4完整超图（Neo4j） | LoCoMo >85% |
+| **CortexCore完整版** | 遗忘曲线+CLS巩固+记忆融合+LLM亲和三级检索 | LongMemEval记忆更新>70% |
+| **Active Retrieval** | 用户输入自动触发跨类型检索（借鉴MIRIX） | 减少30%重复API调用 |
+| **安全层完整版** | 防火墙+溯源链+隔离沙箱+版本回滚（借鉴Memoria CoW） | AgentPoison防御率>80% |
+| **Memoria式版本控制** | Copy-on-Write + 快照 + 回滚 | 投毒后恢复成功率>90% |
+| **SDK** | Python SDK + MCP Server | 5分钟接入Claude Code/Cursor |
+
+#### 3.8.3 Phase 3 — 场景化打磨与生态（Phase 2后12周）
+
+**目标**：在3个核心场景（编码Agent、运维Agent、个人助手）达到生产可用。
+
+| 交付物 | 描述 | 验证标准 |
+|--------|------|---------|
+| **场景适配器** | 编码Agent适配器（代码上下文+失败模式记忆）、运维Agent适配器（时序事件+因果推理）、个人助手适配器（画像进化+隐私保护） | 各场景人工评估>4/5 |
+| **多Agent记忆总线** | 私有+共享+元记忆+信任感知共享 | CortexBench-Multi通过 |
+| **自定义Benchmark** | CortexBench-Code/Forget/Skill/Multi/Sec | 全部通过 |
+| **轻量模式优化** | SQLite-only模式，$5 VPS可运行 | 部署启动<5min |
+| **企业模式** | PostgreSQL+Qdrant+Neo4j+Redis，多租户隔离 | 企业级可用性测试 |
+
+#### 3.8.4 Phase 4 — 前沿探索与差异化（Phase 3后持续）
+
+| 方向 | 描述 | 前置条件 |
+|------|------|---------|
+| **User as Code** | 可执行用户偏好规则（可选模式） | 安全沙箱成熟 |
+| **多模态扩展** | 多模态原子单元（MAU，借鉴OmniMem） | Phase 3完成 |
+| **AI自主优化** | 记忆架构参数的AutoML优化（借鉴OmniMem方法论） | 足够的实验数据积累 |
+| **模型记忆联动** | 与MSA/MemoryLLM/STEM类架构的混合实验 | 模型记忆+外部记忆技术协同成熟 |
+| **集体意识总线** | 多Agent共享记忆的共识协议 | 多Agent总线稳定运行 |
+
+#### 3.8.5 最终实现策略
+
+**技术栈选型**：
+
+| 层级 | 轻量模式 | 标准模式 | 企业模式 |
+|------|---------|---------|---------|
+| **存储** | SQLite + FTS5 | PostgreSQL + pgvector | PostgreSQL + Qdrant + Neo4j |
+| **缓存** | SQLite WAL | Redis | Redis Cluster |
+| **LLM** | OpenAI API / 本地Ollama | OpenAI API / Azure OpenAI | 私有部署 / Azure OpenAI |
+| **版本控制** | Git（文件级） | Git + Copy-on-Write | Git + CoW + 分支合并 |
+| **部署** | pip install | Docker Compose | Kubernetes + Helm |
+
+**关键风险与缓解**：
+
+| 风险 | 概率 | 影响 | 缓解策略 |
+|------|------|------|---------|
+| 5层架构系统复杂度导致调试困难 | 高 | 高 | MVP先实现3层，逐步扩展；每层独立可测试 |
+| CortexCore调度器LLM调用成本过高 | 高 | 中 | 分级策略：高频操作用规则引擎，低频操作用强模型 |
+| 超图（Neo4j）部署复杂度劝退用户 | 中 | 高 | 轻量模式用SQLite替代；标准模式用Docker一键部署 |
+| 安全层增加写入延迟 | 中 | 中 | 异步验证：先写入后验证，验证失败触发回滚 |
+| LoCoMo基准无法达到85%目标 | 中 | 高 | 分阶段验证：MVP先达75%，逐步优化检索和调度策略 |
+
+**开源策略**：Apache 2.0许可，确保商业友好。核心调度器和安全层作为差异化保留（可选商业许可），基础记忆层完全开源。
 
 ---
 
 ## 附录
 
-### A. 系统全景表
+### A. 24个产业界系统C.A.P.E全景对比表
 
-| 系统 | 分类 | 存储 | 定位 | 进化 | Token | LoCoMo | LongMemEval | 可观测 | 许可 | GitHub |
-|------|------|------|------|------|-------|--------|-------------|--------|------|--------|
-| Mem0 | LLM决策 | 向量+图 | SDK | L1 | ~90% | 66.9%☆/~49%★ | 66.4%★ | API | Apache 2.0 | ~52K |
-| Letta | 分层 | Core/Archival | 平台 | L2 | 中 | ~83.2%☆ | - | ADE | Apache 2.0 | ~21.8K |
-| MemOS | 分层 | 图+向量 | OS | L3 | 35-72% | 75.80%☆ | 77.80%☆ | 面板 | Apache 2.0 | ~8.3K |
-| MemBrain | Agent原生 | - | 服务 | L4 | - | 声称SOTA☆☆ | - | Viewer | TBD | ~269 |
-| Memoria | 版本安全 | CoW DB | 安全层 | L1 | - | - | - | Git版本 | Apache 2.0 | ~193 |
-| TiMem | 时序 | 5层TMT | 框架 | L2 | 52.2% | 75.30%☆☆ | 76.88%☆☆ | - | TBD | ~84 |
-| EverMemOS | 分层 | Scenes/Cells | OS | L3 | ~85%☆ | ~~93.05%~~☆☆ | ~~83.00%~~☆☆ | - | Apache 2.0 | ~3.3K |
-| MemMachine | Ground-Truth | 分层+自适应 | - | L2 | ~80% | 91.69%☆☆ | 93.0%☆☆ | - | Apache 2.0 | - |
-| Zep | 时序图 | 时序图 | MaaS | L2 | ~1.4k tokens | 85.22%☆☆ | 63.80%☆☆ | Web | BSL | ~17.3K |
-| ENGRAM | 架构级 | typed extract. | - | 无 | ~99% | 77.55%☆☆ | +15pts | - | - | - |
-| SwiftMem | KV感知 | multi-token | - | 无 | 显著 | 70.4%☆☆ | - | - | - | - |
-| OpenViking | 外部增强 | 虚拟FS | MaaS | L2 | 83-91% | 49%↑ | - | URI | AGPL-3.0 | ~4.8K |
-| MIRIX | 多智能体 | 6类 | - | L3 | - | 85.4%☆☆ | - | - | TBD | - |
-| 0GMem | 结构化 | BM25+语义 | 插件 | - | - | 88.67%(10-conv)☆ | - | - | MIT | 4 |
+**⚠️ 分类修正说明**：经源码级深度调研，原"OS内存页置换"分类是营销隐喻。修正为"分层记忆管理"；原"RAG外挂检索"细分为LLM决策记忆、多Agent共享记忆、上下文基础设施；新增"程序性/技能记忆"独立分类。
 
-### B. 论文索引 (arXiv ID 已验证)
+| 系统 | 技术分类 | 存储范式 | 系统定位 | 自我进化 | 遗忘 | 结构化推理 | Token效率 | 搜索延迟p95 | 总延迟p95 | LOCOMO | LongMemEval | 可观测性 | 多Agent | 开源许可 |
+|------|---------|---------|---------|---------|------|-----------|----------|------------|-----------|--------|-------------|---------|---------|---------|
+| OpenViking | 外部记忆增强 | 虚拟文件+向量 | MaaS | L2活 | 隐式 | 目录层次 | 83-91%☆ | - | - | - | - | URI可寻址 | 多租户 | AGPL-3.0 |
+| memsearch | 外部记忆增强 | Markdown+向量影子 | CLI插件 | L1半活 | 无 | 分类标签 | 显著 | - | - | - | - | 人类可读 | 共享 | MIT |
+| Hermes Agent | LLM决策记忆 | Markdown+FTS5 | Agent框架 | L3活 | 无 | 分类标签 | 中等 | - | - | - | - | 人类可读 | 单Agent | MIT |
+| Letta | 分层记忆管理 | 分层存储(Core/Recall/Archival) | Agent平台 | L2活 | 手动 | 扁平块 | 中等 | - | - | 83.2%☆ | - | ADE面板 | 隔离 | Apache 2.0 |
+| mem0 | LLM决策记忆 | 扁平向量+图 | SDK+MaaS | L1半活 | 手动 | 扁平/图 | ~90%★(@1.8K tokens) | 200ms | 1.44s | 66.9%★ / 64.2%★ | 66.4%★ | API+Dashboard | 跨Agent | Apache 2.0 |
+| mem0g | LLM决策记忆+图 | 向量+图 | SDK+MaaS | L1半活 | 手动 | 图关系 | ~93%★(@14K tokens) | 660ms | 2.59s | 68.4%★ | 72.18%★ | API+Dashboard | 跨Agent | Apache 2.0 |
+| MemOS | 分层记忆管理 | 图+向量(MemCube) | Memory OS | L3活 | 调度器 | 图遍历 | 70-72%☆(~2.5K tokens) | 1,983ms | 7,957ms | 80.76%★ | 77.80%★ | 可视化面板 | 隔离+共享 | Apache 2.0 |
+| EverMemOS | 分层记忆管理 | 超图+向量(EverCore) | Memory OS | L3活 | EverCore | 超图多跳 | ~85%☆(@2.3K tokens) | - | - | 93.05%☆ | 83.00%☆ | 超图可视化 | 共享+分区 | 待确认 |
+| Zep | 知识图谱 | 时序知识图 | MaaS | L2活 | 衰减 | 时序图 | ~1.4K tokens | 522ms | 3,255ms | 85.22%★ | 63.80%★ | Web Console | - | BSL |
+| ENGRAM | 模型增强 | typed extraction | 架构级 | 无 | 无 | dense聚合 | ~99%★(@1-1.2K tokens) | 806ms | 1,819ms | 77.55%★ | +15pts vs Full | 不可读 | 单模型 | - |
+| SwiftMem | KV感知 | multi-token agg | 架构级 | 无 | 无 | 多token聚合 | 显著 | 11-15ms | 1,289ms | 70.4%★ | - | 不可读 | 单模型 | - |
+| MemMachine v0.2 | - | - | 新兴 | - | - | - | 80%减少 vs mem0 | - | - | 91.69%☆ | - | - | - | - |
+| claude-mem | 上下文基础设施 | SQLite+Chroma | 插件 | L1半活 | 无 | 扁平 | 智能压缩 | - | - | - | - | 人类可读 | 单Agent | AGPL-3.0 |
+| mem9 | LLM决策记忆 | TiDB向量+全文 | 插件(云) | L1半活 | 记忆调和 | 扁平 | 按需检索 | - | - | - | - | 日志 | 单Agent | Apache 2.0 |
+| lossless-claw | 外部记忆增强 | SQLite DAG | 插件 | L0死 | 无 | 时序DAG | 渐进披露 | - | - | - | - | 人类可读 | 单Agent | MIT |
+| memU | 外部记忆增强 | 文件目录树+pgvector | 插件+服务 | L2活 | 隐式淘汰 | 标签+符号链接 | ~90%☆(@4.0K tokens) | - | - | 66.67%★ | 38.40%★ | 人类可读 | 多Agent协作 | Apache 2.0 |
+| xiaoclaw-memory | 程序性/技能记忆 | 纯Markdown | 插件 | L1半活 | 隐式淘汰 | 标签分类 | 零成本 | - | - | - | - | 人类可读 | 单Agent | MIT |
+| langmem | 上下文基础设施 | 可插入(内存/PG) | SDK | L1半活 | 手动 | 命名空间 | ~130*/query | 54,340ms | 60,000ms | 58.1%★ | - | LangSmith | 多Agent隔离 | MIT |
+| honcho | 多Agent共享记忆 | 向量+关系型(对等体) | MaaS | L3活 | 重要性 | 认知图谱 | 个性化路由 | - | - | - | - | Thought可追溯 | 多Agent共享 | AGPL-3.0 |
+| ContextLoom | 多Agent共享记忆 | Redis+时序 | 中间件 | L0死 | 无 | 无 | 无优化 | - | - | - | - | 日志 | 共享记忆 | 待确认 |
+| eion | 多Agent共享记忆 | PostgreSQL+Neo4j | MaaS | L0死 | 无 | 图遍历 | 无优化 | - | - | - | - | 图可视化 | 隔离+共享 | 待确认 |
+| mindforge | 分层记忆管理 | 向量+概念图 | Python库 | L2部分 | 无 | 概念图 | 多层分流 | - | - | - | - | 概念图可视化 | 单Agent | 待确认 |
+| Acontext | 程序性/技能记忆 | Markdown技能+向量 | 插件 | L2活 | 无 | 技能匹配 | 技能复用 | - | - | - | - | 技能审计 | 跨Agent共享 | Apache 2.0 |
+| ultraContext | 上下文基础设施 | 分布式结构化 | CaaS | L0死 | 无 | 无 | 智能压缩 | - | - | - | - | 版本控制 | 跨环境共享 | Apache 2.0 |
+| Voyager | 程序性/技能记忆 | JavaScript代码技能 | Agent框架 | L2活 | 无 | 技能检索 | 技能复用 | - | - | - | - | 代码可读 | 单Agent | MIT |
+| MemoryLLM | 模型原生 | 模型参数 | 模型底座 | 自监督 | 蒸馏 | 无 | 零检索开销 | - | - | - | - | 不可读 | 单模型 | 待确认 |
+| Memorizing Trans. | 模型原生 | KV Cache | 模型修改 | 无 | 无 | kNN注意力 | kNN开销 | - | - | - | - | 不可读 | 单模型 | Google |
+| Infini-attention | 模型原生 | 压缩记忆+线性注意力 | 模型修改 | 无 | 无 | 压缩检索 | 恒定内存 | - | - | - | - | 不可读 | 单模型 | Google |
+| MemaryAI | 分层记忆管理 | 向量+图+时序 | Python库 | L2活 | 衰减曲线 | 知识图谱 | 衰减淘汰 | - | - | - | - | 三层可视化 | 单Agent | 待确认 |
+| MindOS | 分层记忆管理 | 状态机+文件 | MaaS | L3活 | 无 | 心智状态机 | 全局同步 | - | - | - | - | 心智审计 | 全局同步 | 待确认 |
+| MineContext | 外部记忆增强 | 文件树+向量 | 插件 | L1半活 | 无 | 目录浏览 | 主动预加载 | - | - | - | - | 目录浏览 | 单Agent | 待确认 |
+| Ori-Mnemos | 分层记忆管理 | 文件树+向量 | MaaS | L2活 | 重要性 | 层次结构 | 递归压缩 | - | - | - | - | 可视化 | 单Agent | 待确认 |
+| agentmemory | 外部记忆增强 | BM25+Vector(本地) | npm插件 | L0死 | 无 | 混合检索 | ~99%★(170K/yr vs 19.5M) | - | - | 95.2%(R@5,LongMemEval-S) | - | Real-time Viewer | 单Agent | MIT |
 
-| # | 论文 | 年 | ID | 核心 | 可信度 |
-|---|------|----|----|------|--------|
-| 1 | Memorizing Transformers | 2022 | 2203.08913 | kNN注意力 | ★☆ |
-| 2 | MemoryLLM | 2024 | 2402.04624 | 参数级记忆 | ★☆ |
-| 3 | MSA | 2026 | 2603.23516 | 端到端长记忆 | ★☆ |
-| 4 | ICLR STEM | 2026 | 2601.10639 | 查表式编辑 | ★☆ |
-| 5 | MemGPT/Letta | 2023 | 2310.08560 | 虚拟上下文 | ★☆ |
-| 6 | EverMemOS | 2026 | 2601.02163 | engram生命周期 | **☆☆复现失败** |
-| 7 | HyperMem | 2026 | 2604.08256 | 超图 | ☆同团队 |
-| 8 | TiMem | 2026 | 2601.02845 | CLS 5层TMT | ★☆ |
-| 9 | MemMachine | 2026 | 2604.04853 | Ground-Truth+自适应 | ★☆ |
-| 10 | MemOS | 2025 | 2507.03724 | Memory OS | ★☆ |
-| 11 | Generative Agents | 2023 | 2304.03442 | 记忆流+反思 | ★ |
-| 12 | A-MEM | 2025 | 2502.12110 | 记忆即Agent | ★☆ |
-| 13 | CoALA | 2023 | 2309.02427 | 认知架构 | ★ |
-| 14 | LOCOMO | 2024 | 2402.10790 | 基准 | ★ |
-| 15 | LongMemEval | 2024 | 2407.16958 | 基准 | ★ |
-| 16 | AgentPoison | 2024 | 2407.12784 | 投毒攻击 | ★☆ |
-| 17 | eTAMP | 2026 | 2604.02623 | 环境注入 | ★☆ |
-| 18 | MINJA | 2026 | 2601.05504 | 防御 | ★☆ |
-| 19 | LiCoMemory | 2025 | 2511.01448 | CogniGraph | ★☆ |
-| 20 | OmniMem | 2026 | 2604.01007 | AI自主研究 | ★☆ |
+> ☆ = 项目自报数据，无独立验证
+> 注：MemaryAI、MindOS、Ori-Mnemos系统源码未能通过公开搜索验证，分类基于原始报告描述
 
----
+### B. 26篇核心学术论文索引
 
-> **版本历史**：
-> v1.0 — 初始版：30+系统 + 26论文
-> v2.0 — 2026 Q2批判性验证：修正arXiv ID，标注可信度
-> v3.0 — Token四维评估 + MemBrain/Memoria/TiMem/OmniMem/Engram/STEM/LiCoMemory
-> v4.0 — **重大修正**：EverMemOS不可复现(GitHub #73) + MemMachine + HyperMem + 0GMem + 全数据可信度分级修正
+| # | 论文 | 年份 | arXiv ID | 核心创新 | 数据可信度 |
+|---|------|------|----------|---------|-----------|
+| 1 | Memorizing Transformers | 2022 | 2203.08913 | kNN-注意力外部KV记忆 | ★☆ |
+| 2 | MemoryLLM | 2024 | 2402.04624 | 参数级自更新记忆 | ★☆ |
+| 3 | LongMem | 2023 | 2305.06239 | 解耦记忆侧网络 | ★☆ |
+| 4 | Infini-attention | 2024 | 2404.07143 | 压缩记忆融入注意力 | ★☆ |
+| 5 | LM2 | 2024 | 2411.02237 | 精确+压缩双记忆 | ★☆ |
+| 6 | MemGPT/Letta | 2023 | 2310.08560 | 虚拟上下文管理 | ★☆ |
+| 7 | EverMemOS | 2026 | 2601.02163 | 自组织记忆OS | ☆ 自建基准 |
+| 8 | HyperMem | 2026 | 2604.08256 | 超图记忆模型 | ☆ 自建基准 |
+| 9 | RMT | 2022 | 2207.06881 | 循环记忆token | ★☆ |
+| 10 | Reflexion | 2023 | 2303.11366 | 语言反思强化学习 | ★☆ |
+| 11 | Generative Agents | 2023 | 2304.03442 | 记忆流+反思+三维检索 | ★ |
+| 12 | MemoryBank | 2024 | 2305.10250 | Ebbinghaus遗忘曲线 | ★☆ |
+| 13 | A-MEM | 2025 | 2502.12110 | 记忆即Agent | ★☆ |
+| 14 | ExpeL | 2024 | 2308.10144 | 经验→洞察→技能闭环 | ★☆ |
+| 15 | Voyager | 2023 | 2305.16291 | 可执行代码技能库 | ★☆ |
+| 16 | Zep/Graphiti | 2024 | - | 时序知识图谱 | ★☆ |
+| 17 | RAP | 2023 | 2305.14992 | LLM推理重构为规划 | ★☆ |
+| 18 | MemoRAG | 2024 | 2409.05591 | 记忆引导检索 | ★☆ |
+| 19 | LOCOMO | 2024 | 2402.10790 | 长期对话记忆基准 | ★ |
+| 20 | LongMemEval | 2024 | 2407.16958 | 五大核心能力评估 | ★ |
+| 21 | MemBench | 2024 | 2405.03558 | 统一评估框架 | ★ |
+| 22 | EverBench | 2026 | 2602.01313 | 多方协作对话评估 | ★☆ |
+| 23 | MINDSTORES | 2024 | 2406.03023 | 多Agent记忆架构 | ★☆ |
+| 24 | MemLong | 2024 | 2402.15359 | 选择性KV保留+检索增强 | ★☆ |
+| 25 | CacheGen | 2024 | 2310.07240 | KV Cache压缩流式传输 | ★☆ |
+| 26 | CoALA | 2024 | 2309.02427 | 认知架构理论框架 | ★ 理论框架 |
+
+**安全相关论文**：
+
+| # | 论文 | 年份 | arXiv ID | 核心发现 |
+|---|------|------|----------|---------|
+| S1 | AgentPoison | 2024 | 2407.12784 | 记忆投毒攻击框架，成功率85%+ |
+| S2 | BadRAG | 2024 | 2402.16893 | RAG后门攻击 |
+| S3 | PoisonedRAG | 2024 | 2402.07867 | 知识投毒攻击 |
+| S4 | 间接注入攻击 | 2023 | 2302.12173 | 通过外部数据源注入恶意指令 |
+| S5 | 🆕 MINJA防御 | 2026 | 2601.05504 | 真实条件下MINJA攻击效果大幅下降；提出I/O Moderation和Memory Sanitization防御 |
+| S6 | 🆕 eTAMP | 2026 | 2604.02623 | 跨会话跨站点环境注入记忆投毒；Frustration Exploitation使ASR提升8倍 |
+
+**🆕 2026 Q2 新增核心论文**：
+
+| # | 论文 | 年份 | arXiv ID | 核心创新 | 数据可信度 |
+|---|------|------|----------|---------|-----------|
+| 27 | 🆕 DeepSeek Engram | 2026 | 待确认 | 条件记忆模块嵌入MoE架构，O(1)确定性知识查找（媒体报道存在，但arXiv论文待确认） | ☆ 待验证 |
+| 28 | 🆕 ICLR STEM | 2026 | 2601.10639 | 查表式记忆，FFN up-projection替换为token索引embedding表，ICLR 2026录用 | ★☆ 论文自报 |
+| 29 | 🆕 TiMem | 2026 | 2601.02845 | CLS时序分层记忆树+复杂度感知召回，LoCoMo 75.30%，Token节省52.2% | ★☆ 论文自报 |
+| 30 | 🆕 Omni-SimpleMem | 2026 | 2604.01007 | AI自主研究管道发现记忆架构，LoCoMo F1 0.117→0.598（+411%，但绝对值低于SOTA） | ★☆ 论文自报 |
+| 31 | 🆕 LiCoMemory | 2025 | 2511.01448 | CogniGraph轻量层次图+时序层次感知搜索+集成重排序，HKUST+华为+WeBank | ★☆ 论文自报 |
+| 32 | 🆕 MIRIX | 2025 | arXiv待确认 | 6类记忆+Active Retrieval+多智能体协同，UCSD+NYU，LoCoMo 85.4% | ★☆ 论文自报 |
+| 33 | 🆕 MemBrain 1.0 | 2026 | Feeling AI技术报告 | LLM亲和记忆+子Agent协调+时间戳标准化，LoCoMo 93.25% | ☆ 自报，无独立验证 |
+| 34 | 🆕 MemoryOS | 2025 | 2506.06326 | BUPT+腾讯，三层记忆+热度驱动更新+语义感知检索，LoCoMo F1 +49.11% | ★☆ 论文自报 |
+
+> ★ = 独立验证/标准基准 ★☆ = 论文自报 ☆ = 自建基准自报/无独立验证
+
+### C. 参考资源
+
+- [Awesome-Agent-Memory](https://github.com/TeleAI-UAGI/Awesome-Agent-Memory) - 论文和系统索引
+- [AGENTS.md](file:///Users/wangxu/1-project/claude-books/agenticos-memory/AGENTS.md) - 项目需求定义
+
+### D. 批判性评估方法论说明
+
+本报告在原报告基础上进行了以下批判性改进：
+
+1. **数据可信度标注**：对所有性能数据标注可信度等级（★/★☆/☆），明确区分独立验证数据与自报数据
+2. **基线偏差分析**：系统分析了Token效率数据的三个层面系统性偏差（基线稻草人、场景选择性、缺乏竞品对比）
+3. **MAG学术严谨性审查**：明确指出MAG目前不是严格定义的学术术语，分析了其成为正式范式所需的条件
+4. **安全维度补充**：基于AgentPoison等安全研究，新增安全盲区分析和安全内生设计
+5. **CoALA框架深化**：将CoALA从附录一行提升为2.2.1节独立分析，阐述其对产业界的奠基性影响
+6. **工程可行性注释**：对CortexMem的每个创新点增加工程可行性和安全风险注释
+7. **KPI现实性评估**：对预期效果进行现实性检验，区分"可实现"与"激进预期"
+8. **预测不确定性声明**：对未来3年预测增加置信度评级和前提条件说明
+9. **源码级分类验证**：通过并行子Agent对24个系统进行源码级深度调研，发现原"OS内存页置换"分类是营销隐喻而非技术实现，据此提出七大范式分类修正案
+10. **🆕 2026 Q2全网检索验证**：基于WebSearch+WebFetch对6个新系统（MemBrain、Memoria、TiMem、OmniMem、Engram/STEM、LiCoMemory）和2个新安全威胁（eTAMP、MINJA防御）进行全网检索，对CortexMem的每个场景优势进行逐项验证，修正不合理主张
+11. **🆕 CortexMem v2架构升级**：基于全网检索验证结果，将3层架构扩展为5层（融合TiMem CLS理论），增加LLM亲和检索路径（回应MemBrain洞察），增加版本回滚安全机制（借鉴Memoria），增加Active Retrieval（借鉴MIRIX），User as Code降级为可选模式
+12. **🆕 分类体系批判性重构**：指出原始"按技术实现分类"的根本问题，提出"认知层级×记忆动力学×安全可信"三维分类框架
+13. **🆕 9系统批判性验证**：对MemBrain、Memoria、TiMem、OmniMem、DeepSeek Engram、ICLR STEM、LiCoMemory、MIRIX、MemoryOS进行WebSearch+arXiv原文交叉验证。修正：DeepSeek Engram arXiv ID从"条件记忆论文"修正为"待确认"；ICLR STEM arXiv ID从"ICLR 2026"修正为"2601.10639"；MIRIX从"无arXiv ID"修正为"UCSD+NYU团队，LoCoMo 85.4%"；OmniMem"+411%"补充限定"绝对值F1=0.598远低于SOTA"。新增CortexMem场景化优势深度分析和行动路线（MVP→Phase 2→Phase 3→Phase 4）
+14. **🆕 2026 Q2 Token效率四维评估**：
+    - 从单一"Token节省率"扩展到**节省token、准确率、时延响应、用户体验**四个维度的系统性评估
+    - 基于Mem0 ECAI 2025论文 (arXiv:2504.19413) 获取首个系统性延迟数据（p50/p95搜索延迟+总响应延迟）
+    - 基于SwiftMem (arXiv:2601.08160) 发现11ms搜索延迟的轻量架构可能性
+    - 基于ENGRAM (OpenReview) 验证99% token节省下的77.55% LoCoMo准确率
+    - 基于EverMind统一评估框架实现Mem0/MemOS/Zep/MemU/EverMemOS的横向对比
+    - 基于AMB (Agent Memory Benchmark) 识别LOCOMO/LongMemEval在百万token时代的局限性
+    - 绘制**延迟-准确率-Token三角权衡图**，量化生产可用性的硬门槛（p95 <2秒）
+    - 补充GitHub Stars、社区活跃度、上手难度等UX指标
+    - 附录全景表从10列扩展到14列，新增搜索延迟p95、总延迟p95、LOCOMO、LongMemEval四列量化数据
+15. **🆕🆕 模型记忆三大范式重构（本次更新）**：
+    - 将原"模型原生记忆"拆分为**三大子范式**：KV缓存检索（推理前）、MSA端到端稀疏注意力（推理中）、MemoryLLM参数内化（权重融入）
+    - 基于Memorizing Transformers (ICLR 2022, arXiv:2203.08913)、MSA (arXiv:2603.23516)、MemoryLLM (ICML 2024, arXiv:2402.04624)、M+ (arXiv:2502.001)等原始论文的深度研读
+    - 基于H2O、SnapKV、StreamingLLM、Scissorhands、PyramidKV、RazorAttention、KVzip、DynamicKV等KV cache优化工作的系统性梳理
+    - **批判性发现**：KV缓存压缩不是记忆系统（无跨会话持久性），MSA的"端到端"是训练层面的，MemoryLLM的"百万次更新"有限定条件
+    - 提出**混合架构是必然方向**：参数记忆(通用知识) + KV缓存优化(推理效率) + 外部记忆(用户特定信息) = 完整记忆栈
