@@ -1,0 +1,6 @@
+# IDE and tool config directories
+.claude/
+.codex/
+.entire/
+.omc/
+.opencode/

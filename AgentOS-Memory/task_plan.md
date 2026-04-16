@@ -73,6 +73,12 @@
 - 基于 web-access 全网检索最新论文和技术细节
 - 更新 findings.md 和报告第1章、第2章、附录
 
+### Phase 7: 🆕 三稿融合整合与主文清洗 `[complete]`
+- 深度比对 `agent_memory_system_insight_report.md`、`agent_memory_system_insight_report_v0.1.md`、`agent_memory_system_insight_report_v0.2.md`
+- 提取 `v0.1` / `v0.2` 对主文仍有增量价值的技术观点、结构表达与关键数据
+- 在“不无故删除主文内容”的约束下，补充九类 taxonomy、证据等级映射、双平面架构表达
+- 修正主文中的结构污染、术语漂移、附录分类口径不一致和与主题无关示例
+
 ## 错误记录
 | Error | Attempt | Resolution |
 |-------|---------|------------|
