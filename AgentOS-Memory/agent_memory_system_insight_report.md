@@ -258,7 +258,7 @@
 | **DAG摘要** | lossless-claw | 层级压缩、原文可恢复 | 结构复杂、检索需多跳 |
 | **对等体模型** | honcho | 实体深度理解、推理增强 | 推理成本高、延迟大 |
 | **KV Cache / Activation** | Memorizing Transformers, MSA, Infini-attention | 可直接介入推理态 | 无跨会话持久性 |
-| **混合范式** | MemOS, CortexMem, LiCoMemory | 同时兼顾可读性、效率和结构 | 系统复杂度高 |
+| **混合范式** | MemOS, , LiCoMemory | 同时兼顾可读性、效率和结构 | 系统复杂度高 |
 
 **融合趋势**：单一存储范式已无法满足复杂Agent需求。主流方向是**混合存储**：
 - **向量 + 图**（MemOS, mindforge, eion）：语义检索 + 结构化推理
@@ -701,8 +701,8 @@ ultraContext  eion   claude-mem
 🆕 8. 单模态 → 多模态（OmniMem验证）
    纯文本记忆 → 多模态原子单元(MAU) → 热/冷存储分层 → 渐进式检索
 
-🆕 9. 不安全 → 安全内生（CortexMem/Memoria验证）
-   无防护 → 外挂安全(Cisco AI Defense) → 版本控制安全(Memoria) → 内生安全(CortexMem)
+🆕 9. 不安全 → 安全内生（/Memoria验证）
+   无防护 → 外挂安全(Cisco AI Defense) → 版本控制安全(Memoria) → 内生安全()
 ```
 
 **⚠️ 关于"RAG → MAG"的学术严谨性注释**：
@@ -776,7 +776,7 @@ MAG（Memory-Augmented Generation）目前**不是一个被正式定义的学术
   无防护：大多数系统
   外挂防护：Cisco AI Defense（外部安全层）
   版本控制：Memoria（Git for Memory）
-  内生安全：CortexMem（防火墙+溯源+沙箱+版本回滚）
+  内生安全：（防火墙+溯源+沙箱+版本回滚）
 ```
 
 ---
@@ -986,7 +986,7 @@ MSA的正确定位是：**模型内的运行时记忆访问机制**，不是"把
 
 3. **OWASP Agentic AI Top 15**：记忆投毒排名首位安全威胁。Cisco AI Defense已覆盖MCP中的记忆投毒检测，标志着安全从学术走向产业。
 
-4. **Memoria的版本回滚防御**：GTC 2026发布的Memoria通过Git式版本控制，使被投毒的记忆可回退到安全版本，提供了与CortexMem防火墙互补的恢复性安全能力。
+4. **Memoria的版本回滚防御**：GTC 2026发布的Memoria通过Git式版本控制，使被投毒的记忆可回退到安全版本，提供了与防火墙互补的恢复性安全能力。
 
 ### 2.3 学术论文与产业系统的映射
 
@@ -1082,11 +1082,11 @@ MSA的正确定位是：**模型内的运行时记忆访问机制**，不是"把
 | **部署成本与复杂度** | 降低外部依赖，支持从个人到企业的弹性部署 | 图/OS类系统依赖组件多 |
 | **记忆安全与隐私** | 防止记忆投毒、泄露，支持数据主权 | 几乎无系统专门解决 |
 
-### 3.3 技术方案：CortexMem — 分层认知记忆系统
+### 3.3 技术方案：AgentMem — 分层认知记忆系统
 
 #### 3.3.1 设计哲学
 
-借鉴本研究的核心洞察及2026 Q2全网检索验证，CortexMem的设计哲学为：
+借鉴本研究的核心洞察及2026 Q2全网检索验证，AgentMem的设计哲学为：
 
 1. **Markdown-first + 向量影子 + 版本控制**：人类可读为源头真相，向量为加速层（借鉴memsearch），Git式版本控制为安全基线（借鉴Memoria）
 2. **OS级调度 + 超图结构 + LLM亲和路径**：EverCore式调度器 + HyperMem式超图（借鉴EverMemOS），但增加LLM直接参与记忆推理的路径（回应MemBrain洞察）
@@ -1100,7 +1100,7 @@ MSA的正确定位是：**模型内的运行时记忆访问机制**，不是"把
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    CortexMem Architecture (v2)                │
+│                    AgentMem Architecture                    │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │              L0: 感知记忆层 (Sensory Memory)             │ │
@@ -1177,9 +1177,9 @@ MSA的正确定位是：**模型内的运行时记忆访问机制**，不是"把
 | **P1 召回规划平面** | complexity-aware retrieval 与 semantic-to-KV bridge | planner、packer、router、reranker |
 | **P2 治理与安全平面** | provenance、ACL、branch、rollback、quarantine | trust score、audit log、version graph |
 
-**🆕 CortexMem 总视角**：CortexMem不是"拼装竞品"，而是重构记忆栈，其设计元素与借鉴来源的取舍如下：
+**🆕 AgentMem 总视角**：AgentMem不是"拼装竞品"，而是重构记忆栈，其设计元素与借鉴来源的取舍如下：
 
-| 设计元素 | 主要借鉴来源 | CortexMem 的取舍 |
+| 设计元素 | 主要借鉴来源 | AgentMem 的取舍 |
 |---------|-------------|------------------|
 | Markdown-first 可读层 | memsearch、OpenViking、xiaoclaw-memory | 保留可读、可改、可审计的源头真相层 |
 | 层次化时间结构 | TiMem、Letta Recall | 采用五层记忆主干，而不是单层扁平 chunk |
@@ -1189,12 +1189,12 @@ MSA的正确定位是：**模型内的运行时记忆访问机制**，不是"把
 | 版本回滚与恢复 | Memoria | 将分支、回滚、隔离引入治理平面 |
 | Active Retrieval | MIRIX | 只在合适场景启用，避免全量主动噪声 |
 
-CortexMem 的总视角固定为：
+AgentMem 的总视角固定为：
 - **北向语义记忆**：长期事实、偏好、技能、关系和资源
 - **南向KV协同**：把北向召回结果压缩并桥接进当前推理态
 - **治理平面**：provenance、ACL、branch、rollback、quarantine
 
-**🆕 类型化 memory objects**：为避免"只有 chunk，没有语义类型"的老问题，CortexMem 默认使用以下对象类型：
+**🆕 类型化 memory objects**：为避免"只有 chunk，没有语义类型"的老问题，AgentMem 默认使用以下对象类型：
 
 - `fact` — 稳定事实
 - `preference` — 用户偏好
@@ -1229,7 +1229,7 @@ CortexMem 的总视角固定为：
 ##### 创新一：5层记忆 + 双索引 + LLM亲和架构
 
 ```
-L0 感知记忆: KV Cache分页管理（感知层优化，CortexMem独有）
+L0 感知记忆: KV Cache分页管理（感知层优化，AgentMem独有）
     ↓ 注意力权重分析
 L1 事实记忆: 原始事实片段 + Agent自分类标签（零成本写入）
     ↓ 自动归纳（会话结束时）
@@ -1250,7 +1250,7 @@ L4 画像记忆:
 - **Path B：结构化路径** — 关系、版本、时间链问题 → 图遍历/时间树/轻量重排，1次LLM调用
 - **Path C：LLM亲和路径** — 多跳、假设、跨类型综合推理 → 允许多轮LLM参与，但只对复杂查询启用
 
-**与CoALA框架的对应**：L0对应CoALA的感知输入层，L1-L2对应工作记忆，L3-L4对应长期记忆（语义/情景/程序性三分）。CortexMem在CoALA基础上增加了感知层（KV Cache管理）、模式层（CLS系统巩固）和安全层。
+**与CoALA框架的对应**：L0对应CoALA的感知输入层，L1-L2对应工作记忆，L3-L4对应长期记忆（语义/情景/程序性三分）。AgentMem在CoALA基础上增加了感知层（KV Cache管理）、模式层（CLS系统巩固）和安全层。
 
 ##### 创新二：CortexCore 智能调度器
 
@@ -1346,7 +1346,7 @@ L1 技能条目（蒸馏后）:
 
 ##### 创新五：Security Layer — 安全内生设计
 
-回应AgentPoison、eTAMP等安全研究的发现，CortexMem将安全作为横切关注点贯穿所有记忆层级：
+回应AgentPoison、eTAMP等安全研究的发现，AgentMem将安全作为横切关注点贯穿所有记忆层级：
 
 1. **记忆防火墙 (Memory Firewall)**
    - 写入验证：新记忆进入前进行语义异常检测和行为异常检测
@@ -1401,13 +1401,13 @@ L1 技能条目（蒸馏后）:
 | **标准模式** | PostgreSQL + pgvector + Neo4j Community | 小团队 |
 | **企业模式** | PostgreSQL + Qdrant + Neo4j Enterprise + Redis | 企业级 |
 
-**⚠️ 部署复杂度现实检验**：CortexMem的标准模式依赖PostgreSQL + pgvector + Neo4j，这与报告1.2.3节中批评的"图/OS类系统依赖组件多"问题一致。轻量模式虽降低了门槛，但牺牲了超图推理和向量语义检索能力。建议在轻量模式中用SQLite + FTS5替代Neo4j + Qdrant，提供降级但可用的体验。
+**⚠️ 部署复杂度现实检验**：AgentMem的标准模式依赖PostgreSQL + pgvector + Neo4j，这与报告1.2.3节中批评的"图/OS类系统依赖组件多"问题一致。轻量模式虽降低了门槛，但牺牲了超图推理和向量语义检索能力。建议在轻量模式中用SQLite + FTS5替代Neo4j + Qdrant，提供降级但可用的体验。
 
 ### 3.4 差异化竞争优势
 
-| 差异化维度 | CortexMem v2 | 最强竞品（2026 Q2） | 核心差异 | 验证状态 | 修正建议 |
+| 差异化维度 | AgentMem | 最强竞品（2026 Q2） | 核心差异 | 验证状态 | 修正建议 |
 |-----------|-----------|---------------------|---------|---------|---------|
-| **5层认知架构** | L0感知+L1事实+L2会话+L3模式+L4画像 | TiMem（5层TMT） | CortexMem增加L0感知层KV管理 | ⚠️ TiMem 5层已验证(LoCoMo 75.30%) | 保留L0独特性，L1-L4对齐TiMem |
+| **5层认知架构** | L0感知+L1事实+L2会话+L3模式+L4画像 | TiMem（5层TMT） | AgentMem增加L0感知层KV管理 | ⚠️ TiMem 5层已验证(LoCoMo 75.30%) | 保留L0独特性，L1-L4对齐TiMem |
 | **超图+向量双索引** | 结构化推理+语义检索 | EverMemOS（超图+LoCoMo 93.05%） | 超图n-元关系 | ⚠️ EverMemOS已SOTA | 增加LLM亲和检索路径 |
 | **User as Code** | 可执行偏好（可选模式） | MemBrain（活人感记忆+PersonaMem 51.50%） | 确定性 vs 自然性 | ⚠️ MemBrain更优 | 降级为可选模式，默认用模型亲和记忆 |
 | **零成本蒸馏** | Agent自分类+Markdown蒸馏 | TiMem（复杂度感知召回） | 无LLM决策路由 | ✅ 方向正确 | 融合TiMem复杂度感知 |
@@ -1443,8 +1443,8 @@ L1 技能条目（蒸馏后）:
 
 | KPI | 目标值 | 测量方法 | 说明 |
 |-----|--------|---------|------|
-| **Token节省率** | >60%（及格）/ >70%（优秀） | (无记忆基线token - CortexMem token) / 无记忆基线token | 🆕 修正：原>80%过于激进，TiMem实测52.2%，建议同时报告相对竞品的节省率 |
-| **记忆检索准确率** | >90% | LoCoMo/LongMemEval标准评估 | 🆕 修正：当前SOTA为MemBrain 93.25%/EverMemOS 93.05%，>90%已不够激进，但CortexMem需先验证基础能力 |
+| **Token节省率** | >60%（及格）/ >70%（优秀） | (无记忆基线token - AgentMem token) / 无记忆基线token | 🆕 修正：原>80%过于激进，TiMem实测52.2%，建议同时报告相对竞品的节省率 |
+| **记忆检索准确率** | >90% | LoCoMo/LongMemEval标准评估 | 🆕 修正：当前SOTA为MemBrain 93.25%/EverMemOS 93.05%，>90%已不够激进，但AgentMem需先验证基础能力 |
 | **记忆更新准确率** | >80% | LongMemEval Memory Update维度 | - |
 | **遗忘精确率** | >85% | 重要记忆保留率 × 过时记忆淘汰率 | 需定义"重要记忆"和"过时记忆"的判定标准 |
 | **技能复用率** | >60% | 跨任务技能命中次数 / 总任务数 | - |
@@ -1478,9 +1478,9 @@ L1 技能条目（蒸馏后）:
 
 然而，"LoCoMo >90%"、"多跳推理>80%"、"遗忘质量>95%/70%"等目标仍为激进预期，原因如下：
 1. 当前SOTA（MemBrain 93.25%/EverMemOS 93.05%）均为自报数据，无独立验证
-2. CortexMem v2集成了更多机制（5层架构+超图+调度器+遗忘+安全+版本控制+Active Retrieval），系统复杂度极高，各组件的交互效应未知
+2. AgentMem集成了更多机制（5层架构+超图+调度器+遗忘+安全+版本控制+Active Retrieval），系统复杂度极高，各组件的交互效应未知
 3. 缺乏在标准基准上的初步实验数据支撑
-4. 🆕 2026 Q2全网检索揭示：MemBrain的"LLM亲和记忆"和TiMem的"CLS时序分层树"已在LoCoMo上取得验证结果，CortexMem需要在相同基准上直接对比
+4. 🆕 2026 Q2全网检索揭示：MemBrain的"LLM亲和记忆"和TiMem的"CLS时序分层树"已在LoCoMo上取得验证结果，AgentMem需要在相同基准上直接对比
 
 建议采用**分阶段验证策略**：
 1. **Phase 1**：在LoCoMo上验证核心记忆检索能力（对标TiMem 75.30%）
@@ -1488,15 +1488,15 @@ L1 技能条目（蒸馏后）:
 3. **Phase 3**：验证遗忘、推理、安全等高级能力
 4. **Phase 4**：验证多Agent协作和多模态扩展
 
-### 3.7 🆕 CortexMem 场景化优势深度分析
+### 3.7 🆕 AgentMem 场景化优势深度分析
 
-基于2026 Q2全网检索对9个关键系统的批判性验证，CortexMem相对现有方案的场景化优势如下：
+基于2026 Q2全网检索对9个关键系统的批判性验证，AgentMem相对现有方案的场景化优势如下：
 
 #### 3.7.1 批判性验证结论
 
 经WebSearch+arXiv原文验证，9个系统的可信度分级：
 
-| 系统 | 验证状态 | 核心发现 | 对CortexMem的借鉴价值 |
+| 系统 | 验证状态 | 核心发现 | 对AgentMem的借鉴价值 |
 |------|---------|---------|---------------------|
 | **MemBrain 1.0** | ✅ 存在，☆自报 | 新智元/机器之心报道确认；LoCoMo 93.25%为自报，无独立验证；"LLM亲和"概念缺乏形式化定义 | 中：LLM参与记忆推理方向正确，但概念需独立定义 |
 | **Memoria** | ✅ 存在，工程早期 | GTC 2026发布确认（InfoQ报道）；GitHub仓库存在；Copy-on-Write已实现但工程成熟度低 | 高：版本控制记忆方向是安全防御的实用手段 |
@@ -1514,31 +1514,31 @@ L1 技能条目（蒸馏后）:
 - MIRIX从"无arXiv ID"修正为"UCSD+NYU团队，LoCoMo 85.4%"
 - OmniMem的"+411%"补充限定"绝对值F1=0.598远低于SOTA"
 
-#### 3.7.2 CortexMem 场景化优势矩阵
+#### 3.7.2 AgentMem 场景化优势矩阵
 
-| 场景 | CortexMem核心优势 | 最强竞品 | 差异化关键 |
+| 场景 | AgentMem核心优势 | 最强竞品 | 差异化关键 |
 |------|------------------|---------|-----------|
-| **编码Agent** | Markdown-first+版本控制+零成本蒸馏 | memsearch(Markdown), Memoria(版本控制) | CortexMem同时具备可读性+版本控制+分层调度，竞品仅各具其一 |
-| **运维Agent** | 时序分层+热度驱动遗忘+安全内生 | TiMem(时序分层), EverMemOS(调度) | CortexMem增加安全层（防火墙+溯源+沙箱+回滚），运维场景安全是刚需 |
-| **研究Agent** | 超图+向量双索引+LLM亲和推理路径 | EverMemOS(超图), MemBrain(LLM亲和) | CortexMem三级检索路径（零LLM/1次LLM/多轮LLM）平衡成本与能力 |
-| **个人助手** | 5层CLS时序树+画像进化+隐私保护 | TiMem(5层TMT), mem0(用户画像) | CortexMem增加GDPR"被遗忘权"和加密存储，个人场景隐私是刚需 |
-| **多Agent协作** | 私有+共享+元记忆+信任感知+Active Retrieval | MIRIX(6类+Active), eion(PG+Neo4j) | CortexMem增加信任感知共享（回应eTAMP攻击），安全是协作前提 |
+| **编码Agent** | Markdown-first+版本控制+零成本蒸馏 | memsearch(Markdown), Memoria(版本控制) | AgentMem同时具备可读性+版本控制+分层调度，竞品仅各具其一 |
+| **运维Agent** | 时序分层+热度驱动遗忘+安全内生 | TiMem(时序分层), EverMemOS(调度) | AgentMem增加安全层（防火墙+溯源+沙箱+回滚），运维场景安全是刚需 |
+| **研究Agent** | 超图+向量双索引+LLM亲和推理路径 | EverMemOS(超图), MemBrain(LLM亲和) | AgentMem三级检索路径（零LLM/1次LLM/多轮LLM）平衡成本与能力 |
+| **个人助手** | 5层CLS时序树+画像进化+隐私保护 | TiMem(5层TMT), mem0(用户画像) | AgentMem增加GDPR"被遗忘权"和加密存储，个人场景隐私是刚需 |
+| **多Agent协作** | 私有+共享+元记忆+信任感知+Active Retrieval | MIRIX(6类+Active), eion(PG+Neo4j) | AgentMem增加信任感知共享（回应eTAMP攻击），安全是协作前提 |
 
-#### 3.7.3 CortexMem 真正独特的三个维度
+#### 3.7.3 AgentMem 真正独特的三个维度
 
-经全网检索验证，CortexMem在以下三个维度具有**无竞品对标的真正独特性**：
+经全网检索验证，AgentMem在以下三个维度具有**无竞品对标的真正独特性**：
 
-1. **安全内生设计（预防+检测+隔离+恢复四层闭环）**：当前24+产业界系统中，仅Memoria提供版本回滚（恢复层），Cisco AI Defense提供外挂检测（检测层），无一系统实现四层闭环。CortexMem的记忆防火墙（预防）+溯源链（检测）+隔离沙箱（隔离）+版本回滚（恢复）是唯一完整方案。
+1. **安全内生设计（预防+检测+隔离+恢复四层闭环）**：当前24+产业界系统中，仅Memoria提供版本回滚（恢复层），Cisco AI Defense提供外挂检测（检测层），无一系统实现四层闭环。AgentMem记忆防火墙（预防）+溯源链（检测）+隔离沙箱（隔离）+版本回滚（恢复）是唯一完整方案。
 
-2. **全认知栈覆盖（L0感知→L4画像）**：TiMem覆盖L1-L5（无感知层），EverMemOS覆盖语义/情景/程序性（无感知层），MemBrain覆盖LLM亲和推理（无感知层）。CortexMem的L0 KV Cache语义感知管理是唯一覆盖感知层的系统。
+2. **全认知栈覆盖（L0感知→L4画像）**：TiMem覆盖L1-L5（无感知层），EverMemOS覆盖语义/情景/程序性（无感知层），MemBrain覆盖LLM亲和推理（无感知层）。AgentMem的L0 KV Cache语义感知管理是唯一覆盖感知层的系统。
 
-3. **Markdown-first + 版本控制 + 分层调度的三位一体**：memsearch具备Markdown-first但无版本控制和分层调度；Memoria具备版本控制但非Markdown-first且无分层调度；EverMemOS具备分层调度但非Markdown-first且无版本控制。CortexMem是唯一同时具备三者的系统。
+3. **Markdown-first + 版本控制 + 分层调度的三位一体**：memsearch具备Markdown-first但无版本控制和分层调度；Memoria具备版本控制但非Markdown-first且无分层调度；EverMemOS具备分层调度但非Markdown-first且无版本控制。AgentMem是唯一同时具备三者的系统。
 
 ### 3.8 🆕 行动路线
 
 #### 3.8.1 MVP（最小可行产品）— 4周交付
 
-**目标**：验证CortexMem核心假设——5层时序分层+Markdown-first+复杂度感知召回能否在LoCoMo上达到75%+准确率。
+**目标**：验证AgentMem核心假设——5层时序分层+Markdown-first+复杂度感知召回能否在LoCoMo上达到75%+准确率。
 
 **MVP范围**：
 
@@ -1548,7 +1548,7 @@ L1 技能条目（蒸馏后）:
 | **L4语义记忆** | 简化版CogniGraph（实体+关系+时间戳，SQLite存储，非Neo4j） | SQLite | 结构化关系推理 |
 | **CortexCore简化版** | 复杂度感知召回（借鉴TiMem，无需LLM决策）+ 基础遗忘（TTL+重要性评分） | LLM API | Token节省40%+ |
 | **安全层MVP** | 写入验证（语义异常检测）+ 变更日志（溯源链基础） | LLM API | 基础安全防护 |
-| **CLI工具** | `cortexmem add/search/consolidate/forget` | Python | 开发者可用 |
+| **CLI工具** | `AgentMem add/search/consolidate/forget` | Python | 开发者可用 |
 
 **MVP不包含**：L0感知层、超图、Active Retrieval、版本回滚、多Agent总线、User as Code。
 
@@ -1830,10 +1830,10 @@ L1 技能条目（蒸馏后）:
 7. **KPI现实性评估**：对预期效果进行现实性检验，区分"可实现"与"激进预期"
 8. **预测不确定性声明**：对未来3年预测增加置信度评级和前提条件说明
 9. **源码级分类验证**：通过并行子Agent对首轮24个系统进行源码级深度调研，发现原"OS内存页置换"分类是营销隐喻而非技术实现，据此提出七大范式分类修正案
-10. **🆕 2026 Q2全网检索验证**：基于WebSearch+WebFetch对6个新系统（MemBrain、Memoria、TiMem、OmniMem、Engram/STEM、LiCoMemory）和2个新安全威胁（eTAMP、MINJA防御）进行全网检索，对CortexMem的每个场景优势进行逐项验证，修正不合理主张
-11. **🆕 CortexMem v2架构升级**：基于全网检索验证结果，将3层架构扩展为5层（融合TiMem CLS理论），增加LLM亲和检索路径（回应MemBrain洞察），增加版本回滚安全机制（借鉴Memoria），增加Active Retrieval（借鉴MIRIX），User as Code降级为可选模式
+10. **🆕 2026 Q2全网检索验证**：基于WebSearch+WebFetch对6个新系统（MemBrain、Memoria、TiMem、OmniMem、Engram/STEM、LiCoMemory）和2个新安全威胁（eTAMP、MINJA防御）进行全网检索，对AgentMem的每个场景优势进行逐项验证，修正不合理主张
+11. **🆕 AgentMem架构升级**：基于全网检索验证结果，将3层架构扩展为5层（融合TiMem CLS理论），增加LLM亲和检索路径（回应MemBrain洞察），增加版本回滚安全机制（借鉴Memoria），增加Active Retrieval（借鉴MIRIX），User as Code降级为可选模式
 12. **🆕 分类体系批判性重构**：指出原始"按技术实现分类"的根本问题，提出"认知层级×记忆动力学×安全可信"三维分类框架
-13. **🆕 9系统批判性验证**：对MemBrain、Memoria、TiMem、OmniMem、DeepSeek Engram、ICLR STEM、LiCoMemory、MIRIX、MemoryOS进行WebSearch+arXiv原文交叉验证。修正：DeepSeek Engram arXiv ID从"条件记忆论文"修正为"待确认"；ICLR STEM arXiv ID从"ICLR 2026"修正为"2601.10639"；MIRIX从"无arXiv ID"修正为"UCSD+NYU团队，LoCoMo 85.4%"；OmniMem"+411%"补充限定"绝对值F1=0.598远低于SOTA"。新增CortexMem场景化优势深度分析和行动路线（MVP→Phase 2→Phase 3→Phase 4）
+13. **🆕 9系统批判性验证**：对MemBrain、Memoria、TiMem、OmniMem、DeepSeek Engram、ICLR STEM、LiCoMemory、MIRIX、MemoryOS进行WebSearch+arXiv原文交叉验证。修正：DeepSeek Engram arXiv ID从"条件记忆论文"修正为"待确认"；ICLR STEM arXiv ID从"ICLR 2026"修正为"2601.10639"；MIRIX从"无arXiv ID"修正为"UCSD+NYU团队，LoCoMo 85.4%"；OmniMem"+411%"补充限定"绝对值F1=0.598远低于SOTA"。新增AgentMem场景化优势深度分析和行动路线（MVP→Phase 2→Phase 3→Phase 4）
 14. **🆕 2026 Q2 Token效率四维评估**：
     - 从单一"Token节省率"扩展到**节省token、准确率、时延响应、用户体验**四个维度的系统性评估
     - 基于Mem0 ECAI 2025论文 (arXiv:2504.19413) 获取首个系统性延迟数据（p50/p95搜索延迟+总响应延迟）
@@ -1856,7 +1856,7 @@ L1 技能条目（蒸馏后）:
     - 整合v0.1的八项记忆能力核心诉求、互补路线对照表、三个误区警示
     - 整合v0.1的MSA深度技术分析、MemOS统一抽象价值、Graphiti关键变化判断
     - 整合v0.2的第七核心判断（北向语义记忆+南向KV协同+治理平面）、类型化memory objects（10种）、命名空间六维度设计
-    - 整合v0.2的CortexMem设计元素取舍表、三级检索路径（Path A/B/C）
+    - 整合v0.2的AgentMem设计元素取舍表、三级检索路径（Path A/B/C）
     - 修正arXiv ID：LoCoMo(2402.10790→2402.17753)、LongMemEval(2407.16958→2410.10813)、MemBench(2405.03558→2506.21605)
     - 修正附录标题与实际条目数不一致的问题
     - 新增弱证据条目显式排除机制和完整参考文献URL列表
