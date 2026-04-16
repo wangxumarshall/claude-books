@@ -1,26 +1,20 @@
-# Filesystem-like 与 Vector/Graph-like Agent Memory研究
+# Filesystem-like 与 Vector/Graph-like Agent Memory 深度研究报告
 
-> 目录定位：`AgentOS-Memory/fs-vector-graph/`
+> 目录：`AgentOS-Memory/fs-vector-graph/`
 >
-> 更新时间：2026-04-15
+> 更新时间：2026-04-16
 >
-> 研究主题：Agent 外部记忆增强中的两条主路线
-> 1. `filesystem-like agent memory`
-> 2. `vector/graph-like agent memory`
+> 融合来源：`report.md`、`report_v2.md`、`report_v3.md`、`report_v4.md`
 >
-> 研究目标：回答
-> - 这些 memory 方案解决了哪些关键问题，当前解决到什么程度，业界 SOTA 是什么，还有哪些空间
-> - 核心实现机制和原理是什么
-> - 分别面向哪些关键场景
-> - 对 CortexMem 的能力建设有什么直接启发
+> 补充核验：截至 `2026-04-16` 的公开一手材料，仅用于校正“业界 SOTA / 公开前沿”判断
 
 ---
 
-## 0. 研究范围、方法与结论先行
+## 0. 研究范围、方法与先给结论
 
 ### 0.1 研究范围
 
-报告聚焦 **external memory augmentation**，即模型外的持久化记忆系统，不把 Transformer 原生记忆、参数编辑、KV-cache 机制本身当作主线。
+本报告聚焦 **external memory augmentation**，即模型外的持久化记忆系统，不把 Transformer 原生记忆、参数编辑、KV cache 机制本身当作主线。
 
 纳入主研究对象的标准是同时具备三点：
 
@@ -28,549 +22,646 @@
 2. **可检索 / 可复用**
 3. **可更新 / 可巩固**
 
-因此：
+因此，本报告的主线对象仍以已有研究材料中的系统为主：
 
-- `Voyager` 虽然不是通用聊天 memory 产品，但其可执行技能库满足"长期可复用程序性记忆"，纳入主研究。
-- `MemGPT/Letta` 更接近虚拟上下文管理框架，作为重要学术参照。
-- `UltraContext` 属于重要邻接基础设施：它解决跨 agent 上下文同步和版本化，但还不是典型的长期记忆抽取/巩固系统。
-- `XiaoClaw` 仍不作为独立 memory architecture 处理，它更像 OpenClaw 的安装封装与生态包装层。
+- `Filesystem-like`：`OpenViking`、`memsearch`、`memU`、`Acontext`、`Voyager`、`lossless-claw`、`Memoria`
+- `Vector/Graph-like`：`mem0`、`Honcho`、`Graphiti/Zep`、`eion`、`ContextLoom`、`mem9`、`UltraContext`
 
-### 0.2 为什么单独研究 filesystem-like 与 vector/graph-like
+为回答“业界 SOTA 是什么”，本轮额外补查了截至 `2026-04-16` 的官方 benchmark / research 页面，例如 `Hindsight`、`Mem0`、`Honcho`。这些补充材料只用于界定**公开分数前沿**，不把所有新项目都扩写成完整架构剖析。
 
-"Agent Memory"经常被笼统地说成"长期记忆"，但实际至少有两套不同的工程目标：
+### 0.2 为什么把“vector-like”扩展写成“vector/graph-like”
 
-- **Filesystem-like memory**
-  重点是把记忆重新变成可读、可调试、可迁移、可治理的工程对象。
-- **Vector/graph-like memory**
-  重点是把记忆做成共享语义平面、关系平面和服务平面，支撑多 agent、跨产品、跨终端协同。
+用户问题里使用了 `vector-like`。但到 2025-2026 年，很多所谓 vector memory 已经不再是“纯 embedding 池”，而是演化成：
 
-这个切分更接近真实工程问题：
+- 语义检索
+- 关键词检索
+- 图遍历
+- 实体状态表示
+- 时间有效窗
+- 共享命名空间
 
-> 生产里的 agent memory，到底更像"可审阅的知识工作区"，还是更像"可编排的共享语义基础设施"？
+所以本报告统一使用 **`vector/graph-like`**，强调它们的主导接口是**中央化语义 / 关系 / 服务平面**，而不再只是传统向量库。
 
-答案不是二选一，但两类系统的第一性设计目标明显不同。
+### 0.3 分类规则与证据等级
 
-### 0.3 主导接口判定规则
+#### 分类规则
 
-同一系统可能同时有文件层、向量层和图层，本报告按**主导接口**归类：
+同一系统可能同时有文件层、向量层和图层。本报告按 **主导接口** 归类：
 
-- 主导接口是文件树、Markdown、skill file、目录导航、版本对象：归 `filesystem-like`
-- 主导接口是 API、SDK、共享状态、向量检索、图检索、managed service：归 `vector/graph-like`
+- 主导接口是 `Markdown / 文件树 / URI / skill file / 版本对象`：归为 `filesystem-like`
+- 主导接口是 `API / SDK / shared memory pool / vector retrieval / graph retrieval / managed service`：归为 `vector/graph-like`
 
-例子：
-
-- `memsearch` 内部有 Milvus 向量索引，但 Markdown 是 source of truth，仍归 filesystem-like。
-- `mem9` 服务 coding agents，但主导接口是中心化 memory server、共享 memory pool、混合检索和可视控制，归 vector/graph-like。
-- `lossless-claw` 以 SQLite + DAG 摘要和 recall tools 管理 OpenClaw 上下文，主导接口仍更接近 filesystem/context-engine，因此归 filesystem-like 的"上下文压缩子类型"。
-
-### 0.4 证据等级
+#### 证据等级
 
 | 等级 | 含义 |
 |------|------|
 | A | 官方仓库 / 官方文档 / 原始论文相互印证，关键机制可核验 |
-| B | 以官方仓库或官方文档为主，机制较清晰，但效果主要依赖项目自报 |
-| C | 官方入口存在，但口径偏产品化、实现细节或评测链条不够稳 |
-| X | 本轮未拿到足够稳定的一手技术链条，只能弱引用或不纳入主线 |
+| B | 官方仓库或官方文档较清晰，但效果主要依赖项目自报 |
+| C | 官方入口存在，但实现细节或评测链条不够稳 |
+| X | 本轮未拿到足够稳定的一手技术材料，只作弱引用 |
 
-### 0.5 六个高层结论
+### 0.4 如何正确理解“SOTA”
 
-1. **Filesystem-like memory 的价值不是"反向量库"，而是把记忆重新拉回可读、可控、可迁移的工程对象。**
-2. **Vector/graph-like memory 的价值不是"多存 embedding"，而是为多 agent、跨会话、跨系统协作提供共享语义与关系平面。**
-3. **两类路线解决的是不同层次的问题：前者先解决可观测性、程序性沉淀和治理；后者先解决共享、规模化、关系化和异步基础设施。**
-4. **行业正在走向混合架构：filesystem-like 正引入 shadow index / hybrid retrieval，vector/graph-like 正补 provenance / versioning / observability。**
-5. **公开 benchmark 很重要，但不能被滥用。LoCoMo、LongMem、LongMemEval、DMR、BEAM 测的是不同能力，不能做单一总冠军表。**
-6. **CortexMem 最合理的方向不是押单一路线，而是"文件表面 + 语义索引 + 图关系 + 程序性记忆 + 治理层"的混合架构。**
+“SOTA”在 agent memory 里不能被理解成一个总冠军数字。更合理的读法是：
+
+| 信号类型 | 能说明什么 | 不能说明什么 |
+|----------|------------|-------------|
+| 同行评审论文 / 官方 benchmark | 方法在某个测试集上有效 | 一定最适合生产，也不一定可迁移到别的场景 |
+| 官方 research / benchmark 页面 | 当前公开前沿和产品方向 | 独立复核、可重复性、跨系统公平性 |
+| README / Docs 工程数据 | 架构形态、接入方式、成本和产品成熟度 | 通用记忆质量冠军 |
+
+因此，后文不会写“唯一 SOTA”，而会写：
+
+- **哪类问题已经被较好解决**
+- **哪类切片上谁更强**
+- **哪些还是 vendor self-report**
+- **还有哪些空间**
+
+### 0.5 七个高层结论
+
+1. **Filesystem-like memory 的价值，不是“反向量库”，而是把记忆重新变成可读、可改、可迁移、可治理的工程对象。**
+2. **Vector/graph-like memory 的价值，不是“多存 embedding”，而是构建共享语义平面、关系平面和服务平面。**
+3. **当前已经被证明能解决的问题，主要是跨会话 recall、按需压缩上下文成本、以及一定程度的多 agent 状态共享。**
+4. **当前还没有成为行业默认能力的问题，主要是程序性记忆治理、记忆回滚/审计、以及安全遗忘与知识更新。**
+5. **公开 benchmark 前沿在 2026 年变得更碎片化，很多高分来自厂商官方页面；这恰恰说明不能把 agent memory 写成单一排行榜。**
+6. **Filesystem-like 与 vector/graph-like 已经开始相互收敛：前者引入 shadow index 与 hybrid retrieval，后者补 provenance、temporal modeling、trace 与治理。**
+7. **`CortexMem` 最合理的方向不是二选一，而是“文件真相层 + 语义/图检索层 + 程序性记忆层 + 治理/遗忘层”的混合架构。**
 
 ---
 
-## 1. 解决了哪些关键问题，当前解决到什么程度
+## 1. 解决了哪些关键问题，当前解决到什么程度，业界 SOTA 是什么，还有哪些空间
 
-### 1.1 问题总览
+### 1.1 总表
 
-| 关键问题 | 主要路线 | 当前解决程度 | 2026-04 公开强信号 / SOTA | 仍有空间 |
-|----------|---------|-------------|---------------------------|---------|
-| **跨会话失忆，记忆不可读** | 两类都有 | 已较成熟，但对时间演化与冲突仍脆弱 | Honcho 90.4% LongMem S、89.9% LoCoMo（官方 blog 自报）；mem0 在官方研究页持续强化 LongMemEval/LoCoMo 结果；TiMem 75.30% LoCoMo / 76.88% LongMemEval-S（论文） | 需要更强时间结构、知识更新和可解释性 |
-| **有限上下文中的注意力质量与 token 成本** | 两类都有 | 已有明显工程收益 | mem0 论文/研究页持续强调 latency 与 token 节省（91% faster、90% fewer tokens vs full-context）；OpenViking 输入 token 降低 83%-91%；memU 自报约 1/10 comparable usage | 仍缺真实生产成本基准和跨系统可比性 |
-| **多 agent 协作时没有共享脑** | Vector/graph-like 更强 | 真实需求明确，但无统一 benchmark | ContextLoom、eion、mem9、UltraContext 都给出可运行 shared context/memory plane | 权限模型、冲突解决、共享一致性仍未标准化 |
-| **高价值长期资产（技能/策略）沉淀** | Filesystem-like 更强 | 已证明可行，但仍未成为行业默认 | Voyager 的 executable skill library 是学术代表；Acontext 是产业化代表 | 技能验证、失效检测、版本升级仍弱 |
-| **记忆写错/被污染/过时后的治理** | Filesystem-like 当前更强 | 仍是行业短板，但方向清晰 | Memoria 在 snapshot / branch / rollback / quarantine / provenance 上最完整 | 需要成为行业默认能力，而不是少数系统特性 |
-| **记忆遗忘/过期/知识更新** | Vector/graph-like 略强 | 远未解决 | LongMemEval 已把 knowledge update / abstention 纳入 benchmark；Graphiti、TiMem、Honcho 有方向性优势 | 缺安全遗忘、置信度衰减和策略化淘汰机制 |
+| 关键问题 | 当前解决程度 | 当前公开强信号 / SOTA 切片（截至 2026-04-16） | 主要代表 | 仍有空间 |
+|----------|-------------|-----------------------------------------------|---------|---------|
+| **跨会话失忆，记忆不可读** | 事实 recall 已较成熟；“可读可改”主要由 filesystem-like 解 | 长对话 recall 的公开高分前沿已进入 vendor self-report 阶段，例如 `Hindsight` 官方页给出 `94.6% LongMemEvalS / 92.0% LoCoMo10`，`Mem0` 官方研究页给出 `92.0% LongMemEval`，`Honcho` 官方 blog 给出 `90.4% LongMem S / 89.9% LoCoMo`；但“人能读懂、纠正、迁移”的强信号仍主要来自 `memsearch`、`Acontext`、`OpenViking` | Hindsight, Mem0, Honcho, memsearch, Acontext, OpenViking | 时间边界、来源溯源、冲突处理、人类纠错与跨系统迁移一致性 |
+| **有限上下文窗口中的注意力质量与 token 成本** | 工程收益已经很明确 | `Mem0` 官方研究页报告相对 full-context 的 `91%` 延迟下降与 `90%` token 节省；`OpenViking` README 报告相对 OpenClaw 的 `83%-91%` 输入 token 降低；`BEAM` 等新 benchmark 开始逼迫系统在 1M-10M 级历史上工作 | Mem0, OpenViking, Hindsight, Honcho, Graphiti | 缺统一的成本-质量-延迟联合基准，很多结果仍不便横向公平比较 |
+| **多 agent 协作时没有共享脑** | 架构需求明确，工程样本已出现，但没有统一 benchmark | 这一维没有公认分数冠军；更强的是架构信号：`mem9` 的中心化 memory pool、`eion` 的 shared knowledge graph、`ContextLoom` 的 Redis-first shared brain、`UltraContext` 的 context plane、`Honcho` 的 entity-aware shared state | mem9, eion, ContextLoom, UltraContext, Honcho | 权限边界、并发冲突、命名空间、事务语义、共享一致性仍未标准化 |
+| **高价值长期资产：技能 / 策略 / SOP** | 已被证明可行，但远未成为行业默认 | `Voyager` 用 executable skill library 证明程序性记忆有效；`Acontext` 把 “skill is memory” 做成产品接口；但主流 memory 系统仍偏向“记事实”而不是“记做法” | Voyager, Acontext | 技能验证、失效检测、版本升级、与语义记忆联动仍弱 |
+| **记忆治理 / 回滚 / 审计** | 仍是行业短板，只有少数系统做成一等能力 | 这条线没有 benchmark 型 SOTA，**架构 SOTA** 更接近 `Memoria`：snapshot / branch / merge / rollback / quarantine / audit trail | Memoria | 需要从“少数系统特性”变成“行业默认能力” |
+| **记忆遗忘 / 过期 / 知识更新** | 最弱的一环 | `Graphiti/Zep` 在 temporal validity 和 fact invalidation 上最有代表性；`LongMemEval` 已把 knowledge update / abstention 纳入 benchmark；但“安全遗忘、置信度衰减、策略淘汰”仍基本缺位 | Graphiti/Zep, TiMem, LongMemEval | 缺安全遗忘策略、衰减函数、过期治理和低置信隔离机制 |
 
-### 1.2 已解决/解决部分的问题
+### 1.2 已经被基本证明的三件事
 
-#### 问题一：跨会话失忆，记忆不可读
+#### 1.2.1 跨会话失忆可以被解决，但“可信记忆”还没完成
 
-在 coding agent、research agent、personal assistant 场景里，真正困扰用户的不是模型"不会检索"，而是：
+在 coding agent、research agent、personal assistant 场景里，用户真正痛的往往不是“模型不会检索”，而是：
 
 - 上一轮有效讨论没有稳定落盘
-- 即使落盘，人也无法读懂、改正、迁移
-- 换一个 agent、换一个终端、换一个模型后上下文断掉
+- 落盘后人又看不懂、改不动
+- 换模型、换 agent、换终端后上下文断掉
 
-`memsearch`、`OpenViking`、`Acontext` 的兴起，都是在回答这个问题。
+这一点已经被两类路线分别证明：
 
-**当前状态**：跨会话事实 recall 已经"能用"，但还没"可信"。今天大多数成熟系统已经能在跨会话事实 recall 上给出明显收益，但真正难点不再是"能否找到一句旧话"，而是：
+- `Filesystem-like` 证明了**可读、可改、可迁移**是刚需，而不是附属功能
+- `Vector/graph-like` 证明了**事实 recall** 和 **跨会话复用** 可以工程化做出来
 
-- 这句话现在还对不对
-- 它的时间边界是什么
-- 这一结论是用户明确说的，还是系统推断的
-- 多条记忆冲突时如何处理
+但“已能 recall”不等于“已可信”。当前系统仍普遍缺三样东西：
 
-因此，当前更像是"高可用的 recall 层"而不是"高可信的长期认知层"。
+1. 这条记忆是**谁说的、何时说的、是否推断得出**
+2. 这条记忆**现在是否仍然有效**
+3. 新旧记忆冲突时，**应如何更新、保留还是隔离**
 
-#### 问题二：有限上下文中的注意力质量与 token 成本
+换句话说，今天的主流水平更像“高可用 recall 层”，还不是“高可信认知层”。
 
-长上下文并不等于好记忆。MemGPT 把问题定义为"有限上下文窗口下的虚拟内存管理"；memU、OpenViking、mem0、Honcho 都在强调：
+#### 1.2.2 “长上下文不等于好记忆”已经成为行业共识
 
-- 需要比"每轮都全塞进去"更便宜
-- 需要比"扁平 top-k chunk"更稳定
-- 需要主动做 consolidation，而不是只堆历史
+旧式做法往往是：
 
-**当前状态**：业界逐渐意识到"塞满 1M Token Context"在工程上并不经济且不稳定。SOTA 方案正在从单纯的 Dense Vector Retrieval 转向 GraphRAG（如微软的研究）。GraphRAG 通过构建知识图谱并在不同层级（社区）生成摘要，解决了全局认知问题。但这依然属于 Vector/Graph 范式，对人类并不友好。
+- 要么把所有历史直接塞进 context
+- 要么做一次扁平 top-k chunk retrieval
 
-#### 问题三：多 agent 协作时没有共享脑
+这两者都不稳：
 
-单 agent 还能靠本地文件或对话摘要勉强维持；多 agent 一旦串行或并行协作，就会遇到：
+- 全塞进 context 会导致 token 成本高、注意力分散、时延上涨
+- 扁平 top-k 容易召回噪声块，缺层次感，也缺时间结构
 
-- 状态共享断裂
-- 权限边界不清
-- 关系信息难以表达
-- 不同 agent 对同一实体的认知无法汇合
+当前更成熟的方案已经走向三种能力的组合：
 
-ContextLoom、eion、mem9、UltraContext、Honcho 都是在解决这个问题。
+1. **主动 consolidation**
+   不是存原话堆历史，而是抽取高浓度事实、摘要、实体状态或 skill
+2. **按需披露**
+   先给目录、摘要、短 context，再逐层下钻
+3. **混合检索**
+   semantic + keyword + metadata + graph traversal，而不是单纯 dense vector
 
-**当前状态**：多agent共享脑是真需求，但industry还没统一范式。ContextLoom、mem9、eion、UltraContext 都表明多agent系统无法只靠每个agent各自的本地 session 状态运行，必须有共享状态或共享上下文层。但这个方向目前仍缺权限与命名空间标准、冲突与并发写策略、标准 benchmark。
+这也是为什么：
 
-### 1.3 待解决的问题
+- `Mem0` 强调 extract / update / selective retrieval
+- `OpenViking` 强调 `L0/L1/L2` tiered loading
+- `Hindsight` 和 `Honcho` 都开始强调长程 benchmark 尤其是 `BEAM 10M`
 
-#### 待解决问题一：记忆资产化——从记"事实"到记"技能/策略"
+今天真正要优化的，不再是“能否记住所有文本”，而是：
 
-记住"用户喜欢咖啡"当然有价值，但在大量 agent 工作流中，更高价值的是：
+> 在有限上下文里，把最值得被关注的东西，以最低 token 成本、最高注意力质量，稳定地送到模型面前。
 
-- 哪种调试步骤有效
-- 哪个工具组合最稳
-- 什么 workflow 在这个环境里能跑通
-- 什么失败模式出现后该怎么修
+#### 1.2.3 多 agent 确实需要共享脑，但还没有标准答案
 
-Voyager、Acontext 和 filesystem-like 路线的"skill memory"本质上在回答：
+单 agent 还能靠对话摘要、本地文件或者 session memory 勉强维持；多 agent 一旦并行，就会暴露出一组新的系统问题：
 
-> 经验能不能被沉淀成可执行资产，而不只是变成一段文字摘要？
+- agent A 的状态，agent B 看不到
+- 多个 agent 同时写入，冲突无人处理
+- “谁对什么有读写权限”边界不清
+- 同一实体被多 agent 以不同方式理解，无法汇合
 
-**当前状态**：目前的记忆多为"陈述性记忆"（Declarative Memory，例如"用户是程序员"）。但在复杂系统中，更高价值的是"程序性记忆"（Procedural Memory）。例如一个 Coding Agent 经过反复调试解决了一个环境配置问题，它应该能生成一个 `.md` 或 `.yaml` 格式的 SOP 文件持久化下来，下次遇到类似环境直接加载执行。Acontext 是产业化代表，Voyager 是学术代表，但技能验证、失效检测、版本升级仍弱。
+这一点已经被多个系统从不同角度证明：
 
-#### 待解决问题二：记忆治理/回滚/审计
+- `ContextLoom`：shared brain / decoupled memory from compute
+- `eion`：shared knowledge graph + guest access
+- `mem9`：stateless plugins + central memory pool
+- `UltraContext`：same context, everywhere
+- `Honcho`：围绕 entities / sessions / representations 组织共享状态
 
-长期记忆进入生产后，问题从"能不能记住"升级为：
+但这条路线目前仍然更像“工程必要性被证明”，而不是“行业已有标准栈”。最薄弱的部分不是检索本身，而是：
+
+- 权限和命名空间
+- 并发和事务
+- 冲突解决
+- provenance 和审计
+
+### 1.3 仍未被行业默认解决的三件事
+
+#### 1.3.1 记忆资产化：从“记事实”到“记技能 / 策略 / SOP”
+
+大量系统今天仍偏向**陈述性记忆**：
+
+- 用户喜欢什么
+- 过去说过什么
+- 某个事实是否出现过
+
+但对 agent 真正更值钱的长期资产，往往是**程序性记忆**：
+
+- 哪套 debug 步骤最稳
+- 哪个工具组合在这个环境里能跑通
+- 哪类失败模式出现后应该怎么修
+- 哪个 workflow 是该团队的默认 SOP
+
+这一点已经有两个强样本：
+
+- `Voyager`：把能力沉淀为 executable skill library
+- `Acontext`：把 skill memory layer 做成产品接口，直接以 `SKILL.md` 等文件形式治理
+
+它们说明方向成立，但还没成为默认范式。主要短板是：
+
+- skill 是否真的有效，缺自动验证
+- 环境变了后，skill 是否过时，缺失效检测
+- skill 版本升级和兼容性治理不成熟
+
+#### 1.3.2 一旦记错、被污染或被投毒，怎么治理
+
+长期记忆一旦进入真实生产，问题就从“能不能写进去”变成：
 
 - 写错了怎么办
-- 记忆冲突怎么办
-- 不同实验分支怎么办
-- 哪次 mutation 导致坏行为
-- 低置信信息如何隔离
+- 记忆互相矛盾怎么办
+- 哪次 mutation 引入了坏行为
+- 低置信信息是否应该被隔离
+- 不同实验分支如何并存
 
-Memoria 之所以重要，不在于它又加了一个向量库，而在于它把"Git for memory"做成了一等公民。
+这条线上最清晰的代表是 `Memoria`。它的重要性不在于“又用了向量库”，而在于它把下面这些能力做成了一等对象：
 
-**当前状态**：当前的 RAG 极度脆弱，一旦向量库中混入了幻觉或错误结论，Agent 就会反复"中毒"。业界急需引入数据库级别的事务（Transaction）或代码级别的版本控制（Version Control）来管理记忆。治理是下一阶段 memory 的真正分水岭——今天很多系统"能记住"，但并不能可控地试验新记忆策略、在记忆污染时恢复、明确追踪 mutation provenance。从生产视角看，这比再多 3-5 个 benchmark 分数更关键。
+- snapshot
+- branch
+- merge
+- rollback
+- contradiction detection
+- low-confidence quarantine
+- audit trail
 
-#### 待解决问题三：记忆遗忘/过期/知识更新
+这说明治理不是附属功能，而是 memory system 的必经阶段。今天很多系统“能记住”，但还不“可治理”。
 
-**当前状态**：大多数系统会写入、会召回，但不太会安全地忘。缺安全遗忘、置信度衰减和策略化淘汰机制。无限制堆砌的记忆最终会拖垮系统。AgentPoison（arXiv:2407.12784）表明记忆投毒攻击 ASR >80%，eTAMP（arXiv:2604.02623）表明环境观察污染可实现跨站投毒 ASR 最高 32.5%。没有 provenance、隔离、回滚、写入审计的 memory system，在生产中并不完整。
+#### 1.3.3 记忆如何安全遗忘、过期和更新，仍然没有好答案
+
+绝大多数系统今天都会：
+
+- 写入
+- 检索
+- 或多或少做 consolidation
+
+但不太会：
+
+- 安全地忘掉不再可信的信息
+- 给低置信信息降权
+- 在新旧事实冲突时做可靠的时间治理
+- 把过期知识从检索主路径里策略化移除
+
+当前最有方向性的工作是：
+
+- `Graphiti/Zep`：用 temporal graph、fact invalidation、valid/invalid 时间戳处理事实变化
+- `LongMemEval`：把 knowledge update、abstention 纳入评测
+- `TiMem`：从时间层次上看待 consolidation 和 recall
+
+但这些离“生产默认遗忘机制”还有明显距离。安全遗忘、置信度衰减、策略淘汰、归档与隔离，会是下一阶段真正的分水岭。
 
 ---
 
 ## 2. 核心实现机制和原理
 
-### 2.1 机制总览
+### 2.1 机制总表
 
-| 机制 | 核心原理 | 代表方案 | 价值 | 代价 / 边界 |
-|------|----------|---------|------|------------|
-| **文件真相层** | 记忆对象以 Markdown / file / skill 落盘，便于人审阅 | memsearch, Acontext | 可读、可改、可迁移 | 共享与关系表达弱于服务层 |
-| **Shadow Index（影子索引）** | 向量/全文索引从真相层重建，文件为 Source of Truth，向量库只作为检索路由和加速的"影子" | memsearch | 检索快且不失真相层 | 需要同步和 rebuild 机制 |
-| **分层加载（L0-L2）** | Agent 先用 `ls` 看目录，再用 `cat` 或 `less` 读内容。按需递归披露上下文 | OpenViking, memsearch, Acontext | 降 token，提解释性 | 需要更复杂的 agent tool-use |
-| **Consolidation（固化）** | 定期后台运行大模型，将短对话压缩提取为高浓度的语义片段存入库中 | mem0, Honcho, Graphiti | 让记忆自更新 | 成本高，且受 judge/抽取质量影响 |
-| **Hybrid Retrieval** | 向量 + BM25 + 图遍历。纯 Vector 在处理"逻辑否定"和"精确关系"时效果极差，SOTA 必然是 Hybrid | mem0, mem9, Graphiti | 平衡精确与语义 | 检索链路更复杂 |
-| **LLM Reconciliation** | 新事实与旧记忆比对，做 ADD/UPDATE/DELETE/NOOP | mem0, mem9 | 让记忆自更新 | 成本高，且受 judge/抽取质量影响 |
-| **Representation Modeling** | 围绕实体形成持续状态表示 | Honcho | 更适合个体/实体长期理解 | 黑箱程度更高 |
-| **Temporal Graph** | 关系带时间、历史与有效窗 | Graphiti | 更贴近真实业务状态 | 图维护和查询复杂 |
-| **Multi-type Orchestration** | 核心、语义、程序、资源等记忆协同 | MIRIX | 更接近真实 agent memory | 系统复杂度高 |
-| **Append-only + DAG Compaction** | 原始消息不丢，摘要 DAG 支撑恢复和扩展 | lossless-claw | 可压缩又可追溯 | 主要解决上下文管理，不等于全功能 memory |
-| **Branch / Rollback / Quarantine** | 把记忆 mutation 纳入版本治理 | Memoria | 可实验、可恢复、可审计 | 需要更重的基础设施和流程 |
+| 机制 | 范式 | 核心原理 | 代表系统 | 价值 | 主要边界 |
+|------|------|----------|---------|------|---------|
+| **文件真相层** | Filesystem-like | 记忆对象以 Markdown / skill / 版本对象落盘，文件为 source of truth | memsearch, Acontext, Memoria | 人类可读、可审阅、可迁移 | 服务化共享不如 northbound plane 自然 |
+| **Shadow Index** | Filesystem-like | 向量 / FTS 从文件真相层重建，负责加速而不负责真相 | memsearch | 快速检索且不牺牲可读性 | 需要同步与 rebuild 策略 |
+| **分层加载（L0-L2）** | Filesystem-like | 先给目录/摘要，再按需递归披露细节 | OpenViking, memsearch, Acontext | 降 token、提注意力质量、提可解释性 | 要求 agent 有更强 tool-use 能力 |
+| **Append-only + Layered Summary** | Filesystem-like | 原始 episode 不丢失，上层摘要可压缩可展开 | lossless-claw, OpenViking | 可追溯、可压缩、可恢复 | 主要解决上下文管理，不等于完整 memory 栈 |
+| **Consolidation / Reconciliation** | Vector/Graph-like | 从对话里提取 salient info，并做 ADD / UPDATE / DELETE / NOOP | mem0, mem9 | 避免只堆历史，让记忆自更新 | 成本高，受抽取质量影响 |
+| **Hybrid Retrieval** | Vector/Graph-like | dense + keyword + metadata + graph traversal 组合检索 | mem0, mem9, Graphiti, Hindsight | 平衡语义召回与精确关系 | 链路更复杂，调参更重 |
+| **Representation Modeling** | Vector/Graph-like | 围绕实体形成持续状态表示，而不只是 chunk recall | Honcho | 更适合长期个体/实体理解 | 黑箱程度更高 |
+| **Temporal Graph** | Vector/Graph-like | 关系携带时间边界与有效窗，支持 point-in-time 查询 | Graphiti/Zep | 更贴近真实业务状态演化 | 图维护和查询复杂 |
+| **Shared Memory Plane** | Vector/Graph-like | 以中心化服务 / pool / namespace 供多 agent 共享 | mem9, ContextLoom, eion, UltraContext | 多 agent 协作和跨端同步更强 | ACL、并发、事务仍难 |
+| **Branch / Rollback / Quarantine** | 治理层 | 把记忆 mutation 纳入版本和安全治理 | Memoria | 可审计、可修复、可实验 | 基础设施和流程成本更高 |
 
-### 2.2 Filesystem-like 范式：将记忆映射为文件系统目录与文件
+### 2.2 Filesystem-like 范式：记忆首先是文件、目录和技能对象
 
-#### 核心机制一：Shadow Index（影子索引）
+#### 2.2.1 Shadow Index：文件为真相，向量为加速
 
-文件作为真相，向量作为加速。这是本轮研究里最稳定、最值得继承的设计原则之一：
+Filesystem-like 路线最值得保留的原则之一是：
 
-- 真相层应便于人检查
-- 检索层应便于机器加速
-- 两者不要混成一个黑盒
+> 文件作为真相，向量作为加速。
 
-memsearch 是最清晰的产业化样本：Markdown 是 source of truth，Milvus 是 rebuildable shadow index。影子索引被触发后，不要把完整的文本丢给大模型，而是返回一个包含 URI 的摘要，例如 `[相关度95%: 数据库调优指南 -> file://knowledge/db_tune.md]`。只有当 Agent 判断需要详细信息时，才通过特定的 Tool (`read_file`) 获取内容。
+这意味着：
 
-#### 核心机制二：分层加载（L0-L2）
+- 记忆对象应当是人能打开的 `Markdown / YAML / skill file`
+- 向量库或全文索引只是可重建的检索缓存
+- 检索命中后，真正被引用和修正的仍是文件本身
 
-这是极其巧妙的设计。L0 是核心摘要（~100 tokens，始终加载）；L1 是结构化摘要（~2k tokens，按需加载）；L2 是完整原始内容（精确查询时加载）。这本质上是用空间换取了 LLM 注意力的聚焦。
+`memsearch` 是这一原则最清晰的工程样本：
 
-OpenViking 的 L0/L1/L2 tiered context loading、memsearch 的三段 recall（search → expand → transcript）、Acontext 的 `get_skill` / `get_skill_file` 都在说明同一件事：
+- `Markdown` 是 source of truth
+- `Milvus` 是 shadow index
+- 检索链路是 `search -> expand -> transcript`
 
-- 真正稳定的 retrieval 往往不是"一步命中"
-- 而是"先缩小空间，再按需向下钻"
+这一机制的重要意义在于：
 
-### 2.3 Vector-like 范式：将记忆抽象为中央化的语义/关系平面向量库
+1. 记忆不会被底层向量库绑死
+2. 人工修正的对象是显式文件，而不是黑箱 embedding
+3. 检索层坏掉时，真相层仍在
 
-#### 核心机制一：Consolidation（固化）
+#### 2.2.2 分层加载（L0-L2）：按需递归披露，而不是一次塞满
 
-从对话中提取 Salient Information，定期后台运行大模型，将短对话压缩提取为高浓度的语义片段存入库中。
+Filesystem-like 路线在上下文管理上的核心发明，不是“存成文件”，而是**层级披露**：
 
-mem0 的两阶段处理是最典型的实现：
+- `L0`：最小核心摘要，默认带入
+- `L1`：结构化摘要、目录、索引，按需展开
+- `L2`：完整原文、完整 skill、完整资源，只在确实需要时加载
 
-```
-Extraction Phase（记忆提取）
-    ↓
-接收对话消息 + 检索历史摘要上下文
-    ↓
-LLM (GPT-4o-mini) 提取原子事实
-    ↓
-Update Phase（记忆决策）
-    ↓
-候选记忆 vs 已有记忆 → LLM 决策：
-    - ADD: 新信息直接添加
-    - UPDATE: 补充/更新现有记忆
-    - DELETE: 删除矛盾记忆
-    - NOOP: 重复信息不操作
-```
+这本质上是在做一种“记忆分页”：
 
-mem9 的两段式提取流水线类似：Step 1 事实提取（只提取用户说的，不提取 AI 回复）→ Step 2 记忆调和（新事实 vs 已有记忆，带"年龄"标签，冲突时老记忆优先被判定过时）。
+- 先把问题缩到足够小
+- 再决定是否继续读更深的层级
 
-#### 核心机制二：Hybrid Retrieval
+`OpenViking` 的 `L0/L1/L2`、`memsearch` 的三级 recall、`Acontext` 的 `list_skills -> get_skill -> get_skill_file`，都在说明同一件事：
 
-稠密向量 + 关键词 + 图遍历混合检索。纯 Vector 在处理"逻辑否定"和"精确关系"时效果极差，因此当前 SOTA 必然是 Hybrid。不仅是 Vector + 关键词，更加入了 Graph 遍历（找到节点后，把相邻的一度/二度关系节点一起召回）。
+> 稳定的 retrieval 往往不是一步命中，而是先缩小空间，再向下钻取。
 
-Graphiti 的三路检索（semantic + keyword + graph traversal）、memsearch 的 BM25 + Dense Vector + RRF Reranking、eion 的 PostgreSQL + pgvector + Neo4j 都是这一思路的体现。
+#### 2.2.3 程序性记忆：skill file 比抽象摘要更接近高价值资产
 
-### 2.4 代表系统源码级关键模块
+Filesystem-like 系统天然更容易把记忆沉淀成：
 
-#### OpenViking：虚拟文件系统范式
+- `skill`
+- `playbook`
+- `workflow`
+- `SOP`
+- `可执行代码`
 
-```
-viking://
-├── memory/
-│   ├── session/     # 会话记忆
-│   ├── task/       # 任务记忆
-│   └── long_term/  # 长期记忆
-├── resources/
-│   ├── docs/       # 文档资源
-│   ├── code/       # 代码资源
-│   └── knowledge/  # 知识库
-└── skills/
-    ├── tools/      # 工具能力
-    └── workflows/  # 工作流
-```
+这比“把所有经验都抽成一段自然语言摘要”更稳，原因有三点：
 
-| 层级 | 内容 | Token 占比 | 加载时机 |
-|------|------|-----------|----------|
-| L0 | 核心摘要 ~100 tokens | ~5% | 始终加载 |
-| L1 | 结构化摘要 ~2k tokens | ~25% | 按需加载 |
-| L2 | 完整原始内容 | 100% | 精确查询时 |
+1. 可验证
+2. 可组合
+3. 可版本化
 
-关键模块：目录递归检索 + 语义预滤、可视化 retrieval trajectory、自动压缩 session 内容形成自迭代回路。
+`Acontext` 和 `Voyager` 分别给出了产业化和学术化的强样本。它们共同说明：
 
-#### memsearch：Markdown-first + Shadow Index
+> 对复杂 agent 而言，长期最值钱的记忆，常常不是“知道过什么”，而是“会怎么做”。
 
-```
-memory/
-├── MEMORY.md              # 手写的长期记忆
-├── 2026-02-09.md          # 今天的工作日志
-└── .memsearch/            # 向量索引缓存（可重建）
-```
+#### 2.2.4 Append-only 原始记录 + 分层摘要 + 可恢复展开
 
-三层渐进检索：L1 Search → L2 Expand → L3 Transcript。混合搜索：BM25 + Dense Vector + RRF Reranking。SHA-256 内容去重，文件监听器实时同步 Milvus shadow index，本地 ONNX 嵌入模型 bge-m3 约 558 MB。
+`lossless-claw` 这类系统之所以值得保留，不是因为它代表了通用 user memory 的最强路线，而是因为它揭示了一个很合理的底层结构：
 
-#### mem0：LLM 驱动的智能记忆管理系统
+- 原始消息要保留
+- 摘要可以分层压缩
+- 命中摘要后，仍能恢复原始上下文
 
-双重存储：向量数据库（VectorStoreFactory 支持 15+ 种）+ 图数据库（GraphStoreFactory）。核心存储机制：图内存，将记忆表示为有向标记图 G = (V, E, L)。关键创新：使用 LLM 作为"记忆决策机"，而非简单的向量相似度匹配。
+这条思路非常适合：
 
-#### mem9：两段式提取流水线
+- coding session
+- 长研究过程
+- 多轮工具调用轨迹
 
-单次最多提取 50 条事实，检索 60 条已有记忆比对。记忆带"年龄"标签，冲突时老记忆优先被判定过时。防幻觉设计：真实 UUID 替换为整数 ID 供给 LLM。5 个核心工具：`memory_store / memory_search / memory_get / memory_update / memory_delete`。
+因为这些场景里，很多关键细节是不能在早期就丢弃的。
 
-#### Acontext：Skill Memory Layer
+### 2.3 Vector/Graph-like 范式：记忆首先是共享语义 / 关系平面
 
-自动从 agent run 中提取 learnings，任务完成/失败后异步蒸馏为 skill files。召回不依赖 embedding top-k，而是依赖 `list_skills / get_skill / get_skill_file` 等逐层获取。后台异步过程，常见延迟约 10-30s。
+#### 2.3.1 Consolidation：从原始对话抽取高浓度记忆
 
-#### lossless-claw：DAG 摘要系统
+Vector/graph-like 路线的主流做法，不是保存全部原话，而是保存**抽取后的记忆单位**。
 
-```
-SQLite DB
-├── messages/           # 原始消息（永不丢失）
-├── leaf_summaries/    # 叶子层摘要
-├── d1_summaries/      # 一级摘要
-└── d2_summaries/      # 二级摘要
-```
+最典型的是两阶段流程：
 
-Fresh Tail（最近 64 条原始消息）+ Summary DAG + 动态展开（`lcm_expand`）。如果原始消息被过早压碎或覆盖，后续很多问题都无法修复——这是 L0 append-only 的工程实证。
+1. **Extraction**
+   从最近消息、滚动摘要、上下文中提取候选事实 / 实体 / 关系
+2. **Update / Reconciliation**
+   将新候选与已有记忆比较，决定：
+   - `ADD`
+   - `UPDATE`
+   - `DELETE`
+   - `NOOP`
 
-#### Memoria：Git for AI Agent Memory
+`mem0`、`mem9` 都属于这一类。这个机制的价值在于：
 
-snapshot / branch / merge / rollback + Copy-on-Write + contradiction detection + low-confidence quarantine + provenance chain + full audit trail。把分支、回滚、隔离、审计从"运维附加项"变成 memory 的原生语义，很像代码系统从"文件备份"走向 Git 的跃迁。
+- 避免重复存原文
+- 让记忆能演化
+- 把“更新”变成一等能力，而不是只会追加
 
-#### Honcho：Entity-Aware State Modeling
+但代价也很清楚：
 
-workspace / peer / session 抽象。存储消息后，后台推理形成 representations——关于 users / agents / groups / ideas 的持续状态。API 不是简单 chunk recall，而是围绕 richer state 组织：`chat` 直接对实体提问、`search` 查找相似消息、`context` 生成 session-scoped context、`representation` 获取实体状态表示。
+- 要跑 LLM 判断
+- 容易受抽取质量影响
+- 错误提炼会持续污染后续决策
 
-#### Graphiti/Zep：时序知识图谱
+#### 2.3.2 Hybrid Retrieval：纯向量检索已经不够
 
-temporal knowledge graph + 动态构建 evolving graph + 保留 changing relationships 和 historical context。检索可融合时间、全文、语义和图算法。事实有效期（Validity Window）+ Source Provenance。
+当前较成熟的 memory system，几乎都在走向 hybrid retrieval：
 
-#### eion：统一知识图谱共享存储
+- dense vector
+- keyword / BM25
+- metadata / entity filters
+- graph traversal
+- reranking
 
-PostgreSQL + pgvector + Neo4j。统一 knowledge graph + register console 管理 agents、permissions、resource snippets。支持 sequential agency、live agency、guest access。384 维 embedding（all-MiniLM-L6-v2），4 个 memory MCP tools + 4 个 knowledge MCP tools。
+原因很直接：
 
-#### ContextLoom：Redis-First 共享上下文
+- 纯语义检索对精确关系和否定信息不稳
+- 纯关键词对近义表达和抽象偏好不稳
+- 没有结构化关系时，多会话和跨实体推理很弱
 
-Redis-first memory backend + decouple memory from compute + 从 PostgreSQL/MySQL/MongoDB 拉冷启动数据 + communication cycle + cycle hash 检测 loop/repetition。
+因此，今天更合理的判断是：
 
-### 2.5 学术论文核心机制
+> 真正可用的 SOTA 不是“最强向量库”，而是“多信号检索 + 更好的路由与重排”。
 
-#### TiMem（arXiv:2601.02845）：时间层次化记忆树
+#### 2.3.3 Representation Modeling 与 Temporal Graph：从“找句子”走向“建状态”
 
-5 层时序记忆树：L1 事实层 → L2 会话层 → L3 日模式层 → L4 周趋势层 → L5 人格画像层。Complexity-Aware Recall：简单问题只检索浅层，复杂问题才往深层找，**无需 LLM 决策即可实现分层路由**。理论基础来自互补学习系统理论（CLS）：海马体到新皮层转移的系统巩固机制。
+这是 vector/graph-like 路线与传统 RAG 最大的分野。
 
-#### LiCoMemory（arXiv:2511.01448）：轻量认知图谱
+`Honcho` 的重点不是更多 chunks，而是：
 
-CogniGraph：lightweight hierarchical graph。图不一定要做成重型知识图谱，也可以是轻量认知索引层。图的主要职责可以是导航和候选缩减，而不是全量推理引擎。很多场景并不需要全量知识图推理，而只需要把"谁、何时、与什么相关"组织清楚。
+- entities
+- sessions
+- representations
+- dreaming / background reasoning
 
-#### MIRIX（arXiv:2507.07957）：多类型记忆编排
+`Graphiti/Zep` 的重点则是：
 
-6 类记忆类型：Core、Episodic、Semantic、Procedural、Resource、Knowledge Vault。Active Retrieval：Agent 不被动等待查询，主动关联所有记忆类型，减少 87% 的 API 调用。多 Agent 协调：由 controller 编排不同 memory types 的读写与协调。
+- temporal knowledge graph
+- facts with `valid_at / invalid_at`
+- point-in-time reasoning
+- source provenance
 
-#### CoALA（arXiv:2309.02427）：认知架构奠基
+这两类设计共同说明：长期记忆的核心问题，不只是“找到一句旧话”，而是：
 
-语言 agent 应被理解为带有模块化记忆组件、结构化动作空间、广义决策过程的认知架构。定义了 Observe → Think → Act → Learn 循环，工作记忆/长期记忆二分，语义/情景/程序性三分。记忆不是单表存储而是多模块协作；记忆、行动、外部环境访问是统一闭环。
+- 某个实体当前处于什么状态
+- 这个状态是如何演化来的
+- 旧事实是失效了，还是仍应保留为历史事实
+
+#### 2.3.4 Shared Memory Plane：多 agent 需要中央化语义/状态平面
+
+Vector/graph-like 路线在多 agent 场景更强，核心原因不是“检索更快”，而是它更容易变成一个：
+
+- northbound API
+- shared pool
+- multi-tenant memory service
+- context / state plane
+
+典型代表：
+
+- `mem9`：central server + stateless plugin
+- `eion`：shared memory storage + knowledge graph + guest access
+- `ContextLoom`：Redis-first shared brain
+- `UltraContext`：history / fork / clone / same context everywhere
+
+这条路线适合做：
+
+- 跨终端同步
+- 多 agent 协作
+- 企业多应用共享同一认知层
+
+但同时必须补上：
+
+- namespace
+- ACL
+- transaction
+- conflict resolution
+
+否则共享脑只会把单 agent 的错误放大成系统性错误。
+
+### 2.4 行业真实趋势：两类路线正在收敛成混合架构
+
+这轮研究最重要的判断之一是：
+
+- `Filesystem-like` 已经不再排斥向量检索，而是把它降成 shadow index
+- `Vector/graph-like` 也不再只强调 recall，而开始补 temporal modeling、trace、governance 和 provenance
+
+因此，未来真正稳定的 memory stack 更可能是：
+
+1. **文件真相层**
+2. **语义 / 图索引层**
+3. **共享 memory plane**
+4. **程序性记忆层**
+5. **治理 / 审计 / 遗忘层**
 
 ---
 
 ## 3. 面向的关键场景
 
-### 3.1 场景总览
+### 3.1 场景总表
 
-| 场景 | 为什么需要 memory | 更优路线 | 合理混合形态 |
-|------|------------------|---------|-------------|
-| **Coding Agent** | 需要跨会话记住决策、代码约定、调试过程、失败经验 | Filesystem-like 起手 | 文件真相层 + shadow index + skill layer |
-| **Proactive Assistant** | 需要长期偏好、关系、待办、提醒和主动行为 | 两类混合 | 文件偏好表面 + entity/temporal memory |
-| **Multi-Agent Workflow** | 多 agent 必须共享状态与任务上下文 | Vector/graph-like 起手 | shared memory plane + namespaces + file artifacts |
-| **Enterprise Copilot** | 需要把动态业务数据、用户历史和知识库统一进 agent | Vector/graph-like 更强 | graph/temporal layer + governed file truth |
-| **Research / Analysis Agent** | 需要可追踪笔记、资源索引、可复查结论 | Filesystem-like 更强 | resource filesystem + retrieval trajectory + provenance |
-| **Long-running Autonomous Process** | 需要持续压缩、巩固、更新和回滚 | 两类都需要 | append-only log + consolidation + governance |
+| 场景 | 更适合的主导范式 | 原因 | 代表系统 |
+|------|------------------|------|---------|
+| **高复杂度编程（Coding Agents）** | Filesystem-like 优先，必要时加 shadow index | 代码库本身就是文件系统；需要记录架构决策、版本依赖、调试经验；必须支持人工审核和记忆修正 | memsearch, OpenViking, Acontext, Memoria |
+| **长程研究（Research Agents）** | Filesystem-like 优先 | 输出物本身是结构化文档；需要多轮整理、改写、引用和人工干预 | OpenViking, memsearch, lossless-claw |
+| **全天候个性化助手（Proactive Assistants）** | Vector/graph-like 优先 | 需要跨设备同步、后台更新偏好、围绕人和关系持续建模 | mem0, Honcho, Graphiti/Zep, memU |
+| **多 agent 协同系统（Planner / Executor / Reviewer）** | Vector/graph-like 优先 | 多个 agent 需要共享状态池、共享实体关系和中心化权限边界，不能都盯着同一个大文件读写 | mem9, eion, ContextLoom, UltraContext |
 
-### 3.2 Filesystem-like 范式适用场景
+### 3.2 Filesystem-like 为什么更适合 coding / research
 
-#### 场景一：高复杂度编程（Coding Agents）
+这类任务有两个共同点：
 
-代码库本身就是文件系统。Agent 维护一个 `.agent_memory` 目录，里面记录 `architecture.md`、`decisions_log.md`。开发者可以直接打开这些文件查看 Agent 的思路甚至帮它纠错。
+1. **任务对象本来就天然是文件和文档**
+2. **人类工程师必须能看懂 agent 在记什么**
 
-这个场景下最关键的不是"人格画像"，而是：项目事实、决策历史、调试策略、skill / playbook。因此 filesystem-like 路线先天占优。
+所以在这些场景里，最关键的不是“极致 recall 分数”，而是：
 
-memsearch、OpenViking、lossless-claw 是强工程样本。memsearch 支持 Claude Code、OpenClaw、OpenCode、Codex CLI 四个主要 coding-agent 平台；OpenViking 在官方 LoCoMo10 插件评测中给出 completion/token 强信号。
+- 记忆能不能被 review
+- 技术决策能不能被纠正
+- SOP 能不能沉淀成 skill
+- 历史过程能不能被追溯
 
-#### 场景二：长程研究（Research Agents）
+这也是为什么 `memsearch`、`Acontext`、`OpenViking` 这类系统对 coding / research 特别贴合。
 
-输出目标本身就是综述报告。Agent 的工作过程就是不断在不同目录下创建草稿、收集 Reference、合并章节的过程。需要将海量信息整理成结构化文档，供人和 Agent 多次迭代。
+### 3.3 Vector/Graph-like 为什么更适合 proactive / multi-agent
 
-### 3.3 Vector-like 范式适用场景
+这类场景的共同特征是：
 
-#### 场景一：全天候个性化助手（Proactive Assistants）
+- 多端同步
+- 高并发
+- 长期在线
+- 多实体关系
+- 中央化服务治理
 
-需要跨手机、电脑多端同步用户画像，自动更新偏好。比如基于手机端侧的 AI，需要不断吸收用户的碎片化信息（喜好、行程）。这些信息不需要人工去阅读一个"用户配置.md"，直接通过向量库在后台潜移默化地影响模型输出。
+这时候单纯靠文件表面不够，因为系统需要：
 
-memU 的定位很明确：memory for 24/7 proactive agents。它把 memory 明确比喻为文件系统（folders → categories, files → memory items, symlinks → cross references, mount points → resources），但主动式 agent 不能只等 query 再检索，它需要更持久的结构化 memory space 和更小的默认上下文。
+- 更像服务，而不是像目录
+- 更像共享状态池，而不是单机工作区
+- 更强的实体建模、时间建模和权限边界
 
-#### 场景二：多 Agent 协同系统（Multi-Agent Workflow）
-
-多个 Agent（如 Planner, Executor, Reviewer）实时共享同一个状态池，避免抢占同一文件或读取超长文档而卡死，通常采用 Vector-like memory。当 5 个 Agent 在解决一个复杂问题时，它们通过高频地向一个统一的 Vector 数据库读写状态来保持同步，避免了文件系统的并发锁死（File Locking）问题。
-
-只做本地 Markdown 不够，因为多个 agent 之间需要：共享命名空间、并发控制、统一视图、跨终端和跨 runtime 的统一访问。因此需要 northbound memory plane。
-
----
-
-## 4. 对 CortexMem 的启示
-
-### 4.1 CortexMem"表里"混合架构
-
-采用"文件为表，语义为里"的设计。南向保留人类可读的 Markdown 文件和 Skill 配置（作为 Source of Truth），北向构建影子向量索引作为加速平面。
-
-| 层 | 目标 | 应借鉴的代表 |
-|----|------|-------------|
-| L0 原始事件层 | append-only 保存原始 observation / tool trace / transcript / artifact refs | lossless-claw, OpenViking |
-| L1 文件记忆表面 | 人类可读、可局部编辑、可迁移的记忆对象 | memsearch, Acontext |
-| L2 语义索引与图层 | dense + sparse + metadata + entity + temporal retrieval | mem0, Graphiti, Honcho |
-| L3 程序性记忆层 | playbook / skill / executable workflow | Acontext, Voyager |
-| L4 治理层 | snapshot / branch / rollback / provenance / quarantine | Memoria |
-
-### 4.2 五条关键启示
-
-#### 启示一：程序性记忆（Procedural Memory）治理
-
-目前多偏向语义记忆（记事），应加强对"技能文件"管理。让 Agent 自动总结确定性的"任务执行 SOP"。
-
-在软件工程中，复用性是降低成本的关键。不要让 Agent 每次都从头推理。当 Agent 成功完成一次复杂任务后，强制触发一个 Reviewer Agent，将刚刚成功的执行轨迹（Trajectory）提炼为一个标准的 YAML/Markdown SOP 文件存入文件系统，并打上向量标签。下次执行类似任务，Agent 直接读取 SOP 按照步骤执行。
-
-高价值长期资产应优先以程序性/技能性对象存在，而不是先压成抽象文本再寄希望于检索。
-
-#### 启示二：分层递归检索和向量索引增强
-
-在 Context Window 依然昂贵的今天，应支持类似 URI 的层次化加载逻辑和索引增强。先提供目录和摘要，长路径支持向量索引增强，由 Agent 发起 `read_file` 指令后再加载详情，大幅压低输入 Token 成本。此能力可外挂到传统 FS，或内嵌到传统 FS。
-
-建议四阶段读路径：
-1. trust / namespace filter
-2. entity / type / time pre-filter
-3. dense + sparse + metadata retrieval + graph expansion + rerank
-4. minimal-context assembly
-
-#### 启示三：引入"检索轨迹"可视化
-
-记忆系统不应只输出结果，需提供 Trace 能力，向开发者/用户展示 Agent 究竟是基于哪一条"过去的文件"或"关系"做出决策，解决记忆透明度问题。
-
-每次回答必须附带类似 APM（应用性能管理）的 Trace Log。用户（或开发者）可以清晰地看到：Agent 识别了意图 A → 查询了影子向量库 → 命中了文件 B 和节点 C → 提取了段落 D → 生成了当前回答。这不仅解决了透明度，更是后续做数据飞轮（反馈优化）的基础。
-
-#### 启示四：记忆治理/回滚/审计
-
-像脚本/程序一样被版本化管理、回滚和共享，实现记忆可修复。
-
-引入基于时间轴或 Commit 的记忆管理。所有 Filesystem 中的记忆文件修改，必须保留 Diff。如果发现 Agent 最近的行为变差，人类可以执行 Memory Rollback，将特定目录的记忆回退到三天前。同时，对于外部输入提取的记忆，应赋予"置信度（Confidence Score）"，低置信度的记忆只作为参考，不作为执行依据。
-
-治理是内生能力，不是后补 feature。长期 memory 系统迟早会遇到污染、冲突、实验分支和恢复问题。branch、rollback、audit、quarantine 不应后补。
-
-#### 启示五：记忆遗忘
-
-研究记忆的安全遗忘、置信度衰减和策略化淘汰机制。
-
-结合缓存淘汰算法（如 LRU）和时间衰减曲线（Ebbinghaus）。对于 Vector 平面的实体，如果长时间未被访问且置信度未被强化，其权重自动降低；对于 Filesystem 平面的文件，定期由一个后台 Agent 进行"碎片整理（Defragmentation）"，将过时文件归档（Archive）或打上 `[DEPRECATED]` 标签，防止其污染新的决策。
-
-### 4.3 优先能力方向
-
-| 优先级 | 方向 | 为什么值得先做 |
-|--------|------|---------------|
-| P0 | L0 + L1 + 基础检索 | 先让记忆可落盘、可读、可查、可扩展 |
-| P0 | progressive disclosure | 立刻改善 token 成本和检索噪声 |
-| P1 | entity / temporal indexing | 解决跨 session 与时间演化问题 |
-| P1 | skill memory | 把真正高价值经验沉淀出来 |
-| P1 | governance primitives | 为长期安全演化打底 |
-| P2 | shared memory plane + MCP/API | 支撑多 agent 和跨产品 |
-
-### 4.4 建议的最小演进顺序
-
-| 阶段 | 重点能力 | 目标 |
-|------|---------|------|
-| Phase 1 | L0/L1 + hybrid retrieval + progressive disclosure | 跑通可读、可查、可扩 |
-| Phase 2 | entity / temporal indexing + skill memory | 提升跨 session 和记忆复用质量 |
-| Phase 3 | governance primitives + MCP/API plane | 进入多 agent / 产品级形态 |
-| Phase 4 | active retrieval + adaptive forgetting + benchmark suite | 进入前沿能力竞争 |
+所以 `mem0`、`Honcho`、`Graphiti/Zep`、`mem9`、`eion`、`ContextLoom` 更适合成为这一层的主体。
 
 ---
 
-## 5. 两类路线的比较与融合判断
+## 4. 对 CortexMem 的直接启示
 
-### 5.1 能力对比
+### 4.1 总体架构判断：文件为表，语义为里，治理为底
 
-| 维度 | Filesystem-like | Vector/Graph-like |
-|------|-----------------|-------------------|
-| 人类可读性 | 强 | 中到弱 |
-| 手动可修正性 | 强 | 弱于文件层 |
-| 多 agent 共享 | 中 | 强 |
-| 关系 / 时序建模 | 中 | 强 |
-| 程序性记忆沉淀 | 强 | 中 |
-| 版本治理自然度 | 强 | 取决于系统设计 |
-| northbound API | 弱到中 | 强 |
-| 大规模服务化 | 中 | 强 |
-| 黑箱风险 | 低到中 | 中到高 |
+这轮研究给 `CortexMem` 最直接的结论不是“该选 filesystem-like 还是 vector-like”，而是：
 
-### 5.2 不是替代关系，而是分工关系
+> `CortexMem` 应采用“文件为表，语义为里，治理为底，程序性记忆为增长引擎”的混合架构。
 
-- Filesystem-like 更像 **southbound memory surface**
-  - 让人和 agent 看懂记忆
-  - 沉淀技能
-  - 做局部修正和治理
-- Vector/graph-like 更像 **northbound memory plane**
-  - 支撑共享
-  - 管理关系和时序
-  - 为多个 agent / runtime 提供统一调用
+可以把它理解为：
 
-### 5.3 当前真正的前沿在哪里
+```
+L4 治理 / 审计 / 回滚 / 遗忘
+L3 程序性记忆 / Skill / SOP
+L2 语义索引 / 图关系 / Shared Memory Plane
+L1 文件真相层（Markdown / Resource / Skill Files）
+L0 Append-only 原始事件与轨迹
+```
 
-前沿已经不再是"谁又把向量检索调好了一点"，而是：
+### 4.2 六个优先建设方向
 
-1. **时间结构**：Graphiti、TiMem、LongMemEval、BEAM 指向了时间维度和超长时程 recall。
-2. **实体持续建模**：Honcho、Graphiti 把 memory 从 chunks 提升到 entity state。
-3. **程序性记忆**：Voyager、Acontext 把技能层推成一等公民。
-4. **治理**：Memoria 把版本、回滚、审计、隔离拉进主舞台。
-5. **跨 agent context plane**：mem9、ContextLoom、UltraContext 解决"记忆怎么共享和同步"。
+#### 4.2.1 程序性记忆治理：把成功做法沉淀成 skill，而不是只记事实
 
-### 5.4 两类路线的共同盲区
+目前大多数系统仍然偏“记事”，但对 agent 最有复利价值的常常是：
 
-- **遗忘与过期策略仍弱**：大多数系统会写入、会召回，但不太会安全地忘。
-- **benchmark 与真实工程目标错位**：benchmark 不直接测"工程师能不能修 memory""团队能不能共享""记忆污染后能不能恢复"。
-- **跨系统可比性差**：各家用不同模型、不同 judge、不同 cutoff、不同上下文预算。
-- **provenance 与 trust 仍未成为行业默认项**：除少数系统外，很多 memory 仍难回答"这条结论从哪来、置信度如何、能否回滚"。
+- 调试步骤
+- 工具组合
+- 环境 workaround
+- 失败模式与修复 SOP
+
+`CortexMem` 应把这些对象单独建模成 `skill / playbook / SOP`，并支持：
+
+- 自动 distill
+- 版本化
+- 失效检测
+- 人工 review
+
+#### 4.2.2 分层递归检索 + 向量增强：先缩小空间，再向下钻
+
+`CortexMem` 不应该默认把完整记忆全文塞给模型，而应支持类似 URI 的层次化加载：
+
+- 先给目录和摘要
+- 再给命中文件路径和原因
+- 仅在需要时读取正文
+
+而 shadow index / hybrid retrieval 的职责是：
+
+- 缩小检索空间
+- 提供候选
+- 支持更快命中
+
+不是直接取代文件真相层。
+
+#### 4.2.3 检索轨迹可视化：让记忆成为可观测系统
+
+记忆系统不应只返回结果，还应给出 trace：
+
+- 为什么命中了这条记忆
+- 经过了哪一层检索
+- 用到了哪些过去的文件、实体或关系
+- 哪条证据最终影响了回答
+
+这对开发者和用户都重要，因为：
+
+- 它能解释错误是如何产生的
+- 它是后续调参与治理的基础
+
+#### 4.2.4 记忆治理 / 回滚 / 审计：像代码一样管理记忆
+
+`CortexMem` 若想进入生产，必须内建：
+
+- snapshot
+- branch
+- rollback
+- diff
+- provenance
+- low-confidence quarantine
+
+否则记忆一旦写错，只能靠下一次写入“碰运气地覆盖”，这在工程上不成立。
+
+#### 4.2.5 安全遗忘与置信度衰减：不只是会写，还要会忘
+
+应把遗忘设计成一等策略，而不是垃圾回收的副产物。至少应考虑：
+
+- 时间衰减
+- 访问频次衰减
+- 置信度衰减
+- 过期归档
+- 低置信隔离
+- 新旧事实冲突时的时间治理
+
+真正成熟的 memory system，不是无限堆积，而是能**安全地压缩、淘汰、归档和忘记**。
+
+#### 4.2.6 面向多 agent 的共享脑：共享记忆必须带权限与命名空间
+
+如果 `CortexMem` 未来要服务 planner / executor / reviewer 这类多 agent 编排，就不能只停留在单机文件记忆。它还需要：
+
+- shared memory plane
+- workspace / tenant / agent scopes
+- 读写权限
+- 冲突和事务语义
+
+否则所谓“共享脑”只会变成“共享污染”。
 
 ---
 
-## 6. 最终判断
+## 5. 最终判断
 
-如果只用一句话总结本轮研究：
-
-> **Filesystem-like 路线解决的是"让记忆成为可读、可控、可沉淀的工程资产"；vector/graph-like 路线解决的是"让记忆成为可共享、可关系化、可服务化的语义基础设施"。**
-
-如果再进一步收敛成对 CortexMem 的一句话建议：
-
-> **不要做"更大的记忆库"，而要做"可读的真相层 + 可编排的语义层 + 可演化的技能层 + 可恢复的治理层"。**
+1. **Filesystem-like 与 vector/graph-like 解决的是不同层级的问题，不是简单替代关系。**
+2. **Filesystem-like 更适合把记忆做成可读、可控、可迁移、可治理的工程对象，尤其适合 coding 和 research。**
+3. **Vector/graph-like 更适合把记忆做成共享语义 / 关系 / 服务平面，尤其适合 proactive assistant 和 multi-agent workflow。**
+4. **截至 2026-04-16，公开 benchmark 前沿已经高度碎片化；因此“业界 SOTA”应该按问题切片理解，而不能写成单一冠军榜。**
+5. **对 `CortexMem` 来说，最有价值的不是押注单一路线，而是做“文件真相层 + 语义/图索引层 + 程序性记忆层 + 治理/遗忘层”的混合栈。**
 
 ---
 
-## 附录 A：Benchmark 数据汇总与正确解读
+## 附录 A：Benchmark / SOTA 的正确读法（截至 2026-04-16）
 
-| 系统 | LoCoMo | LongMemEval | 证据等级 | 正确解读 |
-|------|--------|-------------|---------|---------|
-| mem0 | +26% vs OpenAI Memory | - | B | LLM-as-a-Judge 指标，非 exact-match |
-| TiMem | 75.30% | 76.88%(S) | B | 论文自报，但口径清晰 |
-| MIRIX | 85.4% | - | A | 自定义任务胜出，跨系统不可比 |
-| Zep/Graphiti | 85.22% | 63.80% | A | 证据较强 |
-| EverMemOS | 93.05% | 83.00% | C | 独立复现失败(38.38%)，严重存疑 |
-| Honcho | 89.9% | 90.4%(LongMem S) | B | 官方博客自报 |
-| OpenViking | +43%-49% improvement | - | A | 项目 README 自报，相对 OpenClaw |
+| 切片 | 更该看什么 | 当前公开强信号 | 如何使用 |
+|------|-----------|---------------|---------|
+| **标准长对话 recall** | `LongMemEval / LoCoMo` | `Hindsight` 官方 benchmark 页给出 `94.6% LongMemEvalS / 92.0% LoCoMo10`；`Mem0` 官方 research-2 页给出 `92.0% LongMemEval`；`Honcho` 官方 blog 给出 `90.4% LongMem S / 89.9% LoCoMo` | 可判断公开 recall 前沿，但多为厂商自报，不宜直接当统一总榜 |
+| **超长历史真正需要 memory 架构的切片** | `BEAM 1M / 10M` | `Hindsight` 官方 blog 报告 `64.1% BEAM 10M`；`Mem0` 官方页展示 `45.0% BEAM 10M`；`Honcho` 官方 blog 报告 `0.406 BEAM 10M` | 更接近“context stuffing 已经失效”的 frontier，但仍需注意评测配置差异 |
+| **时间变化与知识更新** | `LongMemEval` 的 knowledge update、temporal reasoning；`Graphiti/Zep` 的 temporal graph | `Graphiti/Zep` 明确支持 validity / invalidation / historical context | 这里更应看架构是否真建模时间，而不是只看总分 |
+| **多 agent 共享脑** | 架构能力 | `mem9`、`eion`、`ContextLoom`、`UltraContext` 提供强架构信号，但无统一 benchmark | 这是“缺 benchmark 但工程需求真实”的典型领域 |
+| **可读性 / 可治理性** | 文件真相层、trace、rollback、audit | `memsearch`、`Acontext`、`OpenViking`、`Memoria` | 这条线目前更该看机制和可操作性，而不是分数 |
 
-**方法论警示**：
-1. 不同 benchmark（LoCoMo、LongMemEval、LongMemEval-S、DMR、BEAM）测的是不同能力，不能直接混排
-2. 不同 metric（accuracy、F1、BLEU-1、LLM-as-a-Judge）不能直接并列排名
-3. 不同论文使用不同基础模型、embedding、judge model、context budget
-4. 产品版本与论文版本可能漂移
+### 附录 A 的核心结论
 
-## 附录 B：核心参考来源
+- `LoCoMo / LongMemEval` 仍有价值，但在更大 context window 时代，已经不够单独代表“真实 memory frontier”。
+- `BEAM 10M` 更能测试“无法靠塞上下文取巧”的能力，因此更接近真正的长期 memory frontier。
+- 但即便如此，agent memory 也不能只看 benchmark；生产上同样重要的是：
+  - 可读
+  - 可调试
+  - 可治理
+  - 可共享
+  - 可遗忘
 
-### 产业系统
-- OpenViking: https://github.com/volcengine/OpenViking
-- memsearch: https://github.com/zilliztech/memsearch
-- memU: https://github.com/NevaMind-AI/memU
-- Acontext: https://github.com/memodb-io/Acontext
-- Memoria: https://github.com/matrixorigin/Memoria
-- mem0: https://github.com/mem0ai/mem0
-- mem9: https://github.com/mem9-ai/mem9
-- ContextLoom: https://github.com/danielckv/ContextLoom
-- eion: https://github.com/eiondb/eion
-- Honcho: https://github.com/plastic-labs/honcho
-- lossless-claw: https://github.com/Martian-Engineering/lossless-claw
+## 附录 B：本轮补充核验的一手来源
 
-### 核心论文
-- CoALA: arXiv:2309.02427
-- MemGPT: arXiv:2310.08560
-- Voyager: arXiv:2305.16291
-- LoCoMo: arXiv:2402.17753
-- LongMemEval: arXiv:2410.10813
-- mem0: arXiv:2504.19413
-- Zep/Graphiti: arXiv:2501.13956
-- TiMem: arXiv:2601.02845
-- LiCoMemory: arXiv:2511.01448
-- MIRIX: arXiv:2507.07957
-- EverMemOS: arXiv:2601.02163
-- AgentPoison: arXiv:2407.12784
-- eTAMP: arXiv:2604.02623
+- `Mem0` 官方 research page：<https://mem0.ai/research>
+- `Mem0` 官方 research-2 page：<https://mem0.ai/research-2>
+- `Honcho` 官方 benchmark blog（`2025-12-19`）：<https://blog.plasticlabs.ai/research/Benchmarking-Honcho>
+- `Hindsight` 官方 benchmark 页：<https://benchmarks.hindsight.vectorize.io/>
+- `Hindsight` 官方 BEAM 文章（`2026-04-02`）：<https://hindsight.vectorize.io/blog/2026/04/02/beam-sota>
+- `Graphiti/Zep` 官方文档：<https://help.getzep.com/graphiti/graphiti/overview>
+
+如需进一步追溯各系统的仓库、论文和细节材料，可继续参考同目录下的 `sources.md` 与 `evidence-matrix.md`。
