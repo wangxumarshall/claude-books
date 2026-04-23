@@ -3,7 +3,7 @@
   "checkpoint_id": "abee087f454b",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 23,
+  "checkpoints_count": 25,
   "files_touched": [
     "AgentOS-Memory/fs-vector-graph/evidence-matrix.md",
     "AgentOS-Memory/fs-vector-graph/report.md"
@@ -98,6 +98,12 @@
       "transcript": "/ab/ee087f454b/14/full.jsonl",
       "content_hash": "/ab/ee087f454b/14/content_hash.txt",
       "prompt": "/ab/ee087f454b/14/prompt.txt"
+    },
+    {
+      "metadata": "/ab/ee087f454b/15/metadata.json",
+      "transcript": "/ab/ee087f454b/15/full.jsonl",
+      "content_hash": "/ab/ee087f454b/15/content_hash.txt",
+      "prompt": "/ab/ee087f454b/15/prompt.txt"
     }
   ],
   "token_usage": {
@@ -105,6 +111,6 @@
     "cache_creation_tokens": 0,
     "cache_read_tokens": 0,
     "output_tokens": 3791,
-    "api_call_count": 45
+    "api_call_count": 46
   }
 }
