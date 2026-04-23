@@ -1,0 +1,25 @@
+{
+  "cli_version": "v0.5.0-dev-5bc86155",
+  "checkpoint_id": "218028f2b228",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "AgentOS-Memory/AgentMem/AgentMem.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/21/8028f2b228/0/metadata.json",
+      "transcript": "/21/8028f2b228/0/full.jsonl",
+      "content_hash": "/21/8028f2b228/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 0,
+    "api_call_count": 0
+  }
+}
