@@ -9,14 +9,53 @@
 
 ## 1. 总体架构
 
-AgentMem 采用 **"文件为表，语义为里"**（Surface as File, Core as Semantic）设计原则。MVP 阶段用 **2 个存储后端**覆盖 3 层（L1 + L2 + L3）：
+AgentMem 采用 **"文件为表，语义为里"**（Surface as File, Core as Semantic）设计原则。MVP 阶段用 **2 个存储后端**覆盖 3 层（L1 + L2 + L3）。
 
-| 后端 | 职责 | 技术选型 |
-|------|------|---------|
-| **文件系统** | L1 文件真相层 | Markdown 目录树 + SKILL.md |
-| **SQLite** | L2 索引 + L3 轻量图谱 + L4 快照 | FTS5 (BM25) + sqlite-vss (向量) + 邻接表 (图) + 快照表 (回滚) |
+> **AgentMem 定位**：核心组件（L1-L4 各单一层）在 OpenViking（文件系统范式）、memsearch（影子索引）、Graphiti（时序知识图谱）、Memoria（版本控制）中各有成熟先例。AgentMem 的差异化在于**组合方式的工程集成**和**L2a-L2c 渐进式加载作为核心差异点**，而非从零发明新范式。MVP 阶段聚焦"三件事"：让记忆像文件一样可读可编辑、让检索渐进式精准、让错误记忆像 Git 一样可回滚。
 
-### 架构决策记录（ADR-001）
+### 1.1 关键场景
+
+| # | 场景 | 需求特征 | AgentMem 应对 |
+|---|------|---------|--------------|
+| 1 | **重度代码编写与研发工作流**（Coding & Dev Agents） | 跨会话代码约束、排障 SOP 的绝对回忆，人类专家对 AI 修改痕迹的强审核 | L1 Markdown 可读 + SKILL.md 技能复用 + 版本回滚 |
+| 2 | **高约束合规企业的主权 AI 管控**（Sovereign Enterprise Copilots） | 防污染渗透、审计链路溯源、毫秒级灾难恢复 | 应用层快照 + 安全写入校验 + 回滚 |
+| 3 | **长期个性化伴生型与主动式智能体**（Proactive Assistants） | 7×24 小时捕获多端噪声并重构深度认知图谱及动态心理侧写 | L3 时序图 + 后台调度器 + 遗忘衰减 |
+| 4 | **大规模多智能体并发网络**（Multi-Agent Dynamism） | 命名空间隔离 + 强并发控制的共享全局状态总线 | SQLite WAL + 快照隔离 + 命名空间 |
+
+### 1.2 现有技术瓶颈
+
+#### Vector-like 困境
+
+虽然实现了高效跨会话召回，但存在严重的**黑盒化**与**记忆绑定（Memory Binding）缺失**问题：
+
+- **向量雾霾（Vector Haze）**：密集向量索引缺乏显式结构，导致检索模糊
+- **上下文污染**：孤立 Vector 切片无法形成因果逻辑；追加式向量极易遭遇"相似但已过期"的污染，幻觉污染后难以在庞大张量库中剔除旧事实
+- **正交维度未解耦**：单模式向量存储缺乏对语义、时间、因果、实体等维度的正交解耦，导致检索策略难以适应不同查询意图
+- **程序性记忆缺位**：完全忽视了程序性记忆（技能/SOP）的治理，仅偏向语义记忆（记事），导致 Agent 无法从经验中提炼可复用的确定性操作流程
+
+#### Filesystem-like 困境
+
+虽然重建了工程纪律和可读性，但：
+
+- **工具调用延迟重**：对模型工具调用的依赖过重（增加延迟）
+- **缺乏隐性关联推演**：严重缺乏应对全局 Multi-hop Reasoning 的能力
+- **动态关系同步弱**：难以支撑高频、跨实体的动态关系同步更新
+- **检索轨迹不可视**：记忆系统仅输出结果不输出依据，透明度严重缺失
+- **遗忘机制缺位**：记忆遗忘机制缺位导致存储无限增长
+- **版本控制空白**：当前 filesystem-like 系统（OpenViking、memsearch）均未实现版本控制 + 回滚能力——这是 AgentMem 试图填补的空白
+
+### 1.3 问题挑战与缓解
+
+| # | 挑战 | 缓解措施 |
+|---|------|---------|
+| 1 | **评估方法失真**：单纯刷榜失效，Token 效率指标以"全量上下文注入"为稻草人基线，未纳入记忆系统自身的 LLM 消耗 | 双轨评测：学术基准（LoCoMo/LongMemEval）+ 场景基准（跨会话代码约束、SOP 蒸馏、投毒回滚时间）；净 Token 节省公式 |
+| 2 | **程序性记忆蒸馏缺位**：多偏向语义记忆，缺乏对"技能文件"的系统性管理 | 三类记忆解耦（战略/程序/工具）+ SKILL.md 规范 + SOP 自动蒸馏 |
+| 3 | **检索效率与成本矛盾**：多存储后端组合显著增加延迟 | L2a-L2c 渐进式卸载 + 复杂度感知调度器 + 冷/热路径成本分账 |
+| 4 | **知识回涌**：机器推理产出比人类编辑的记忆更准确时，如何安全同步回真相层 | L2.5 受控回写协议：confidence >0.8 自动回写，0.5-0.8 待审，<0.5 仅检索增强 |
+| 5 | **企业级治理与并发防线**：AgentPoison ASR 40-80%，缺乏版本化管理、回滚和审计 | 三级防御（入口校验 <150ms + 记忆免疫层 <200ms + 版本回滚 ~0ms 异步） |
+| 6 | **运维复杂度**：多存储后端运维成本被系统性低估 | MVP 2 个后端（文件系统+SQLite），每阶段有明确升级触发条件 |
+
+### 1.4 架构决策记录（ADR）
 
 | 决策 | 方案 | 理由 |
 |------|------|------|
@@ -753,12 +792,17 @@ class ShadowIndexSync:
 
 ## 6. 后台调度器
 
+### 6.1 调度器核心循环
+
 ```python
 import asyncio
 from datetime import datetime
 
 class BackgroundScheduler:
-    """后台任务调度器（冷路径操作）。"""
+    """后台任务调度器（冷路径操作）。
+    
+    冷路径：不在写入/检索前台延迟内体现。
+    """
     
     def __init__(self, agent_mem: AgentMem, interval: int = 86400):
         self.agent_mem = agent_mem
@@ -794,9 +838,220 @@ class BackgroundScheduler:
         ...
 ```
 
+### 6.2 L2.5 受控回写协议
+
+当图推理发现 A 和 C 通过 B 存在间接关联，或其他算法产生新知识时，衍生内容存储在独立区域（JSON 格式，存储于 SQLite），标记为 `source: derived` 而非 `source: authored`。
+
+```python
+from dataclasses import dataclass
+from enum import Enum
+
+class DerivedStatus(Enum):
+    AUTO_ACCEPTED = "auto_accepted"    # confidence > 0.8
+    PROPOSED = "proposed"             # confidence 0.5-0.8
+    RETRIEVAL_ONLY = "retrieval_only" # confidence < 0.5
+    REJECTED = "rejected"
+
+@dataclass
+class DerivedRecord:
+    id: str
+    content: str
+    source_ids: list[str]           # derived_from: [ref_ids]
+    confidence: float
+    algorithm: str                  # confidence_algorithm
+    reasoning_path: str             # 推理路径描述
+    status: DerivedStatus
+
+async def process_derived(derived: DerivedRecord) -> None:
+    """受控回写：保持可审计的双向同步。"""
+    if derived.confidence >= 0.8:
+        # 自动回写 L1 Markdown，带溯源标记
+        await _write_to_markdown(
+            derived,
+            comment=f"<!-- auto-derived 自动于 {datetime.utcnow().isoformat()} via [{derived.reasoning_path}] -->"
+        )
+        derived.status = DerivedStatus.AUTO_ACCEPTED
+    elif derived.confidence >= 0.5:
+        # 标记为待审，可通过 `mem review-derived` 批量审核
+        derived.status = DerivedStatus.PROPOSED
+    else:
+        # 仅用于 L3 检索增强，不回写 L1
+        derived.status = DerivedStatus.RETRIEVAL_ONLY
+```
+
+### 6.3 SOP 自动蒸馏流程
+
+程序性记忆作为"一等公民"管理：
+
+1. **记忆解耦分类**：严格区分三类记忆资产
+   - **战略记忆（Strategic）**：元认知级别原则，KV 对存储
+   - **程序性记忆（Procedural/SOPs）**：标准操作程序，SKILL.md 规范
+   - **工具记忆（Tool）**：特定工具使用说明
+2. **SOP 自动蒸馏**：任务完成后，Reflect Agent 从执行者轨迹中提取确定性知识，将 SOP 视为有向无环图（DAG）
+3. **技能热插拔复用**：生成的 SKILL.md 可跨离散会话热插拔复用，预期任务完成率提升 30%-45%
+
 ---
 
-## 7. 开发实施路线图
+## 7. 冷启动退化模式
+
+在系统记忆条目数 < N（默认 N = 100，可配置 `cold_start_threshold`）时，CortexCore 自动切换为**确定性模式**，避免"记忆空虚时 LLM 决策缺乏锚点"的冷启动悖论。
+
+### 7.1 退化规则
+
+| 组件 | 智能模式 | 退化模式 |
+|------|---------|---------|
+| 路由 | LLM 决策分层 | 纯时间衰减 + 频率评分（无需 LLM） |
+| 检索 | BM25 + 向量 + 图多跳 | BM25 + 向量混合（无需图遍历/LLM 路由） |
+| 去重 | LLM 融合仲裁 | 纯字符串去重 |
+
+超过阈值后渐进切换到智能模式。
+
+### 7.2 复杂度感知调度器
+
+| 意图复杂度 | 检索路径 | LLM 调用 |
+|-----------|---------|---------|
+| 简单事实问答 | L2a 浅层检索 | 0 |
+| 中等关系查询 | L2a → L2b + 1-hop 图 | 1 |
+| 宏观研判 | L2a → L2b → L2c + L3 多跳 | 多轮 |
+
+## 8. 检索轨迹可视化与透明度机制
+
+整合 AgentTrace 框架，解决记忆透明度问题：
+
+### 8.1 三层表面结构化日志
+
+| 层面 | 记录内容 | 示例 |
+|------|---------|------|
+| **操作层（Operational）** | 工具调用、文件读写、网络请求 | `read_file("facts/user_profile.md")` |
+| **认知层（Cognitive）** | 推理过程、决策依据、置信度变化 | `"confidence: 0.92 → 0.87 after conflict check"` |
+| **上下文层（Contextual）** | 检索到的记忆项、使用的源文件、依赖的关系 | `"loaded: mem_20260423_001 (L2b), graph path: A→B→C"` |
+
+### 8.2 行为轨迹格式
+
+```json
+{
+  "timestamp": "2026-04-23T10:00:00Z",
+  "agent_id": "agent_001",
+  "step_id": "step_042",
+  "state": "retrieval",
+  "observation": "L2a search returned 15 results",
+  "thought": "Expanding top 3 to L2b based on confidence scores",
+  "action": "search_progressive",
+  "action_input": {"query": "TypeScript strict mode config", "max_tokens": 4000},
+  "result": {"abstract_ids": 15, "overview_ids": 3, "full_contents": 1, "total_tokens": 2800},
+  "latency_ms": 340,
+  "success": true
+}
+```
+
+### 8.3 Scene 情境标注
+
+每条记忆附带 `scene` 字段区分不同任务背景，降低跨背景混用与串场风险。
+
+## 9. 版本控制、回滚与审计
+
+借鉴 Memoria "Git for Memory" 理念，MVP 阶段采用**应用层快照**（非 MatrixOne CoW），仅支持"全量回滚"。
+
+### 9.1 快照/回滚实现
+
+```python
+async def rollback_to(self, snapshot_id: str) -> RollbackResult:
+    """回滚到指定快照。重建索引，恢复文件。"""
+    # 1. 从 memory_snapshots 读取 manifest
+    # 2. 对比当前文件系统与快照差异
+    # 3. 恢复被删除文件、还原被修改文件
+    # 4. 重建 SQLite 索引（全量重建）
+    # 5. 记录安全事件
+    ...
+```
+
+### 9.2 版本控制最佳实践
+
+| 能力 | MVP 实现 | Phase 2 计划 |
+|------|---------|-------------|
+| 快照创建 | 应用层全量快照 | 增量快照（diff-only） |
+| 回滚粒度 | 全量回滚 | 单条记忆回滚 |
+| 版本标识 | 时间戳 + UUID | SemVer + Git-like hash |
+| 审计追踪 | memory_changelog 表 | 完整 provenance chain |
+| 分支实验 | ❌ | 零拷贝分支（CoW） |
+
+## 10. 安全遗忘与成本分账
+
+### 10.1 差异化衰减率
+
+| 记忆类型 | λ（/天） | 半衰期 | 策略 |
+|---------|---------|--------|------|
+| 原始日志 | 0.05 | ~14 天 | 30 天后移入冷存储（降权非删除） |
+| 用户画像 | 0.005 | ~140 天 | 慢衰减，稳定累积 |
+| 程序性记忆/SKILL.md | 0.001 | ~700 天 | 几乎不衰减 |
+| 图关系边 | 0.02 | ~35 天 | 被新证据强化时重置 |
+| 机器推理衍生 | 0.04 | ~17 天 | 未强化快速衰减 |
+
+### 10.2 遗忘策略
+
+- **标记 inactive 非删除**：低于阈值的记忆标记为 `inactive`，仍可通过精确查询激活（模拟人类"潜伏记忆"）
+- **ACT-R 激活值框架**：`a(t) = a₀ × e^(-λt) × (1 + log(access_count + 1)) × f_semantic`
+
+### 10.3 冷/热路径成本分账
+
+| 路径 | 包含操作 | 延迟影响 | 用户感知 |
+|------|---------|---------|---------|
+| **热路径** | 写入时 Agent 自分类（零额外 LLM 调用）+ 检索时的 BM25/向量/图查询 | <350ms（含安全栈） | ✅ |
+| **冷路径** | CLS 系统巩固（L1→L3 归纳，需 LLM 调用）+ 记忆融合去重 + 遗忘衰减计算 | ~0ms（异步后台） | ❌ |
+
+所有效率指标必须分别报告热/冷路径，否则无法在同类系统间进行公平比较。
+
+## 11. 安全防御体系
+
+### 11.1 三级防御
+
+| 层级 | 安全措施 | 延迟影响 | 覆盖攻击类型 | 启用时机 |
+|------|---------|---------|------------|---------|
+| 入口校验（写入前） | 语义模式匹配（纯规则引擎）+ 来源可信度评分 | <150ms | 直接注入（AgentPoison） | MVP 即用 |
+| 记忆免疫层 | 已有合法记忆一致性检查（语义冲突检测） | <200ms | 多 Agent 传播 + 潜伏型污染 | MVP 即用 |
+| 版本回滚（事后恢复） | 应用层快照 + 异常检测（记忆突变率监控） | ~0ms（异步） | 未知攻击的终极恢复 | MVP 即用 |
+
+### 11.2 MINJA 免疫效应
+
+当系统已有预存合法记忆时，攻击效果大幅下降。**系统的免疫力随运行时间增长**——不必过度焦虑冷启动阶段的完美防御，系统自然积累的记忆本身即构成防御资源。MVP 目标：运行 7+ 天后的记忆免疫效应使同类投毒拦截率提升 30%+。
+
+## 12. 双轨评测体系
+
+**LoCoMo/LongMemEval 是学术名片，但 coding-agent 场景基准决定 MVP 是否合格。**
+
+### 12.1 轨道一：学术基准
+
+| 基准 | MVP 目标 | 参考依据 |
+|------|---------|---------|
+| LoCoMo | >65%（非核心场景，目标下调） | TiMem 75.30% |
+| LongMemEval | 待测 | 含知识更新与拒答机制 |
+| 竞品横向对比 | 优于 memsearch | AgentMem vs memsearch vs OpenViking |
+
+### 12.2 轨道二：场景基准（核心）
+
+| 指标 | MVP 目标 | 说明 |
+|------|---------|------|
+| 跨会话代码约束回忆率 | >90% | session 1 设定约束 → session 2（间隔 3 天）验证 |
+| SOP 蒸馏成功率 | >70% | debug 轨迹 → 自动生成 SKILL.md → 新任务复用 |
+| 投毒后回滚时间 | <30 秒 | 注入恶意记忆 → 触发回滚 → 验证行为恢复 |
+| 组合增效验证 | 检索精度比 memsearch 单独高 >15% | 同一组测试用例 |
+
+### 12.3 轨道三：安全基准
+
+以 AgentPoison（arXiv:2407.12784）的标准攻击流程为基线：
+
+| 攻击类型 | MVP 拦截率目标 |
+|---------|---------------|
+| AgentPoison（记忆库修改 → 后续查询触发恶意行为） | >60% |
+| MINJA（长程记忆注入攻击） | 同左 |
+| "一次污染，永久生效"跨 20+ 会话验证 | 同左 |
+
+### 12.4 通用要求
+
+- **净 Token 效率**：`净 Token 节省 = (全量基线 - 注入窗口) - 记忆系统自身 LLM 消耗`
+- **热/冷路径分账**：所有效率指标必须分别报告热路径和冷路径
+
+## 13. 开发实施路线图
 
 ### Phase 0：基础设施（Week 1）
 - [ ] `pyproject.toml`：Python 3.11+，依赖：`aiosqlite`, `pydantic`, `litellm`, `pyyaml`
@@ -846,7 +1101,7 @@ class BackgroundScheduler:
 
 ---
 
-## 8. 关键依赖
+## 14. 关键依赖
 
 ```toml
 [project]
@@ -873,7 +1128,7 @@ select = ["E", "F", "I", "N", "W", "ASYNC", "B", "SIM"]
 
 ---
 
-## 9. 测试策略
+## 15. 测试策略
 
 | 测试类型 | 范围 | 工具 |
 |---------|------|------|
@@ -905,7 +1160,7 @@ class TestSecurity:
 
 ---
 
-## 10. 风险评估与缓解
+## 16. 风险评估与缓解
 
 | 风险 | 影响 | 概率 | 缓解措施 |
 |------|------|------|---------|
@@ -914,3 +1169,68 @@ class TestSecurity:
 | 文件监听冲突（多个 Agent 同时写入） | 索引不同步 | 低（SQLite 序列化） | 写入时加 advisory lock |
 | LLM embedding 调用延迟 >500ms | 写入延迟超标 | 中 | 异步后台 embedding，前端立即返回 |
 | 回滚导致索引不一致 | 检索错误 | 低 | 回滚时重建索引 |
+
+---
+
+## 17. 预期效果（分阶段）
+
+### MVP 阶段（可实现目标）
+
+1. **热路径 Token 降低 50%-65%**：依托 L2a-L2c 渐进式卸载与 SQLite 影子索引
+2. **检索透明度与可解释性**：AgentTrace 三层表面结构化日志，完整检索轨迹可视化
+3. **投毒回滚能力（简化版）**：应用层快照 + 全量回滚，投毒恢复成功率 >80%
+4. **跨会话代码约束回忆率 >90%**：MVP 场景基准核心指标
+5. **LoCoMo >65%**：学术基准参考目标（非 MVP 核心指标）
+
+### Phase 2（待验证目标）
+
+6. **程序性记忆治理**：SOP 自动蒸馏 + 技能热插拔复用，任务完成率提升 30%-45%
+7. **安全遗忘与存储优化**：35%-45% 存储缩减
+8. **安全防御拦截率 >80%**：CortexBench-Sec（AgentPoison 基线）
+9. **L2.5 PoC 验证**：受控回写协议概念验证
+10. **完整 MVCC + 零拷贝分支**：引入 MatrixOne 或轻量替代方案
+
+### Phase 3（远期目标）
+
+11. **MINJA 免疫效应**：运行 7+ 天后免疫力提升 30%-50%
+12. **LoCoMo 冲刺 >90%** + 多 Agent 并发保护伞
+13. **L0 南向适配**（vLLM/SGLang 插件）
+
+---
+
+## 18. 差异化定位
+
+AgentMem 的核心概念在 OpenViking（文件系统范式）、memsearch（影子索引）、Graphiti（时序知识图谱）、Memoria（版本控制）中各有先例。差异化体现在：
+
+1. **L1+L2+L3 三层主路径 + SQLite 全栈**：MVP 用 SQLite 实现 FTS5 + sqlite-vss + 邻接表，将 5 个存储后端缩减为 2 个，运维成本较竞品降低 60%-70%
+2. **程序性记忆治理（设计目标）**：战略/程序/工具三类记忆解耦并系统性治理
+3. **L2.5 受控回写协议（实验性）**：唯一无产业先例的技术方向，置信度分级回写
+4. **SQLite 全栈 MVP（核心工程差异化）**：每阶段有明确的触发条件（数据量阈值、推理复杂度阈值）
+5. **安全遗忘分层衰减**：不同类型记忆差异化衰减率，"遗忘不是删除而是降权"
+
+---
+
+## 19. 组合增效验证（Synergy Effects）
+
+AgentMem 必须证明以下组合增效，否则将被视为"四个系统的拼合"：
+
+| 组合 | 单独运行效果 | 组合后预期效果 | 验证方法 |
+|------|-------------|---------------|---------|
+| **L1(Markdown) + L2(Shadow Index) + L3(Graph)** | memsearch 已实现 L1+L2，Graphiti 已实现 L2+L3 | 检索精度比 memsearch 单独高 >15% | 同一组测试用例，对比检索准确率 |
+| **L1 + L4(回滚)** | Memoria 已实现 L1 + 版本控制 | 回滚后 L2 索引自动同步（Memoria 缺失此能力） | 回滚到快照 T0 后，SQLite 索引是否自动重建 |
+| **L1 + L2 + 遗忘** | OpenViking 有 L1+L2 但无遗忘机制 | 存储增长速率降低 35%+，同时保持检索精度 | 对比 30 天连续运行的存储增长曲线 |
+
+---
+
+## 20. 批判性自审与设计约束
+
+| 挑战 | 风险等级 | 设计约束 |
+|------|---------|---------|
+| **L0 南向集成边界** | 中 | MVP 阶段不做 L0；Phase 2 明确 vLLM/SGLang 插件交互协议 |
+| **关键路径稀释** | 高 | MVP "主路径优先"：L1+L2+L3 SQLite 全栈 + 渐进式加载，验证组合增效后再纳入 L2.5/L4 |
+| **安全栈延迟** | 高 | 入口校验 <150ms，记忆免疫层 <200ms；总热路径延迟 <350ms |
+| **知识回涌** | 高 | L2.5 受控回写：>0.8 自动回写（带溯源标记），0.5-0.8 待审，<0.5 仅检索增强 |
+| **冷启动悖论** | 中 | CortexCore 在条目 < N 时自动切换为确定性模式，N=100 可配置 |
+| **成本分账不透明** | 高 | 所有效率指标分别报告热路径和冷路径，禁止合并为单一"节省率" |
+| **基准天花板虚高** | 高 | 统一 metric 定义；LoCoMo MVP 目标降至 65%（非核心场景） |
+| **存储后端过度拆分** | 高 | MVP 2 个后端（文件系统+SQLite），每阶段有明确升级触发条件 |
