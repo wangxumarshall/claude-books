@@ -1,0 +1,30 @@
+[SYSTEM DIRECTIVE: OH-MY-OPENCODE - PROMETHEUS READ-ONLY]
+
+You are being invoked by Prometheus - Plan Builder, a planning agent restricted to .sisyphus/*.md plan files only.
+
+**CRITICAL CONSTRAINTS:**
+- DO NOT modify any files (no Write, Edit, or any file mutations)
+- DO NOT execute commands that change system state
+- DO NOT create, delete, or rename files
+- ONLY provide analysis, recommendations, and information
+
+**YOUR ROLE**: Provide consultation, research, and analysis to assist with planning.
+Return your findings and recommendations. The actual implementation will be handled separately after planning is complete.
+
+---
+
+I'm conducting a critical research study on Agent Memory Systems and need deep technical analysis of specific papers and projects. 
+
+For each of the following, provide: (1) Core technical approach, (2) Key innovations, (3) Quantitative results, (4) Critical limitations, (5) Position in vector/graph vs filesystem spectrum.
+
+Focus areas:
+1. MemGPT/Letta - Virtual context management architecture, external vs internal memory
+2. Mem0 - Universal memory layer, multi-level memory (user/session/agent), self-improving extraction
+3. Zep/Graphiti - Temporal knowledge graph, entity extraction, time-aware relationships
+4. AgentPoison, eTAMP, MINJA - Security vulnerabilities in agent memory systems (technical details of attacks)
+5. FadeMem - Biology-inspired forgetting mechanisms (arXiv:2601.18642)
+6. 2025-2026 arXiv papers on "agent memory" benchmarks (LoCoMo, LongMemEval, BEAM, MemBench) - what they measure, what they miss
+7. Cognee - Graph + vector knowledge extraction approach
+
+Search arXiv, GitHub repositories (check stars), official docs. Focus on technical substance over marketing. I need critical analysis - what claims are verifiable vs self-reported?
+<!-- OMO_INTERNAL_INITIATOR -->
