@@ -1,0 +1,15 @@
+Research the engineering patterns of these open-source agent memory systems for a development design doc:
+
+1. **memsearch** (zilliztech/memsearch) - Look at: directory structure, how Markdown files are organized, how shadow index is built, the CLI tools exposed, configuration format
+2. **mem0** (mem0ai/mem0) - Look at: Python SDK API design, memory add/retrieve/update/delete interfaces, configuration patterns, storage backend abstraction
+3. **OpenViking** (volcengine/OpenViking) - Look at: viking:// protocol design, directory structure conventions, L0/L1/L2 file formats, SDK tools
+4. **Graphiti/Zep** (getzep/graphiti) - Look at: Python SDK API, how facts/entities/episodes are created, query interface, Neo4j schema
+
+For each system, focus on:
+- API surface (what functions/methods are exposed to developers)
+- Data models (tables, file formats, JSON schemas)
+- Configuration patterns
+- Integration points (how plugins/agents connect)
+
+Return concrete code examples, API signatures, and file structure trees.
+<!-- OMO_INTERNAL_INITIATOR -->
