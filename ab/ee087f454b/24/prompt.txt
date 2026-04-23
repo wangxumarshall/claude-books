@@ -1,0 +1,38 @@
+TASK: Review 6+ high-star GitHub projects cited in our research report and verify whether the code implementation matches the report's descriptions.
+
+EXPECTED OUTCOME: A markdown file with per-project consistency analysis showing: what the report claims vs what the code actually implements, with specific discrepancies flagged.
+
+REQUIRED TOOLS: Read, webfetch, Bash (git clone or curl), Grep.
+
+MUST DO:
+1. For each project below, visit its GitHub repository and:
+   - Read README.md, main source files, and architecture docs
+   - Compare the report's description against actual code structure
+   - Flag: exaggerated claims, outdated descriptions, unimplemented features
+
+2. Projects to review:
+   a) OpenViking (volcengine/OpenViking) — verify viking:// protocol, L0/L1/L2 loading, self-iteration claims
+   b) memsearch (zilliztech/memsearch) — verify Markdown-first, Milvus shadow index, search->expand->transcript
+   c) mem0 (mem0ai/mem0) — verify graph memory, multi-level memory extraction pipeline
+   d) Graphiti/Zepzep-ai/graphiti) — verify bi-temporal model, entity extraction pipeline
+   e) Memoria (matrixorigin/Memoria) — verify Copy-on-Write, snapshot, branch, rollback features
+   f) memU (NevaMind-AI/memU) — verify filesystem-style memory, category/item/resource structure
+
+3. For each project, output:
+   - Star count | Last commit date | Key files checked
+   - Report claims (list 3-5 claims from report.md)
+   - Verification result for each claim: ✅ verified / ⚠️ partially verified / ❌ not found / ❌ contradicted
+   - Specific code file or line reference for verification
+
+4. Save output to: .sisyphus/critical-research/outputs/project-consistency-review.md
+
+MUST NOT DO:
+- Do NOT review code quality (readability, style, etc.)
+- Do NOT require running the project (only verify structural consistency)
+- Do NOT skip projects due to complexity — summarize what you CAN verify
+
+CONTEXT:
+- report.md is at: /Users/wangxu/1-project/claude-books/AgentOS-Memory/fs-vector-graph/report.md
+- evidence-matrix.md lists the GitHub repos with evidence levels
+- This is Task 2 of Wave 1 in the critical research plan
+<!-- OMO_INTERNAL_INITIATOR -->
