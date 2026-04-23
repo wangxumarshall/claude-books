@@ -133,6 +133,12 @@
       "transcript": "/f6/cf59115302/20/full.jsonl",
       "content_hash": "/f6/cf59115302/20/content_hash.txt",
       "prompt": ""
+    },
+    {
+      "metadata": "/f6/cf59115302/21/metadata.json",
+      "transcript": "/f6/cf59115302/21/full.jsonl",
+      "content_hash": "/f6/cf59115302/21/content_hash.txt",
+      "prompt": ""
     }
   ],
   "token_usage": {
