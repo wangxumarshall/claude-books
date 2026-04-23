@@ -1,0 +1,38 @@
+TASK: Survey the landscape of Agent Memory security attack research.
+
+EXPECTED OUTCOME: A comprehensive markdown document covering ≥3 attack types with technical details, success rates, affected systems, and defense mechanisms.
+
+REQUIRED TOOLS: webfetch (arXiv papers, security research), Read, Write.
+
+MUST DO:
+1. Research these specific attacks:
+   a) AgentPoison (arXiv:2506.x range — search for paper about memory poisoning in agents)
+   b) eTAMP (arXiv:2507.03484 — environmental Trojan attack on memory)
+   c) MINJA (arXiv:2601.05504 — memory immunization effect)
+
+2. For EACH attack, answer:
+   - What is the attack surface? How does the attacker inject malicious memory?
+   - What's the Attack Success Rate (ASR)? On which systems?
+   - What's the impact when successful? (data exfiltration, behavior manipulation, etc.)
+   - What defenses are proposed? Do they actually work?
+   - Any independent verification of the defenses?
+
+3. Also search for:
+   - "indirect prompt injection agent memory" — general category
+   - "multi-agent memory poisoning" — does shared memory amplify the attack surface?
+   - "memory system security agent" — broader landscape of security research
+
+4. Critically assess: Does the report's 3-layer defense scheme (<300ms latency) actually address these attacks, or is it aspirational?
+
+5. Save output to: .sisyphus/critical-research/outputs/security-attack-survey.md
+
+MUST NOT DO:
+- Do NOT construct actual attack code
+- Do NOT assume the report's defense claims are validated
+- Do NOT write generic "security is important" — focus on technical specifics
+
+CONTEXT:
+- This is Task 4 of Wave 1
+- report.md sections 3.4.6 describe AgentMem's defense scheme
+- arXiv paper numbers may vary — search for the actual titles
+<!-- OMO_INTERNAL_INITIATOR -->
