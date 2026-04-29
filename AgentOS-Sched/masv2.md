@@ -1,4 +1,4 @@
-# MAS方案（Multi-Agent System 技术方案书）
+# MAS（Multi-Agent System）
 
 ---
 
