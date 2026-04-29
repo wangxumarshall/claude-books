@@ -1,37 +1,38 @@
-# Findings
+# Findings: MAS方案研究发现
 
-## 素材梳理
+## 源文档概览
 
-### 已有文档矩阵
-| 文件 | 定位 | 核心贡献 |
-|:---|:---|:---|
-| final.md | v1精简版 | 五大刚需、四大困境、技术原语全景 |
-| insight_v1.md | 骨架版 | 五维特征模型、A-E 场景映射 |
-| insight_v2.md | 修正版 | 引入产业实践(LangGraph/CrewAI)，重新定位 AgentOS |
-| insight_v3.md | 学术论文版 | 正式论文格式，引用 60+ 来源 |
-| finalv2_part1.md | 深化版 | 五维判定标准、协议碎片化分析、技术矩阵 |
-| Multi-Agent_Research_Report | 18篇论文报告 | 每篇论文六维度分析框架 |
-| AgentHub | 架构设想 | 六层架构、AgentUnit、TaskEnvelope |
-| AgentPool | 工程研究 | 多协议编排、MessageNode、YAML-first |
+### finalv4.md 核心结论
+1. **MAS非万能**：控制Token预算实验证明SAS在顺序推理碾压MAS（性能下降39-70%）
+2. **五大刚需条件**：并行、隔离、对抗、容错、组织协作
+3. **79%故障源于系统协调**（MAST数据），协调开销占40-60%
+4. **四大挑战**：协议碎片化、执行语义缺失、语义意图歧义、副作用失控
+5. **六层架构**：L1语义状态→L2调度运行时→L3事务引擎→L4编排共识→L5协议网关→L7应用层
+6. **核心原语**：AgentUnit、TaskEnvelope、Capability Graph
 
-### 最新前沿补充
-1. A2A v1.0 已于 2026 初正式发布，Linux Foundation 托管，150+ 组织采用
-2. MCP + A2A 已形成工业界共识的双层协议栈（垂直+水平）
-3. MAST 分类法：三大根类、14 种失败模式，协调开销占执行时间 40-60%
-4. 并行任务 MAS 提升可达 80%，但顺序推理任务 MAS 性能下降 39-70%
+### Multi-Agent_Research_Report_2025_2026.md 核心论文
+| 论文 | 核心贡献 | 关键数据 |
+|---|---|---|
+| SAL [arXiv:2604.22136] | 推理-执行解耦 | 拦截93%不安全意图，延迟仅+12.4ms |
+| SagaLLM [arXiv:2503.11951] | Saga补偿事务 | 碾压所有基线，无损断点续传 |
+| AgentGit [arXiv:2511.00628] | 状态版本控制 | 冗余计算显著下降 |
+| SCF [arXiv:2604.16339] | 语义共识 | 唯一100%工作流完成率，检出65.2%冲突 |
+| AIOS [arXiv:2403.16971] | Agent OS内核 | 执行速度2.1x，API冲突降至0 |
+| UFO^3 [arXiv:2511.11332] | 跨端协作 | 子任务83.3%，端到端70.9% |
+| CASCADE [arXiv:2604.03091] | 级联惰性推理 | LLM调用削减95% |
+| ACE-ROUTER [arXiv:2601.08276] | 历史感知路由 | 超越所有基线 |
+| MAST [arXiv:2503.13657] | 失败分析 | 1600+失败轨迹分类 |
+| arXiv:2604.02460 | SAS vs MAS | SAS在等Token预算下碾压MAS |
+| CodeRL+ [arXiv:2510.18471] | 执行语义对齐 | Pass@1 +4.6%，高难+15.5% |
+| AgentPool | 多协议编排 | 跨协议统一抽象 |
+| LangGraph | 有状态图流转 | 工业级容错 |
 
-### 关键技术方案汇总（18+项）
-- SAL: 推理执行解耦，93% 拦截率
-- SagaLLM: Saga 事务模式，补偿事务链
-- AgentGit: 状态版本控制 Commit/Revert/Branch
-- SCF: 语义共识框架，意图图谱冲突检测
-- AIOS: 内核调度器，2.1x 加速
-- UFO2/UFO3: 桌面/跨端 AgentOS
-- MCP+A2A: 双层协议标准
-- ACE-ROUTER: 万级工具动态路由
-- CASCADE: 级联惰性推理，95% Token 节省
-- SolAgent: 双环循环炼金
-- AGNT2: Agent 原生 L2 基础设施
-- CodeRL+: 执行语义对齐强化学习
-- AgentPool MessageNode: 异构 Agent 统一抽象
-- AgentHub 六层架构: 生产级框架设想
+## 关键定量数据
+- 企业MAS部署失败率：41%-86.7%（SCF论文）
+- 79%失败源于系统协调而非模型智力（MAST）
+- 协调开销占执行时间40-60%
+- SAS在等Token预算下MAS性能下降39-70%
+- SAL拦截93%不安全意图
+- SCF唯一100%工作流完成率
+- CASCADE LLM调用削减95%
+- AIOS调度提速2.1x

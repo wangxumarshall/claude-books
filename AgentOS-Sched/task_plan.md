@@ -1,39 +1,35 @@
-# Task Plan: Multi-Agent 子系统深度研究 → finalv4.md
+# Task Plan: 撰写《MAS方案》
 
 ## Goal
-基于 final.md 为基础，结合目录下所有已有研究材料（insight_v1-v3, finalv2_part1, Multi-Agent_Research_Report, AgentPool, AgentHub），以及学术界和产业界前沿，产出 finalv4.md，一份面向 AgentOS 的 Multi-Agent 子系统深度研究报告。
+基于 finalv4.md 和 Multi-Agent_Research_Report_2025_2026.md 两份源文档，从九大维度撰写一份逻辑严密、严丝合缝的《MAS方案》。
 
 ## Phases
 
-### Phase 1: 素材全量阅读与理解 [complete]
-- 阅读 final.md, finalv2_part1.md, insight_v1-v3.md
-- 阅读 Multi-Agent_Research_Report_2025_2026.md
-- 阅读 AgentSched/agenthub_nextgen_framework.md
-- 阅读 AgentSched/agentpool-deep-research.md
+### Phase 1: 研究材料深度分析 [complete]
+- 阅读 finalv4.md（520行）
+- 阅读 Multi-Agent_Research_Report_2025_2026.md（560行）
+- 提取关键发现到 findings.md
 
-### Phase 2: 前沿技术检索与补充 [complete]
-- 检索 A2A/MCP 协议最新状态
-- 检索 ACP 协议最新状态
-- 检索 AG-UI 协议最新状态
-- 检索 MAST 失败分析最新进展
-- 检索 AgentOS 架构设计最新研究
+### Phase 2: 结构设计与大纲 [complete]
+- 设计九大维度的逻辑流与章节结构
+- 确保各维度之间的论证链条连贯
 
-### Phase 3: 撰写 finalv4.md [in_progress]
-- 结构设计：10 章体系
-- 第1章：执行摘要
-- 第2章：Multi-Agent 必要性的边界判定
-- 第3章：业务场景分类与特征空间映射
-- 第4章：当前面临的深水区挑战
-- 第5章：前沿技术方案深度对比矩阵
-- 第6章：借鉴价值
-- 第7章：下一代 AgentOS Multi-Agent 子系统架构设计
-- 第8章：关键技术与实现路径
-- 第9章：预期效果与评估框架
-- 第10章：结论与未来展望
+### Phase 3: 撰写《MAS方案》[in_progress]
+- 第一章：MAS 必要性
+- 第二章：业务场景
+- 第三章：场景特征建模
+- 第四章：问题挑战
+- 第五章：现有方案
+- 第六章：MAS 架构设计
+- 第七章：核心组件设计
+- 第八章：关键技术
+- 第九章：预期效果
 
-### Phase 4: 质量审查与完善 [pending]
-- 逻辑严密性审查
-- 科学事实准确性验证
-- 引用完整性检查
+### Phase 4: 审校与完善 [pending]
+- 逻辑自洽性审查
+- 事实准确性校验
+- 引文与数据一致性
 
-## Status: Phase 3 in_progress
+## Decisions
+- 输出为单一 Markdown 文件，作为 artifact
+- 所有数据与结论必须可追溯至源文档中的论文
