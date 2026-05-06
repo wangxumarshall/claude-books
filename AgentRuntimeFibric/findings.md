@@ -54,3 +54,13 @@
 - Added module interaction chains for normal execution, runtime recovery, high-risk approval, multi-agent branch collaboration, and Knowledge/Skill use.
 - Added module write-boundary ownership to prevent hidden coupling through shared state.
 - Verified current official/reference docs for the open-source stacking direction at a high level; refined the implementation route by separating directly embeddable open-source components, adapter backends, implementation references, hosted replacements, and industry references.
+
+## 2026-05-06 GitHub/Open-source Selection Addendum
+
+- GitHub and official docs research indicates no single open-source project should become the ARF base. The strongest implementation route is a composable core with stable ARF contracts and multiple adapters.
+- P1 influences for the first implementation slice: OpenAI Agents SDK concepts, Codex CLI as an external coding-agent adapter, Vercel Open Agents as product/workflow reference, OpenHands Runtime as sandbox/action executor reference, MCP SDK as ToolGateway protocol, Docker/gVisor as the local runtime backend.
+- P2 adapter candidates after MVP: E2B, Modal Sandboxes, Daytona, and gVisor hardening. These are useful for snapshot, pause/resume, workspace lifecycle, port, and remote execution capability comparison.
+- P3/P4 references: AutoGen/Microsoft Agent Framework, A2A, AgentPool, AG-UI, Warp, Firecracker, Google ADK/Gemini Enterprise, and AWS Bedrock AgentCore samples. These should not block the MVP and should enter only through mapping ADRs, protocol bridges, or UX/security references.
+- The updated ARF base choice is: self-built minimal Harness, DB outbox workflow kernel, Docker/gVisor runtime adapter, self-built sandbox-daemon, Git worktree + fs snapshot manifest, MCP gateway, internal A2AEnvelope, YAML policy/fake broker, and EventLog-first observability.
+- Added dependency admission standards: license review, schema anti-corruption, contract tests, security checks, operability, maintenance, and cost. Any project that leaks external schema into ARF public API or requires cloud credentials for the minimal recovery demo should be blocked from the MVP path.
+- Codex implementation should begin with contract tests and fake adapters, then Docker/gVisor, sandbox-daemon lease enforcement, read-only MCP gateway, Codex adapter, and only then OpenHands/E2B/Modal/Daytona/A2A/AgentPool spikes.

@@ -13,3 +13,5 @@
 - Revisited the user's full-document request and re-read all local files plus the existing consolidated architecture document.
 - Added source-material distillation, requirement traceability, reusable issue template, module interaction chains, module write-boundary ownership, open-source adoption grading, and MVP technology stack guidance to `AgentRuntimeFabric-Architecture-Implementation.md`.
 - Updated `findings.md` with the new re-synthesis notes.
+- Updated `AgentRuntimeFabric-Architecture-Implementation.md` again with a GitHub/open-source selection matrix, ARF base-stack conclusion, dependency admission standards, and revised Codex implementation tasks covering OpenAI Agents SDK, Codex, Vercel Open Agents, OpenHands, E2B, Modal, Daytona, AutoGen, AgentPool, A2A, MCP, AG-UI, Warp, Google/AWS references, Firecracker, and gVisor.
+- Updated `findings.md` with the open-source selection conclusions and MVP dependency guardrails.
