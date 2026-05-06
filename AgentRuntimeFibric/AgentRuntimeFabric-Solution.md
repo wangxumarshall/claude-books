@@ -4,7 +4,7 @@
 
 AgentRuntimeFabric 是面向复杂 Multi Agent 任务的执行基础设施。它不是把 Agent 简单放进一个 sandbox，也不是给模型一个 remote shell，而是把 Agent 执行问题拆成可治理的分布式系统问题：控制面负责规划和决策，执行面负责隔离计算，状态面负责 workspace、snapshot、event 和 artifact 的持久化，策略面负责权限、审批和网络出口，可观测面负责追踪、回放和故障复盘。
 
-还架构的核心判断是：长时 Multi Agent 任务的成功率不只取决于模型能力，还取决于 runtime 是否可恢复、workspace 是否完整、状态是否可分支、安全策略是否可声明、执行过程是否可回放。OpenAI 的 sandbox agent 把 harness/control plane 与 sandbox compute plane 明确拆分，Codex 把 sandbox 边界与 approval policy 区分开来；Anthropic 强调工具由客户端或服务端执行、应用需要控制 agentic loop；E2B、Modal、Firecracker 和 OpenHands 则分别提供了持久化 sandbox、snapshot、microVM 隔离、agent server/runtime 拆分等工程参考。[^openai-sandbox-agents][^openai-codex-sandbox][^anthropic-tool-use][^e2b-persistence][^modal-sandbox-snapshots][^firecracker-snapshot][^openhands-runtime]
+该架构的核心判断是：长时 Multi Agent 任务的成功率不只取决于模型能力，还取决于 runtime 是否可恢复、workspace 是否完整、状态是否可分支、安全策略是否可声明、执行过程是否可回放。OpenAI 的 sandbox agent 把 harness/control plane 与 sandbox compute plane 明确拆分，Codex 把 sandbox 边界与 approval policy 区分开来；Anthropic 强调工具由客户端或服务端执行、应用需要控制 agentic loop；E2B、Modal、Firecracker 和 OpenHands 则分别提供了持久化 sandbox、snapshot、microVM 隔离、agent server/runtime 拆分等工程参考。[^openai-sandbox-agents][^openai-codex-sandbox][^anthropic-tool-use][^e2b-persistence][^modal-sandbox-snapshots][^firecracker-snapshot][^openhands-runtime]
 
 ## 1. 业务场景
 
