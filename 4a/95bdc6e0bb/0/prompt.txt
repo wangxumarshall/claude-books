@@ -1,13 +1,1 @@
-AgentRuntimeFabric-Architecture-Implementation.md AgentRuntimeFabric-Architecture-Implementation-v2.md 深度理解这两个文章，研究业界主流和前言方案，arf本方案的差异化优势应该不具备，需要构建出来
-
----
-
-AgentRuntimeFabric-Architecture-Implementation.md AgentRuntimeFabric-Architecture-Implementation-v2.md 深度理解这两个文章，研究业界主流和前言方案，arf本方案的差异化优势应该不具备，需要构建出来
-
----
-
-AgentRuntimeFabric-Architecture-Implementation.md AgentRuntimeFabric-Architecture-Implementation-v2.md 深度理解这两个文章，研究业界主流和前言方案，arf本方案的差异化优势应该不具备，需要构建出来
-
----
-
-我要做的是开源替代，闭源体软件已实现，但没有对应开源软件也可以。
+提交 push
