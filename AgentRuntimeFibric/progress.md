@@ -27,3 +27,21 @@
 - Updated `AgentRuntimeFabric-Architecture-Implementation.md` with an industry/open-source replacement analysis, R15-R20 requirements, EvidenceGraph/ChangeSet/RuntimeCapabilities/AdapterMapping objects and contracts, ChangeSet and adapter admission state machines, Evidence/Open-source release gates, new ADRs, and revised MVP/demo criteria.
 - Updated `AgentRuntimeFabric-Architecture-Implementation-v2.md` with the same compressed review-level positioning and requirements, keeping it aligned with the fuller implementation document.
 - Ran `git diff --check` on the edited markdown files; no whitespace errors were reported.
+## 2026-05-07 Session: ARF Architecture Design Specification
+
+- Read the active planning files and the doc-coauthoring/planning skill instructions.
+- Re-read `AgentRuntimeFabric-Architecture-Implementation.md` and inspected `AgentRuntimeFabric-Architecture-Implementation-v2.md`, `AgentRuntimeFabric-v2.md`, and `AgentRuntimeFabric-Solution.md` headings to align the new specification with the strongest existing architecture baseline.
+- Updated `task_plan.md` with Phase 8 for the formal architecture design specification requested by the user.
+- Created `AgentRuntimeFabric-Architecture-Design-Specification.md`, a 1181-line senior review oriented architecture design specification covering introduction, concept model, quality attributes, principles, use cases, key technical solutions, logical/technical/data/code/build/deployment models, and architecture governance.
+- Verified the generated document contains all requested sections and marked Phase 8 complete in `task_plan.md`.
+
+## 2026-05-07 Session: Architecture Diagram/Object/State Machine Deepening
+
+- Re-read the architecture design specification and current planning/finding files.
+- Identified the requested gaps: the design spec has a logical layer diagram and interface table, but needs explicit multi-plane overall architecture, Protocol Fabric architecture, per-plane/per-protocol diagrams, deeper object inventory/semantics/object relationships, and a complete state-machine section with goal/principles/functions.
+- Added Phase 9 to `task_plan.md`.
+- Updated `AgentRuntimeFabric-Architecture-Design-Specification.md` with core object layered inventory, semantic constraints, relationship semantics, and a complete state-machine section covering WorkflowRun, Task, ExecutionLease, RuntimeInstance, WorkspaceBranch/Merge, Approval, ChangeSet, and Adapter Admission.
+- Added overall multi-plane architecture, per-plane architecture diagrams for AgentOps/API, Control, Workflow, Governance, Execution, State, Evidence/Observability, and Semantic Context planes.
+- Added Protocol Fabric architecture, protocol inventory, and diagrams for Control API, Workflow Command/Event, Governance + Runtime, Tool/MCP, A2A, Context, Evidence, and Adapter Admission protocols.
+- Verified the document structure and markdown fences; the specification now contains 2131 lines and 34 Mermaid diagrams. `git diff --check` reported no whitespace errors.
+- Marked Phase 9 complete in `task_plan.md`.
