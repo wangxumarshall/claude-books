@@ -1164,112 +1164,120 @@ ARF 采用多平面架构。每个平面拥有清晰的数据所有权、协议�
 
 ```mermaid
 flowchart TB
-    subgraph EntryPlane[AgentOps / Entry Plane]
-      CLI[CLI]
-      Web[Web UI]
-      IDE[IDE]
-      CI[CI]
-      ReviewUI[Review / Approval UI]
+    subgraph L0[0. 外部参与者与触发源]
+      direction LR
+      Dev[Developer / Reviewer / Security Admin]
+      AgentSDK[Agent SDK / Codex-like Agent]
+      CI[CI / Git Webhook]
     end
 
-    subgraph APILayer[API Plane]
+    subgraph L1[1. AgentOps / Entry Plane: 入口、协作、投影视图]
+      direction LR
+      CLI[arf CLI]
+      Web[Web Timeline / AgentOps UI]
+      IDE[IDE Extension]
+      ReviewUI[Review / Approval / Debug UI]
+    end
+
+    subgraph L2[2. API Plane: 公共边界与请求治理]
+      direction LR
       Gateway[API Gateway]
-      Auth[AuthN / AuthZ]
-      Idem[Idempotency]
-      Rate[Rate Limit]
+      Auth[AuthN / AuthZ + Tenant]
+      Guard[Idempotency / API Version / Rate Limit]
+      CommandAPI[Command API]
+      QueryAPI[Projection Query API]
     end
 
-    subgraph WorkflowPlane[Workflow Plane]
-      Kernel[Durable Workflow Kernel]
-      Scheduler[Scheduler]
-      Checkpoint[Checkpoint Manager]
-      Compensation[Compensation Manager]
+    subgraph L3[3. Workflow + Control + Context: durable 编排与无状态决策]
+      direction LR
+      Workflow[Workflow Plane<br/>Durable Workflow Kernel<br/>Task DAG / Checkpoint / Retry / Recovery]
+      Control[Control Plane<br/>Stateless Harness / Planner / Router / Reviewer<br/>emits intent only]
+      Context[Semantic Context Plane<br/>ContextPack / Semantic Firewall / Skill<br/>projection, not authority]
     end
 
-    subgraph ControlPlane[Control Plane]
-      Harness[Stateless Harness]
-      Planner[Planner / Router]
-      Reviewer[Reviewer Actor]
-      AgentRegistry[AgentSpec Registry]
+    subgraph L4[4. Governance + Execution: 授权闸门与受控执行]
+      direction LR
+      Governance[Governance Fabric<br/>Identity / Policy / Approval / Secret / Egress<br/>PolicyDecision + ExecutionLease]
+      Execution[Execution Plane<br/>RuntimeService / RuntimeAdapter / SandboxDaemon / ToolGateway<br/>validates lease before every action]
     end
 
-    subgraph GovernancePlane[Governance Fabric]
-      Identity[Identity Broker]
-      Policy[Policy Engine]
-      Approval[Approval Service]
-      Secret[Secret Broker]
-      Egress[Egress Gateway]
-      Audit[Audit Ledger]
+    subgraph L5[5. State + Evidence: 事实源、投影和恢复依据]
+      direction LR
+      State[State Plane<br/>Metadata DB / EventLog + Outbox<br/>Workspace / Snapshot / Artifact]
+      Evidence[Evidence / Observability Plane<br/>Evidence Projector / EvidenceGraph<br/>Replay / Timeline / Trace / Metrics]
     end
 
-    subgraph ExecutionPlane[Execution Plane]
-      RuntimeSvc[Runtime Service]
-      Adapter[RuntimeAdapter API]
-      Daemon[SandboxDaemon]
-      ToolGW[Tool / MCP Gateway]
-      RuntimePool[Container / gVisor / MicroVM / Remote Sandbox / Browser / GPU]
+    subgraph L6[6. 可替换 backend 与企业基础设施]
+      direction LR
+      RuntimeBackend[Runtime backends<br/>Docker / gVisor / MicroVM / Remote Sandbox / Browser / GPU]
+      ToolBackend[MCP Servers / External Tools]
+      ModelBackend[LLM Providers]
+      GitBackend[Git Provider / Repo]
+      InfraBackend[IAM / Vault / KMS / Policy Rules / OTel / Object Store]
     end
 
-    subgraph StatePlane[State Plane]
-      Metadata[(Metadata DB)]
-      Events[(EventLog / Outbox)]
-      Workspace[(Workspace Store)]
-      Snapshot[(Snapshot Store)]
-      Artifact[(Artifact Store)]
-    end
+    Dev --> CLI
+    Dev --> Web
+    Dev --> IDE
+    Dev --> ReviewUI
+    AgentSDK --> Gateway
+    CI --> Gateway
+    CLI --> Gateway
+    Web --> Gateway
+    IDE --> Gateway
+    ReviewUI --> Gateway
 
-    subgraph EvidencePlane[Evidence / Observability Plane]
-      Projector[Evidence Projector]
-      Evidence[(EvidenceGraph)]
-      Replay[Replay Engine]
-      Timeline[Timeline]
-      Trace[Trace / Metrics / Cost]
-    end
-
-    subgraph ContextPlane[Semantic Context Plane]
-      ContextPack[ContextPack Builder]
-      Knowledge[KnowledgeMount]
-      SemanticFW[Semantic Firewall]
-      SkillReg[Skill Registry]
-    end
-
-    EntryPlane --> Gateway
     Gateway --> Auth
-    Gateway --> Idem
-    Gateway --> Kernel
-    Kernel <--> Scheduler
-    Kernel <--> Checkpoint
-    Kernel <--> Compensation
-    Kernel <--> ControlPlane
-    Kernel --> GovernancePlane
-    ControlPlane --> GovernancePlane
-    Kernel --> RuntimeSvc
-    RuntimeSvc --> Adapter
-    Adapter --> Daemon
-    Adapter --> RuntimePool
-    ControlPlane --> ToolGW
-    ToolGW --> GovernancePlane
-    ToolGW --> StatePlane
-    Daemon --> Events
-    Daemon --> Artifact
-    Kernel --> Metadata
-    Kernel --> Events
-    Kernel --> Workspace
-    Kernel --> Snapshot
-    RuntimeSvc --> Metadata
-    RuntimeSvc --> Events
-    StatePlane --> Projector
-    GovernancePlane --> Projector
-    Projector --> Evidence
-    Evidence --> Replay
-    Evidence --> Timeline
-    StatePlane --> ContextPack
-    Knowledge --> ContextPack
-    SkillReg --> ContextPack
-    SemanticFW --> ContextPack
-    ContextPack --> Harness
-    EvidencePlane --> EntryPlane
+    Auth --> Guard
+    Guard --> CommandAPI
+    Guard --> QueryAPI
+
+    CommandAPI -->|validated command| Workflow
+    QueryAPI -->|timeline / replay query| Evidence
+    Evidence -->|projection view| QueryAPI
+
+    Workflow -->|task context / checkpoint cursor| Control
+    Control -->|context refs| Context
+    Context -->|ContextPack| Control
+    Control -->|model call| ModelBackend
+    Control -->|action intent / review decision| Workflow
+
+    Workflow -->|evaluate action| Governance
+    Governance -->|PolicyDecision / Approval / ExecutionLease| Workflow
+    Workflow -->|RuntimeAction + ExecutionLease| Execution
+    Execution -->|lease validation / secret / egress request| Governance
+    Execution -->|normalized adapter calls| RuntimeBackend
+    Execution -->|policy-bound ToolCall| ToolBackend
+    Execution -->|lease-bound repo operation| GitBackend
+
+    Workflow -->|state transition / checkpoint / command event| State
+    Governance -->|policy / approval / lease / audit facts| State
+    Execution -->|ActionEvent / ToolResult / Artifact / Snapshot| State
+    State -->|event / artifact / snapshot refs| Context
+    State -->|append-only facts + manifests| Evidence
+    Evidence -->|debug restore / causal chain| ReviewUI
+
+    Governance -->|identity / secret / policy bundle / audit export| InfraBackend
+    State -->|object payload / metrics export| InfraBackend
+
+    classDef actor fill:#fff7ed,stroke:#f97316,color:#7c2d12
+    classDef entry fill:#eff6ff,stroke:#2563eb,color:#1e3a8a
+    classDef api fill:#ecfeff,stroke:#0891b2,color:#164e63
+    classDef orchestration fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95
+    classDef execution fill:#fef2f2,stroke:#dc2626,color:#7f1d1d
+    classDef state fill:#f0fdf4,stroke:#16a34a,color:#14532d
+    classDef external fill:#f8fafc,stroke:#64748b,color:#334155
+
+    class Dev,AgentSDK,CI actor
+    class CLI,Web,IDE,ReviewUI entry
+    class Gateway,Auth,Guard,CommandAPI,QueryAPI api
+    class Workflow,Control,Context orchestration
+    class Governance,Execution execution
+    class State,Evidence state
+    class RuntimeBackend,ToolBackend,ModelBackend,GitBackend,InfraBackend external
 ```
+
+图中主控制路径自上而下推进：入口只提交 command 或查询投影，Control Plane 只产生 intent，Workflow Plane 负责 durable 状态推进；任何 runtime、tool 或 repo 动作都必须先经过 Governance Fabric 生成 `PolicyDecision` 和 `ExecutionLease`。事实路径自执行、治理和 workflow 汇入 State Plane，再由 Evidence Plane 和 Semantic Context Plane 投影回 UI、replay 和模型上下文。
 
 #### 6.1.1 平面职责总表
 
