@@ -1,0 +1,1 @@
+AgentRuntimeFabric-Architecture-Design-Specification.md 理解arf架构设计，按照合理的逻辑顺序调整章节顺序。然后review整个文章，确保逻辑严密、结构合理、名称/名词/术语及其引用统一、严谨，满足最顶级的架构设计文档要求
