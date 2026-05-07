@@ -14,6 +14,7 @@ Deeply understand all files in this directory and produce an actionable AgentRun
 | 4. Draft Document | complete | Write the design document with phases, boundaries, contracts, state machines, error handling, observability, examples, and anti-examples. |
 | 5. Verification | complete | Check the document against the user's requirements and repository evidence. |
 | 6. Open-source stacking route | complete | Add guidance for building on and refactoring existing open-source projects without leaking their internal models into AgentRuntimeFabric core interfaces. |
+| 7. Differentiation Rebuild | complete | Re-read the two architecture implementation documents, research mainstream/frontier industry approaches, identify gaps where ARF currently lacks a defensible advantage, and build explicit differentiated capabilities back into both documents. |
 
 ## Deliverables
 
@@ -27,6 +28,7 @@ Deeply understand all files in this directory and produce an actionable AgentRun
 - Mark proposals as proposals when they go beyond existing text.
 - Keep requirements decomposable, constrained, verifiable, and reusable.
 - Support implementation through incremental stacking and refactoring of existing open-source projects.
+- New request on 2026-05-07: do not assume ARF already has differentiation; compare against industry mainstream/frontier systems and construct a defensible differentiation story plus implementable architecture capabilities.
 
 ## Errors Encountered
 
