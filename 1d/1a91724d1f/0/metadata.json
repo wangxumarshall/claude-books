@@ -1,0 +1,78 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "1d1a91724d1f",
+  "session_id": "019e0022-38ba-7230-96f1-0c219bdd82d9",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-07T03:19:23.682337329Z",
+  "branch": "codex/arf-open-source-differentiation",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "AgentRuntimeFibric/AgentRuntimeFabric-Architecture-Design-Specification.md",
+    "AgentRuntimeFibric/progress.md",
+    "AgentRuntimeFibric/task_plan.md"
+  ],
+  "agent": "Codex",
+  "model": "gpt-5.5",
+  "turn_id": "2dcc16293508",
+  "token_usage": {
+    "input_tokens": 638199,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 2568448,
+    "output_tokens": 45129,
+    "api_call_count": 68
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-07T03:19:23.625766137Z",
+    "agent_lines": 235,
+    "agent_removed": 0,
+    "human_added": 1896,
+    "human_modified": 21,
+    "human_removed": 0,
+    "total_committed": 2142,
+    "total_lines_changed": 2152,
+    "agent_percentage": 10.92007434944238,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 834,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "AgentOS-Memory/.gitignore": 2,
+        "AgentOS-Memory/AgentMem/AgentMem_source_insight_design.md": 832
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 1,
+      "user_lines_removed": 1,
+      "agent_lines_added": 2026,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "AgentRuntimeFibric/AgentRuntimeFabric-Architecture-Design-Specification.md": 1
+      },
+      "user_removed_per_file": {
+        "AgentRuntimeFibric/AgentRuntimeFabric-Architecture-Design-Specification.md": 1
+      }
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 958,
+      "user_lines_removed": 10,
+      "agent_lines_added": 2039,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "AgentRuntimeFibric/AgentRuntimeFabric-Architecture-Design-Specification.md": 958
+      },
+      "user_removed_per_file": {
+        "AgentRuntimeFibric/AgentRuntimeFabric-Architecture-Design-Specification.md": 10
+      }
+    }
+  ]
+}
