@@ -99,3 +99,27 @@
 - Google official docs confirm Gemini Enterprise centralized oversight across Google, third-party, ADK/Agent Engine, A2A, and Dialogflow agents. Agent Runtime provides deploy/manage/scale services plus Sessions, Memory Bank, Code Execution, Observability, Evaluation, Governance, Agent Identity, and Agent Gateway. Agent Identity uses SPIFFE-style identities and credential vault/auth manager; Agent Gateway mediates ingress/egress interactions, MCP/A2A/REST/gRPC, IAM, Model Armor, and Semantic Governance policies.
 - AWS official docs confirm AgentCore is framework/model-neutral and modular. Runtime uses dedicated microVM session isolation, supports MCP/A2A, long-running workloads up to 8 hours, stop/resume filesystem persistence, built-in identity, payloads up to 100MB, bidirectional streaming, and consumption-based pricing. Gateway converts APIs/Lambda/services into MCP-compatible tools and handles auth, composition, semantic tool selection, observability, and auditing.
 - Kimi official help confirms K2.6 Agent Swarm Beta coordinates up to 300 sub-agents, up to 4,000 tool calls per task, claims roughly 4.5x speedup over single-agent sequential execution, and uses PARL where the orchestrator is trained while specialists retain existing capabilities. Kimi Agent SDK exposes Kimi Code/Kimi CLI runtime to Go/Node/Python applications, streams responses, surfaces approvals/tool calls, and reuses CLI config/tools/skills/MCP servers.
+
+## 2026-05-08 Enterprise Agent Benchmark Review Addendum
+
+- Exact requested files were not found in the current checkout, git tracked files, local/remote branch trees, or `git log --all --name-only`: `enterprise_agent_bench_report_ch1.md`, `enterprise_agent_bench_report_ch2.md`, and `bench-research/Agent-Platform-Bench-v1.md`.
+- Closest source materials are `origin/main:AgentRuntimeFibric/bench.md` ("企业智能体评估深度研究报告") and `origin/main:AgentRuntimeFibric/clear-bench.md` ("26年企业级AI Agent平台全景架构与战略研判"). Current branch has `Agent-Platform-Research-Report.md`, which is a stronger platform-fact baseline.
+- Multi-agent review converged on the same core correction: enterprise agent evaluation should not "abandon outcomes"; outcomes remain necessary, but must be combined with trajectory, state, tool, cost, latency, reliability, security, recovery, and human handoff evidence.
+- Academic baseline:
+  - AgentBench evaluates LLMs as agents across multi-turn interactive environments.
+  - GAIA evaluates general assistant tasks requiring tools and real-world information.
+  - WebArena evaluates realistic web interaction; original GPT-4 agent baseline was far below human performance.
+  - SWE-bench evaluates repository-level issue resolution and patch validation, but should not be overgeneralized to enterprise software delivery.
+  - WorkArena, TheAgentCompany, CLASSic, CLEAR, HAL, OSWorld, and tau-bench extend evaluation toward enterprise workflow, workplace simulation, GUI/computer use, tool-user interaction, multi-dimensional cost/reliability, and reproducible infrastructure.
+- Industry baseline:
+  - OpenAI Agents SDK is a lightweight developer framework with agents, tools, handoffs, guardrails, sessions, and tracing; Codex is a coding-agent product/workflow, not a complete enterprise Agent PaaS.
+  - Claude Managed Agents is a hosted Claude harness/environment/session/events product; official docs and Anthropic engineering content support the brain/hands/session decoupling claim, but it must be marked as Anthropic-managed and beta-gated where docs require beta headers.
+  - Google ADK, Vertex/Gemini Agent Runtime, and Gemini Enterprise are different layers; reports must not collapse them into a single SDK or overclaim fully decentralized all-to-all networks unless official docs say so.
+  - AWS Bedrock AgentCore is a model/framework-neutral managed runtime and governance platform; it is not itself an agent framework.
+  - Kimi K2.6 Agent Swarm is a Beta product/model-level fan-out capability; official help supports up to 300 sub-agents, 4,000+ tool calls per task, and 4.5x speedup claims, but this is not evidence of enterprise IAM, policy, audit, or runtime governance.
+- Main factual/quality fixes required for merged report:
+  - Remove unrelated Google Patent reference about a non-agent medical patent.
+  - Replace promotional language ("权威", "唯一正规解法", "坚不可摧", "降维打击", "不可动摇共识") with evidence-scoped claims.
+  - Downgrade unsupported implementation details such as OpenAI "binary memory snapshot", exact managed-agent pricing, Kimi K2.5 internals, and "SWE-bench 100% exploitable".
+  - Mark source confidence tiers: official docs/blogs, peer-reviewed/openreview/arXiv papers, product help pages, media/community material, and inference.
+  - Separate evaluation object layers: model, agent scaffold, runtime/sandbox, tool gateway/protocol, enterprise platform, and full business workflow.
