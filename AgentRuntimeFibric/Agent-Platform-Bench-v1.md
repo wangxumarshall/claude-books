@@ -140,4 +140,5 @@ CLASSic-Bench（ICLR 2025）是一项专注于企业关键任务工作流中稳�
 38. The Integration Layer. Real data, real frameworks, and the… | by Markes | Mar, 2026 | Medium, https://medium.com/@markes76/the-integration-layer-a-practitioners-playbook-for-enterprise-ai-that-actually-ship-c7d69d1082c3
 39. AI Agent Evaluation: Frameworks, Strategies, and Best Practices | by Dave Davies - Medium, https://medium.com/online-inference/ai-agent-evaluation-frameworks-strategies-and-best-practices-9dc3cfdf989
 40. CLEAR: Error Analysis via LLM-as-a-Judge Made Easy
-41. llm-as-a-verifier.github.io
+41. [llm-as-a-verifier.github.io](https://github.com/llm-as-a-verifier/llm-as-a-verifier)
+42. https://llm-as-a-verifier.notion.site/
