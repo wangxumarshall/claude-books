@@ -1,1 +1,1 @@
-结合学术界/产业界的企业级agent系统评估研究（可参考AgentRuntimeFibric/bench-research/Agent-Platform-Bench-v1.md中的参考论文），对enterprise_agent_bench_report_ch1.md和enterprise_agent_bench_report_ch2.md进行review，修正全部错误的地方，然后对他的整体逻辑进行梳理，要求结构清晰、逻辑严密、主次分明，然后合并成一篇研究报告。需要调用多agent进行研究，避免上下文爆炸
+提交 push，解决keyring认证失败问题
