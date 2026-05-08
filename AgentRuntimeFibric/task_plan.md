@@ -17,6 +17,7 @@ Deeply understand all files in this directory and produce an actionable AgentRun
 | 7. Differentiation Rebuild | complete | Re-read the two architecture implementation documents, research mainstream/frontier industry approaches, identify gaps where ARF currently lacks a defensible advantage, and build explicit differentiated capabilities back into both documents. |
 | 8. Architecture Design Specification | complete | Based on `AgentRuntimeFabric-Architecture-Implementation.md`, produce a formal ARF architecture design specification organized for senior architecture review. |
 | 9. Architecture Diagrams/Object/State Machine Deepening | complete | Deepen the architecture design specification with plane/protocol diagrams, stronger core object semantics and relationships, and complete state machine intent/principles/functions. |
+| 10. Agent Platform Research Report | complete | Research OpenAI Agents SDK + Codex, Claude managed/agent surfaces, Google Gemini Enterprise/ADK, AWS Bedrock AgentCore, and Kimi Swarm across architecture, developer experience, production readiness, limitations, and future direction. |
 
 ## Deliverables
 
@@ -33,6 +34,7 @@ Deeply understand all files in this directory and produce an actionable AgentRun
 - New request on 2026-05-07: do not assume ARF already has differentiation; compare against industry mainstream/frontier systems and construct a defensible differentiation story plus implementable architecture capabilities.
 - New request on 2026-05-07: create a Silicon Valley top-tier architecture design specification with introduction, concept model, architecture/quality goals, architecture principles, system use case model, key technical solutions, and logical/technical/data/code/build/deployment design models.
 - New request on 2026-05-07: deepen the architecture design specification with overall plane/protocol architecture diagrams, per-plane/per-protocol diagrams, core object inventory/semantics/relationships, and each state machine's goal, principles, and functions.
+- New request on 2026-05-07: output a systematic research report comparing OpenAI Agents SDK + Codex, Claude Managed Agents, Google Gemini Enterprise Agent Platform, AWS Bedrock AgentCore, and Kimi Swarm from architecture, implementation, developer path, orchestration, hands/tooling, memory/state, governance, cost/performance, ecosystem, fit/limits, and future evolution.
 
 ## Errors Encountered
 

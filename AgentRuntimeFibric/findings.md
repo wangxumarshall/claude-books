@@ -86,3 +86,16 @@
   4. `RuntimeAntiCorruption`: Docker/gVisor/OpenHands/E2B/Modal/Daytona/Firecracker capabilities enter only through `RuntimeAdapter` and `RuntimeCapabilities`, with contract tests and schema lint.
   5. `AgentChangeControl`: optimized first use case for code-changing agents: kill-and-recover, approval without runtime occupancy, audit timeline, and reproducible debug restore.
   6. `OpenControlPlane`: self-hostable local demo and open schemas; cloud platforms can be adapters, not mandatory control planes.
+
+## 2026-05-07 Agent Platform Research Addendum
+
+- The five requested systems are not the same product category:
+  - OpenAI Agents SDK is a developer framework; Codex is a coding agent product/CLI/cloud workflow.
+  - Claude Managed Agents is a hosted session/harness/sandbox API for long-horizon Claude work.
+  - Google Gemini Enterprise Agent Platform is an enterprise build/scale/govern/optimize platform around Agent Runtime, ADK, Agent Identity, Agent Gateway, Registry, Observability, Evaluation, Memory Bank, and Code Execution.
+  - AWS Bedrock AgentCore is a modular managed agent infrastructure platform: Runtime, Memory, Gateway, Identity, Code Interpreter, Browser, Observability, Evaluations, Policy, Registry.
+  - Kimi Agent Swarm is a product/model-level parallel agent mode plus a CLI/SDK ecosystem, centered on horizontal fan-out rather than enterprise runtime governance.
+- Anthropic Managed Agents official docs confirm a versioned Agent resource, Environment resource, Session resource, bidirectional event stream, server-side agent tools, MCP/custom tools, permission policies, session checkpoint/resume, usage accounting, and console trace. The engineering article states the design philosophy explicitly: decouple brain/harness, hands/tools/sandbox, and durable session log.
+- Google official docs confirm Gemini Enterprise centralized oversight across Google, third-party, ADK/Agent Engine, A2A, and Dialogflow agents. Agent Runtime provides deploy/manage/scale services plus Sessions, Memory Bank, Code Execution, Observability, Evaluation, Governance, Agent Identity, and Agent Gateway. Agent Identity uses SPIFFE-style identities and credential vault/auth manager; Agent Gateway mediates ingress/egress interactions, MCP/A2A/REST/gRPC, IAM, Model Armor, and Semantic Governance policies.
+- AWS official docs confirm AgentCore is framework/model-neutral and modular. Runtime uses dedicated microVM session isolation, supports MCP/A2A, long-running workloads up to 8 hours, stop/resume filesystem persistence, built-in identity, payloads up to 100MB, bidirectional streaming, and consumption-based pricing. Gateway converts APIs/Lambda/services into MCP-compatible tools and handles auth, composition, semantic tool selection, observability, and auditing.
+- Kimi official help confirms K2.6 Agent Swarm Beta coordinates up to 300 sub-agents, up to 4,000 tool calls per task, claims roughly 4.5x speedup over single-agent sequential execution, and uses PARL where the orchestrator is trained while specialists retain existing capabilities. Kimi Agent SDK exposes Kimi Code/Kimi CLI runtime to Go/Node/Python applications, streams responses, surfaces approvals/tool calls, and reuses CLI config/tools/skills/MCP servers.

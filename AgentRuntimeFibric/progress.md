@@ -45,3 +45,11 @@
 - Added Protocol Fabric architecture, protocol inventory, and diagrams for Control API, Workflow Command/Event, Governance + Runtime, Tool/MCP, A2A, Context, Evidence, and Adapter Admission protocols.
 - Verified the document structure and markdown fences; the specification now contains 2131 lines and 34 Mermaid diagrams. `git diff --check` reported no whitespace errors.
 - Marked Phase 9 complete in `task_plan.md`.
+
+## 2026-05-07 Session: Agent Platform Research Report
+
+- Restored active planning context and added Phase 10 for the requested cross-platform agent research report.
+- Decided to produce a standalone Markdown report in this repository, using official docs and public source/community material as primary evidence. Cloud-only hands-on experiments will be represented as reproducible experiment designs unless credentials/runtime access are locally available.
+- Created `Agent-Platform-Research-Report.md`, a 1461-line standalone research report covering the five requested platforms across core architecture/design philosophy, implementation details, developer path, orchestration, hands/tool execution, memory/state, security/governance, performance/cost/production readiness, ecosystem, fit/limitations, future evolution, shared unsolved problems, same-task comparison, experiment route, and implications for AgentRuntimeFabric.
+- Verified the report outline and ran `git diff --check` on the new report with no whitespace errors.
+- Marked Phase 10 complete in `task_plan.md`.
