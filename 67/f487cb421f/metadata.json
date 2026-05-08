@@ -3,7 +3,7 @@
   "checkpoint_id": "67f487cb421f",
   "strategy": "manual-commit",
   "branch": "codex/arf-open-source-differentiation",
-  "checkpoints_count": 4,
+  "checkpoints_count": 5,
   "files_touched": [
     "AgentRuntimeFibric/Enterprise-Agent-Benchmark-Research-Report.md",
     "AgentRuntimeFibric/findings.md",
@@ -34,13 +34,19 @@
       "transcript": "/67/f487cb421f/3/full.jsonl",
       "content_hash": "/67/f487cb421f/3/content_hash.txt",
       "prompt": "/67/f487cb421f/3/prompt.txt"
+    },
+    {
+      "metadata": "/67/f487cb421f/4/metadata.json",
+      "transcript": "/67/f487cb421f/4/full.jsonl",
+      "content_hash": "/67/f487cb421f/4/content_hash.txt",
+      "prompt": "/67/f487cb421f/4/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 519883,
+    "input_tokens": 531999,
     "cache_creation_tokens": 0,
-    "cache_read_tokens": 2318080,
-    "output_tokens": 51485,
-    "api_call_count": 88
+    "cache_read_tokens": 2333184,
+    "output_tokens": 51879,
+    "api_call_count": 91
   }
 }
