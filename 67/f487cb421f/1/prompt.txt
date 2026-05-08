@@ -1,0 +1,1 @@
+你是研究侧 agent 1。任务：在仓库 /home/ubuntu/code/claude-books 中，围绕企业级 Agent 系统评估基准，整理学术界评估维度。优先查找并读取可能存在的 AgentRuntimeFibric/bench-research/Agent-Platform-Bench-v1.md、bench.md、clear-bench.md、Agent-Platform-Research-Report.md；如果指定文件不存在，请说明你实际读取了哪些文件。输出：1) 学术评估维度和典型论文/基准；2) 对企业级 agent bench 报告应采用的一级/二级结构建议；3) 容易出现的事实/逻辑错误清单。只做研究总结，不编辑文件。
