@@ -1,42 +1,46 @@
-# AgentRuntimeFabric Documentation Plan
+# Agent Platform 深度研究计划
 
-## Goal
+## 目标
+深入研究5大AI Agent平台，从技术架构、开发者体验、生产落地、局限性等11个维度系统性拆解，输出5篇独立研究报告 + 1篇横向对比总结。
 
-Deeply understand all files in this directory and produce an actionable AgentRuntimeFabric architecture, implementation, and requirement-realization document that can guide continued open-source development and Codex implementation.
+## 研究对象
+1. OpenAI Agents SDK + Codex
+2. Claude Managed Agents (Claude Code / Anthropic Agent Platform)
+3. Google Gemini Enterprise Agent Platform (Vertex AI Agent Builder / ADK)
+4. AWS Bedrock AgentCore
+5. Kimi Swarm (Moonshot AI)
+
+## 研究维度 (每个平台都需覆盖)
+- 0. 核心架构与设计哲学
+- 1. 实现原理和实现细节
+- 2. 开发者使用方式与上手路径
+- 3. 多Agent协调与Orchestration
+- 4. 执行环境与工具集成（Hands层）
+- 5. 记忆、状态与持久化
+- 6. 安全、治理与企业特性
+- 7. 性能、成本与生产就绪度
+- 8. 集成与生态
+- 9. 适用场景（优势）与局限性
+- 10. 演进路线与未来
 
 ## Phases
 
-| Phase | Status | Purpose |
-| --- | --- | --- |
-| 1. Inventory | complete | Identify all files, roles, and existing themes. |
-| 2. Evidence Extraction | complete | Extract concepts, requirements, modules, objects, states, protocols, and gaps from every source file. |
-| 3. Synthesis | complete | Distill a coherent architecture and implementation plan, separating validated facts from proposed structure. |
-| 4. Draft Document | complete | Write the design document with phases, boundaries, contracts, state machines, error handling, observability, examples, and anti-examples. |
-| 5. Verification | complete | Check the document against the user's requirements and repository evidence. |
-| 6. Open-source stacking route | complete | Add guidance for building on and refactoring existing open-source projects without leaking their internal models into AgentRuntimeFabric core interfaces. |
-| 7. Differentiation Rebuild | complete | Re-read the two architecture implementation documents, research mainstream/frontier industry approaches, identify gaps where ARF currently lacks a defensible advantage, and build explicit differentiated capabilities back into both documents. |
-| 8. Architecture Design Specification | complete | Based on `AgentRuntimeFabric-Architecture-Implementation.md`, produce a formal ARF architecture design specification organized for senior architecture review. |
-| 9. Architecture Diagrams/Object/State Machine Deepening | complete | Deepen the architecture design specification with plane/protocol diagrams, stronger core object semantics and relationships, and complete state machine intent/principles/functions. |
-| 10. Agent Platform Research Report | complete | Research OpenAI Agents SDK + Codex, Claude managed/agent surfaces, Google Gemini Enterprise/ADK, AWS Bedrock AgentCore, and Kimi Swarm across architecture, developer experience, production readiness, limitations, and future direction. |
+### Phase 1: 并行研究各平台 [status: in_progress]
+- [ ] 1.1 OpenAI Agents SDK + Codex 深度研究
+- [ ] 1.2 Claude Managed Agents 深度研究
+- [ ] 1.3 Google Gemini Enterprise Agent Platform 深度研究
+- [ ] 1.4 AWS Bedrock AgentCore 深度研究
+- [ ] 1.5 Kimi Swarm 深度研究
 
-## Deliverables
+### Phase 2: 横向对比与总结 [status: pending]
+- [ ] 2.1 多维度横向对比表
+- [ ] 2.2 一句话核心价值总结
+- [ ] 2.3 输出综合对比报告
 
-- New architecture/design document in the project directory.
-- Planning notes in `findings.md` and `progress.md`.
-
-## Constraints
-
-- Cover every current source file in the directory.
-- Prefer evidence from existing documents over invention.
-- Mark proposals as proposals when they go beyond existing text.
-- Keep requirements decomposable, constrained, verifiable, and reusable.
-- Support implementation through incremental stacking and refactoring of existing open-source projects.
-- New request on 2026-05-07: do not assume ARF already has differentiation; compare against industry mainstream/frontier systems and construct a defensible differentiation story plus implementable architecture capabilities.
-- New request on 2026-05-07: create a Silicon Valley top-tier architecture design specification with introduction, concept model, architecture/quality goals, architecture principles, system use case model, key technical solutions, and logical/technical/data/code/build/deployment design models.
-- New request on 2026-05-07: deepen the architecture design specification with overall plane/protocol architecture diagrams, per-plane/per-protocol diagrams, core object inventory/semantics/relationships, and each state machine's goal, principles, and functions.
-- New request on 2026-05-07: output a systematic research report comparing OpenAI Agents SDK + Codex, Claude Managed Agents, Google Gemini Enterprise Agent Platform, AWS Bedrock AgentCore, and Kimi Swarm from architecture, implementation, developer path, orchestration, hands/tooling, memory/state, governance, cost/performance, ecosystem, fit/limits, and future evolution.
-
-## Errors Encountered
-
-| Error | Attempt | Resolution |
-| --- | --- | --- |
+## 输出文件
+- `01-openai-agents-sdk-codex.md` - OpenAI研究报告
+- `02-claude-managed-agents.md` - Claude研究报告
+- `03-google-gemini-agent-platform.md` - Google研究报告
+- `04-aws-bedrock-agentcore.md` - AWS研究报告
+- `05-kimi-swarm.md` - Kimi研究报告
+- `06-agent-platform-comparison.md` - 横向对比总结
