@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "309935656027",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "AgentRuntimeFibric/bench-research/enterprise_agent_bench_research_report.md",
+    "AgentRuntimeFibric/bench-research/findings.md",
+    "AgentRuntimeFibric/bench-research/progress.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/30/9935656027/0/metadata.json",
+      "transcript": "/30/9935656027/0/full.jsonl",
+      "content_hash": "/30/9935656027/0/content_hash.txt",
+      "prompt": "/30/9935656027/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 313023,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 1937152,
+    "output_tokens": 31276,
+    "api_call_count": 53
+  }
+}
