@@ -1,0 +1,25 @@
+[book]
+title = "pi 的设计艺术：构建生产级 Coding Agent 的架构决策"
+authors = ["Alex Zhang"]
+language = "zh"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/ZhangHanDong/pi-book"
+additional-css = ["theme/custom.css"]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+
+[output.html.search]
+enable = true
+limit-results = 30
+use-hierarchical-strategy = true
+
+[output.html.fold]
+enable = true
+level = 1
