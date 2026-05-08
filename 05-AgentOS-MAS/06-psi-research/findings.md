@@ -8,6 +8,7 @@
 - `03-insight-Pi-Deep-Research.md`
 - `04-feasibility-Psi-Project-Assessment.md`
 - `05-insight-Psi-Microkernel-Strategy.md`
+- `06-insight-Psi-Intelligence-Amplifying-Scaffold.md`
 
 ## Article Notes
 
@@ -56,6 +57,15 @@
 - 战略定位：反框架中间件，竞品不是 Pi/Cline 终端产品，而是复杂自研编排代码和重型框架。
 - 建议 killer demos：Durable Backend Agent、Safe Coding Agent、Browser Automation。
 
+### `06-insight-Psi-Intelligence-Amplifying-Scaffold.md`
+
+- 进一步提出 PSI 的叙事应从 `durable execution runtime` 升级为 `intelligence-amplifying runtime for continuous agents`。
+- 区分补偿型脚手架与智能放大型脚手架：前者替弱模型规划/路由/编排，后者改善强模型的目标、状态、工具、反馈、记忆、分支和边界。
+- 提出智能放大的七个面向：理解、行动、反馈、记忆、自我修正、边界感、自我扩展。
+- 建议 PSI 保持 Core 5，但将其重新解释为智能放大模块：TaskSpec 是任务事实，ToolRegistry 是行动语义地图，EventLog 是工作记忆，SafetyGate 是清晰边界。
+- 建议新增薄接口 `ContextBuilder`，只定义上下文装配契约，不把 memory/RAG/summary 策略做进 core。
+- 给出新增功能的检查表：是否对模型可见、是否减少 hidden state、是否提升 observation、是否让失败可恢复、是否可通过 schema/event/hook/skill/extension 外置。
+
 ## Cross-Cutting Findings
 
 - PSI 的核心方向不是“另一个 agent framework”，而是“可持续执行的薄 runtime”。
@@ -66,6 +76,7 @@
 - 架构红线：任何业务工具、planner、workflow、memory、UI、dashboard、subagent 都应首先作为插件/适配器，而不是进入内核。
 - 技术判断：MVP 应以文件系统 JSONL + snapshot/checkpoint 开始，而非数据库/Temporal；等证明价值后再提供 pluggable storage。
 - 产品判断：首个用户不是终端用户，而是 agent/tool builder；首个 demo 应证明“进程死掉、等待人类、跨工具失败后仍能继续”。
+- 新增判断：PSI 的脚手架价值不在于替模型做更多决定，而在于把模型已有的规划、反思、修正和工具使用能力放进一个能长期运转的工程环境。
 
 ## External Verification
 
