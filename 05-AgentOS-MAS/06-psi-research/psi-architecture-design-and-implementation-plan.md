@@ -25,7 +25,7 @@ PSI 值得做，但只在一个很窄的定义下值得做：
 | 技术必要性 | 成立。durable execution、audit log、HITL、tool safety 是真实缺口。 |
 | 市场独特性 | 部分成立。泛化 runtime 已红海，轻量本地 durable loop 仍有空间。 |
 | 开源爆火概率 | 低。不应以替代 Pi 或追求 stars 为目标。 |
-| 内部基础设施价值 | 高。可作为 Multica 或其他 agent 产品的执行底座。 |
+| 内部基础设施价值 | 高。可作为 Clawteam 或其他 agent 产品的执行底座。 |
 | 个人/团队技术价值 | 高。能沉淀 agent runtime 的核心工程能力。 |
 
 最终建议：
