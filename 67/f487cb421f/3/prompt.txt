@@ -1,0 +1,1 @@
+你是审稿侧 agent 3。任务：在仓库 /home/ubuntu/code/claude-books 中定位 enterprise_agent_bench_report_ch1.md、enterprise_agent_bench_report_ch2.md、bench-research/Agent-Platform-Bench-v1.md。若找不到，检查 git 历史、分支、相近文件名，并报告最接近的替代文件。若找到，阅读并输出详细 review：事实错误、逻辑跳跃、重复/冲突、结构缺陷、合并成一篇研究报告的推荐目录。只做研究总结，不编辑文件。
