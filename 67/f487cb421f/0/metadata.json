@@ -1,0 +1,56 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "67f487cb421f",
+  "session_id": "019e06fc-dc40-76d0-8ca8-ab1c6ca6a958",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-08T10:34:53.414126767Z",
+  "branch": "codex/arf-open-source-differentiation",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "AgentRuntimeFibric/Enterprise-Agent-Benchmark-Research-Report.md",
+    "AgentRuntimeFibric/findings.md",
+    "AgentRuntimeFibric/progress.md",
+    "AgentRuntimeFibric/task_plan.md"
+  ],
+  "agent": "Codex",
+  "model": "gpt-5.5",
+  "turn_id": "1e36e525ea04",
+  "token_usage": {
+    "input_tokens": 342396,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 2038272,
+    "output_tokens": 39485,
+    "api_call_count": 63
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-08T10:34:53.353074396Z",
+    "agent_lines": 557,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 557,
+    "total_lines_changed": 557,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 557,
+      "agent_lines_removed": 0
+    }
+  ]
+}
