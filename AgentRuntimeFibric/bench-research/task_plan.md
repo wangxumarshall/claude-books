@@ -46,10 +46,10 @@
 ### Phase 4: 报告撰写 [status: complete]
 - 整合所有研究发现，撰写最终报告
 
-### Phase 5: CLEAR 专题改写 [status: complete]
-- 按用户新要求，将 `Agent-Platform-Bench-v1.md` 从企业 Agent benchmark 泛化综述改为 CLEAR 专题深度研究
-- 核对 CLEAR 论文 arXiv:2507.18392 与 `IBM/CLEAR` 代码仓，修正旧文档中的 CLEAR-Bench 误引
-- 输出覆盖论文方法、实验结论、代码仓 pipeline、Agentic workflow 扩展、局限风险和 AgentRuntimeFabric 集成建议
+### Phase 5: CLEAR 专题校正 [status: complete]
+- 按用户明确要求，将当前目录下 CLEAR 评估研究统一为 arXiv:2511.14136
+- 移除同名错误分析工具与代码仓相关内容
+- 输出覆盖 CLEAR 五维框架、企业任务套件、实验结果、expert validation、局限边界和 AgentRuntimeFabric 集成建议
 
 ## 最终产出
 - `enterprise_agent_bench_research_report.md` - 主报告

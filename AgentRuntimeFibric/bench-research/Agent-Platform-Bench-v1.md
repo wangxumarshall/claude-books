@@ -1,18 +1,12 @@
-# CLEAR 企业 Agent 评估框架深度研究
-
-研究对象：Sushant Mehta, **Beyond Accuracy: A Multi-Dimensional Framework for Evaluating Enterprise Agentic AI Systems**, arXiv:2511.14136
+# Sushant Mehta, **Beyond Accuracy: A Multi-Dimensional Framework for Evaluating Enterprise Agentic AI Systems**, arXiv:2511.14136
 
 ## 0. 更正说明
 
-本文中的 CLEAR 指的是 arXiv:2511.14136 提出的企业级 Agent 多维评估框架：
+本文提出企业级Agent多维评估框架，核心主张是：企业 Agent 不能只按任务完成准确率排序。真实部署还必须同时评估成本、时延、任务效能、安全合规和多次运行可靠性。论文通过系统分析 12 个主流 Agent benchmark，并对 6 类 Agent 架构在 300 个企业任务上做实验，提出 CLEAR 作为面向企业上线决策的多维评估框架。
 
 ```text
 CLEAR = Cost + Latency + Efficacy + Assurance + Reliability
 ```
-
-它不是同名的错误分析工具或代码仓。因此，本文不讨论逐样本错误聚合、KPA、工具 CLI 或 dashboard；这些内容属于另一条同名 CLEAR 工作线，不应混入本目录的企业 Agent 评估研究。
-
-arXiv:2511.14136 的核心主张是：企业 Agent 不能只按任务完成准确率排序。真实部署还必须同时评估成本、时延、任务效能、安全合规和多次运行可靠性。论文通过系统分析 12 个主流 Agent benchmark，并对 6 类 Agent 架构在 300 个企业任务上做实验，提出 CLEAR 作为面向企业上线决策的多维评估框架。
 
 ## 1. 论文定位
 
