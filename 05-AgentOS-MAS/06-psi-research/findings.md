@@ -9,6 +9,7 @@
 - `04-feasibility-Psi-Project-Assessment.md`
 - `05-insight-Psi-Microkernel-Strategy.md`
 - `06-insight-Psi-Intelligence-Amplifying-Scaffold.md`
+- `07-research-Thin-Harness-Intelligence-Amplification.md`
 
 ## Article Notes
 
@@ -65,6 +66,14 @@
 - 建议 PSI 保持 Core 5，但将其重新解释为智能放大模块：TaskSpec 是任务事实，ToolRegistry 是行动语义地图，EventLog 是工作记忆，SafetyGate 是清晰边界。
 - 建议新增薄接口 `ContextBuilder`，只定义上下文装配契约，不把 memory/RAG/summary 策略做进 core。
 - 给出新增功能的检查表：是否对模型可见、是否减少 hidden state、是否提升 observation、是否让失败可恢复、是否可通过 schema/event/hook/skill/extension 外置。
+
+### `07-research-Thin-Harness-Intelligence-Amplification.md`
+
+- 深度报告将 Anthropic/Claude Code 近期 harness 观点、Boris Cherny 访谈信号、Psi 架构和 pi-book 的极简内核思想整合到同一论证中。
+- 核心判断：`harness 越来越薄` 不等于 runtime 消失，而是补偿型控制逻辑变薄、智能放大型环境接口变强。
+- 报告区分两类 harness：补偿型控制（planner/router/DAG/隐藏 memory）与放大型环境（工具 schema、事件日志、checkpoint、sandbox、verification、context builder）。
+- 对 Psi 的建议：升级定位为 `intelligence-amplifying runtime for continuous agents`，保留 Core 5，但新增薄 `ContextBuilder` 接口，并把 verification 作为一等事件。
+- 提出下一步最小研究 demo：崩溃恢复、工具失败自修正、审批反馈学习、fork 对比、完成验证。
 
 ## Cross-Cutting Findings
 

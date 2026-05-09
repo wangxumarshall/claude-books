@@ -16,3 +16,5 @@
 - Studied current PSI materials together with the newly vendored `vendor/pi-book`.
 - Created `06-insight-Psi-Intelligence-Amplifying-Scaffold.md`, focused on shifting PSI's scaffold from compensating for model weaknesses to amplifying model intelligence.
 - Updated `findings.md` with the new article and cross-cutting synthesis.
+- Created `07-research-Thin-Harness-Intelligence-Amplification.md`, a deeper research report integrating Anthropic harness sources, Claude Code docs, Boris Cherny interview metadata, Psi, and pi-book.
+- Updated `findings.md` with the new report summary and Psi implications.
