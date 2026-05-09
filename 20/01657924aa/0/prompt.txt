@@ -1,0 +1,21 @@
+下载到vender中：https://github.com/ZhangHanDong/pi-book.git
+
+---
+
+下载到vender中：https://github.com/ZhangHanDong/pi-book.git，用vender中一样的方法
+
+---
+
+push，然后研究psi项目方案，并根据当前psi，结合pi-mono这本书的理解，来思考psi及其方案。然后思考如何“脚手架作用转变：从弥补模型不足，转向放大模型本身的智能。如何放大模型本身的智能？如何设计这种脚手架“
+
+---
+
+提交 push
+
+---
+
+模型会越来越强“脚手架作用转变：从弥补模型不足，转向放大模型本身的智能。如何放大模型本身的智能？如何设计这种脚手架“，结合claudecode创始人最新关于harness应该越来越薄的观点
+
+---
+
+深度研究并撰写一篇研究报告文章

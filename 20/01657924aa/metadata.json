@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "2001657924aa",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "05-AgentOS-MAS/06-psi-research/07-research-Thin-Harness-Intelligence-Amplification.md",
+    "05-AgentOS-MAS/06-psi-research/findings.md",
+    "05-AgentOS-MAS/06-psi-research/progress.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/20/01657924aa/0/metadata.json",
+      "transcript": "/20/01657924aa/0/full.jsonl",
+      "content_hash": "/20/01657924aa/0/content_hash.txt",
+      "prompt": "/20/01657924aa/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 452673,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 4528256,
+    "output_tokens": 42512,
+    "api_call_count": 109
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "2001657924aa",
+  "session_id": "019e0823-2f0f-7780-8c76-2a08bed1faed",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-09T01:29:29.222394283Z",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "05-AgentOS-MAS/06-psi-research/07-research-Thin-Harness-Intelligence-Amplification.md",
+    "05-AgentOS-MAS/06-psi-research/findings.md",
+    "05-AgentOS-MAS/06-psi-research/progress.md"
+  ],
+  "agent": "Codex",
+  "model": "gpt-5.5",
+  "turn_id": "eff058377e02",
+  "token_usage": {
+    "input_tokens": 452673,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 4528256,
+    "output_tokens": 42512,
+    "api_call_count": 109
+  },
+  "session_metrics": {
+    "turn_count": 5
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-09T01:29:29.163801905Z",
+    "agent_lines": 579,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 579,
+    "total_lines_changed": 579,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 579,
+      "agent_lines_removed": 0
+    }
+  ]
+}
