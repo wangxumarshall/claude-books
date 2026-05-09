@@ -8,6 +8,14 @@
 | 目标读者 | Agent runtime / agent tool builder / 内部基础设施研发者 |
 | 核心定位 | Durable Local Agent Microkernel |
 
+## 0. TODO信息
+- 控制论
+- 写程序来思考
+- 写程序来调用各种工具，并进行组合
+- plan、工具、记忆（agent自进化）、反思自改进
+- 长上下文、复杂问题
+- 约束
+
 ## 1. 结论摘要
 
 PSI 值得做，但只在一个很窄的定义下值得做：
