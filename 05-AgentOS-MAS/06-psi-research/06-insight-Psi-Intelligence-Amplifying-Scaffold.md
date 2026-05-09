@@ -6,6 +6,7 @@
 | 输入 | 当前 Psi 研究方案、`vendor/pi-book` |
 | 主题 | 如何让脚手架从弥补模型不足，转向放大模型本身的智能 |
 
+> Psi - Intelligence-amplifying runtime for continuous agents
 ## 1. 核心判断
 
 当前 Psi 的正确方向不是继续发明一个更完整的 Agent Framework，而是把自己收敛为：
