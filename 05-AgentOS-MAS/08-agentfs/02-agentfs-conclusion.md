@@ -1,20 +1,14 @@
-# Agent 场景文件系统研究：结论与方案
-
-> 日期：2026-05-13
-> 基于：`agent-oriented-filesystem-research-report.md`、`log-structured-filesystem-research.md`、`findings.md`
-> 性质：独立结论文件，不修改原有报告
+# Agent 场景文件系统研究
 
 ---
 
-## 核心结论
+## 结论
 
 **现有文件系统需要改造，但改造对象是 agent 接触文件系统的语义层（AgentFS），而非底层磁盘布局（ext4/XFS/Btrfs/ZFS）。**
 
 ---
 
-## 一、现有文件系统是否已满足需求？
-
-**不满足。** 但缺口不在"能不能存文件"，而在"能不能解释和约束 agent 的文件操作"。
+## 一、现有文件系统在哪些方面无法满足Agent诉求？缺口不在"能不能存文件"，而在"能不能解释和约束 agent 的文件操作"。
 
 ### 事实依据
 
@@ -28,7 +22,7 @@
 
 ### 推理
 
-普通文件系统能保存字节流、目录、权限位和 inode 元数据，但它不表达"哪个模型、基于什么上下文、通过哪个工具、在什么策略下、为什么写了这个文件"。Agent 场景恰好需要这些语义。
+普通文件系统能保存字节流、目录、权限位和 inode 元数据，但它不表达"**哪个模型、基于什么上下文、通过哪个工具、在什么策略下、为什么写了这个文件**"。Agent 场景恰好需要这些语义。
 
 ---
 
@@ -40,7 +34,7 @@
 
 **依据**：Linux `openat2(2)` 手册页明确记录了 `/proc` magic link 的容器逃逸风险，并提供了 `RESOLVE_BENEATH`/`RESOLVE_IN_ROOT` 约束。Linux Landlock 文档建议采用最小权限目录边界。这些机制的存在本身就证明了路径逃逸是真实威胁。
 
-**改造点**：AgentFS 必须默认是 capability-scoped filesystem——路径字符串不能直接等于权限；权限应绑定到工作区、动作类型、路径前缀、数据等级和任务目的。
+**改造点**：AgentFS 必须默认是 capability-scoped filesystem——路径字符串不能直接等于权限；权限应绑定到**工作区、动作类型、路径前缀、数据等级和任务目的**。
 
 ### 问题二：多文件修改缺少 agent 级事务
 
@@ -54,9 +48,9 @@
 
 **事实**：普通文件系统记录 owner、mode、mtime、ctime，但不能回答：哪个 agent 写了这个文件？使用了哪个模型、工具版本、系统提示？写入前看过哪些文件？
 
-**依据**：W3C PROV-DM 将 provenance 定义为关于实体、活动和参与者的信息，用于评估数据质量、可靠性和可信度。CISA/NSA/FBI 联合发布的 AI 数据安全指南建议跟踪数据 provenance、使用安全存储、签名和完整性措施。
+**依据**：W3C PROV-DM 将 provenance 定义为关于**实体、活动和参与者**的信息，用于评估数据质量、可靠性和可信度。CISA/NSA/FBI 联合发布的 AI 数据安全指南建议跟踪数据 provenance、使用安全存储、签名和完整性措施。
 
-**改造点**：每次 agent 写入应建模为 provenance graph 的一部分。文件内容、工具动作、模型调用、测试结果和人工批准都应有可关联的 ID。
+**改造点**：每次 agent 写入应建模为 provenance graph 的一部分。**文件内容、工具动作、模型调用、测试结果和人工批准**都应有可关联的 ID。
 
 ### 问题四：长轨迹难以回放和调试
 
@@ -64,7 +58,7 @@
 
 **依据**：OpenTelemetry 已把 trace 建模为 span、event、attribute 等结构。AgentFS 不需要重新发明观测模型，但需要把文件操作纳入这种 trace。
 
-**改造点**：operation log 应同时服务于审计、调试、回放和安全检测。单纯保存最终文件树不够。
+**改造点**：operation log 应同时服务于**审计、调试、回放和安全检测**。单纯保存最终文件树不够。
 
 ### 问题五：并发 agent 的冲突不是 advisory lock 能解决的
 
@@ -80,7 +74,7 @@
 
 **依据**：Btrfs 的 subvolume/snapshot 使用 COW 共享 root block，支持只读快照。OverlayFS 可组合 lower/upper/workdir 成叠加视图。这些机制已存在但 agent 工具层未统一使用。
 
-**改造点**：snapshot/branch/rollback 应作为一等操作，而非要求上层每次手写 `cp -r` 或 `git stash`。
+**改造点**：**snapshot/branch/rollback** 应作为一等操作，而非要求上层每次手写 `cp -r` 或 `git stash`。
 
 ---
 
