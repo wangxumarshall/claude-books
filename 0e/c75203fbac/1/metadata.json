@@ -1,0 +1,54 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "0ec75203fbac",
+  "session_id": "019e1f3b-6514-73b1-b925-af635c577980",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-13T03:07:29.34121195Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "05-AgentOS-MAS/08-agentfs/agent-oriented-filesystem-research-report.md",
+    "05-AgentOS-MAS/08-agentfs/findings.md",
+    "05-AgentOS-MAS/08-agentfs/progress.md",
+    "05-AgentOS-MAS/08-agentfs/task_plan.md"
+  ],
+  "agent": "Codex",
+  "model": "gpt-5.5",
+  "turn_id": "c28425a26fe4",
+  "token_usage": {
+    "input_tokens": 261155,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 1107840,
+    "output_tokens": 32657,
+    "api_call_count": 49
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-13T03:07:29.311132808Z",
+    "agent_lines": 785,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 785,
+    "total_lines_changed": 785,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 855,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "05-AgentOS-MAS/07-infinite-context/github-projects-for-infinite-context-agents.md": 257,
+        "05-AgentOS-MAS/07-infinite-context/vertical-opportunities-after-ai-coding.md": 311,
+        "05-AgentOS-MAS/08-agentfs/log-structured-filesystem-research.md": 287
+      }
+    }
+  ]
+}
