@@ -1,5 +1,5 @@
-# 《Psi - Minimal Agent Runtime》架构设计文档（正式版）
-
+# 《Psi - Minimal Agent Runtime》架构设计文档
+> Intelligence-amplifying runtime for continuous agents
 ## 1. 文档信息
 
 | 字段   | 内容                                    |
