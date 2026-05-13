@@ -4,14 +4,12 @@
 
 ## 0. 摘要
 
-本地报告对 log-structured filesystem、F2FS、NILFS2、ZFS、Btrfs、WAFL、LSM-tree 的梳理是有价值的，但它把“Agent 场景”过早等同为“写密集、追加为主、适合 log-structured 存储”。这个推理不够严格。现有公开证据只能支持更保守也更重要的结论：
-
 1. Agent 的真实文件系统问题不是单纯吞吐量问题，而是“可执行写入 + 不可信上下文 + 长轨迹 + 外部副作用 + 多主体协作”叠加后的安全性、可回放性、可审计性、回滚性和冲突控制问题。
 2. 当前 POSIX 风格文件系统适合存储字节流、目录、权限位和 inode 元数据，但它不表达“哪个模型、基于什么上下文、通过哪个工具、在什么策略下，为什么写了这个文件”。Agent 场景恰好需要这些语义。
 3. 因此，需要改造的是 agent-facing filesystem layer：受限命名空间、能力权限、事务化工作区、版本化提交、来源证明、操作轨迹、可回放审计和冲突检测。底层可以先复用 ext4/XFS/Btrfs/ZFS/F2FS/OverlayFS/FUSE 等成熟机制。
-4. 新的 on-disk filesystem 或全面 log-structured 设计目前不是科学上必要的第一步。只有当真实 agent 工作负载测量显示现有组合方案在延迟、写放大、快照成本、审计吞吐或并发提交上无法满足目标时，才应考虑内核文件系统或专用布局。
+4. 只有当真实 agent 工作负载测量显示现有组合方案在延迟、写放大、快照成本、审计吞吐或并发提交上无法满足目标时，才应考虑内核文件系统或专用布局。
 
-本文提出的方案称为 **AgentFS**：它不是“替代 Linux 文件系统”的口号，而是一个面向 agent runtime、MCP server、IDE agent、CI agent 和多 agent 协作环境的文件系统语义层。它的最低目标是：让 agent 的文件读写变成可约束、可解释、可回滚、可审计、可合并、可重放的操作序列。
+ **AgentFS**不“替代 Linux 文件系统”，而是一个面向 agent runtime、MCP server、IDE agent、CI agent 和多 agent 协作环境的文件系统语义层。最低目标是：让 agent 的文件读写变成可约束、可解释、可回滚、可审计、可合并、可重放的操作序列。
 
 ---
 
