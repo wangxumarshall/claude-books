@@ -1,9 +1,5 @@
-# Log 方式文件系统深度研究报告
+# Log 方式文件系统
 
-> 数据来源：Wikipedia、Linux Kernel 文档 (docs.kernel.org)、GitHub (RocksDB)、LWN.net、SNIA、USENIX
-> 调研日期：2026-05-12
-
----
 
 ## 一、核心概念与原理
 
