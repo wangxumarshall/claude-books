@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.6.0",
+  "checkpoint_id": "0ec75203fbac",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "05-AgentOS-MAS/07-infinite-context/github-projects-for-infinite-context-agents.md",
+    "05-AgentOS-MAS/07-infinite-context/vertical-opportunities-after-ai-coding.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0e/c75203fbac/0/metadata.json",
+      "transcript": "/0e/c75203fbac/0/full.jsonl",
+      "content_hash": "/0e/c75203fbac/0/content_hash.txt",
+      "prompt": "/0e/c75203fbac/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 210725,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 255488,
+    "output_tokens": 23291,
+    "api_call_count": 24
+  }
+}
