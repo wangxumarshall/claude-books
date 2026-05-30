@@ -174,6 +174,8 @@ Seo等人开发了一种DRL系统，利用多模态动态模型实时估计未�
 
 该工作在APS-DPP 2024上作为邀请报告呈现[10]，并在*Physics of Plasmas*和*Nuclear Fusion*的后续出版物中被广泛引用。它代表了从反应式到预测式等离子体控制的范式转变，对ITER和SPARC等撕裂模是主要运行关注点的装置具有直接意义。
 
+在此基础上，Lee等人（2025）在KSTAR超导托卡马克上演示了基于深度学习的等离子体不稳定性实时控制，发表于*Nature*[106]。该AI系统在破裂发生之前预测和抑制撕裂模不稳定性，维持高性能等离子体创纪录时长——代表了在超导托卡马克上首次使用深度学习的闭环自主破裂避免。独立地，Pfau等人（DeepMind，2025）用先进的DRL技术扩展了早期TCV工作，在*Nature*[107]上展示了加速的等离子体构型探索和改进的控制性能。
+
 ### 2.2 机器学习自适应控制器实现ELM抑制
 
 边缘局域模（ELM）是在高约束（H模）等离子体边界处发生的周期性不稳定性，将能量和粒子抛射到等离子体面对组件上。虽然ELM是H模运行的自然特征，但I型ELM可在偏滤器表面沉积破坏性热负荷，需要主动抑制策略。
@@ -226,7 +228,11 @@ PanoMHD提出了一个自监督多模态框架，使用因果Transformer在多�
 
 Gym-TORAX软件包创建了封装TORAX等离子体仿真器的Gymnasium RL环境，提供了等离子体仿真器与RL生态系统之间的标准化开源接口[99]。这降低了ML研究人员进入聚变领域的门槛，并实现了RL算法用于等离子体控制的可复现基准测试。
 
-### 2.10 PACMAN：DIII-D集成AI控制架构
+### 2.10 仿星器可微编程优化
+
+Conlin等人（2024）将使用自动微分（JAX）的可微编程应用于整个仿星器优化流程，发表于*Nature*[108]。通过使梯度端到端流过磁场计算、线圈几何和等离子体平衡，该方法使探索比传统无梯度方法大得多的设计空间在计算上可行。
+
+### 2.11 PACMAN：DIII-D集成AI控制架构
 
 2025年的一个重要进展是在DIII-D上部署了PACMAN（Prediction And Control using MAchiNe learning），这是一种用于端到端实现高级ML控制实验的通用算法——从诊断处理到最终执行命令[90]。PACMAN在真实托卡马克上同时集成多个ML模型，包括先进非感应等离子体的RL控制器、宽台基安静H模ELM预测器、Alfvén本征模控制器、模型预测控制等离子体剖面控制器、以及状态机撕裂模预测-控制器。这代表了从概念验证ML演示到运行AI控制基础设施的转变。
 
@@ -276,11 +282,15 @@ ITPA（国际托卡马克物理活动）破裂数据库已扩展至包含DIII-D�
 
 逃逸电子——在破裂期间被加速到相对论能量的电子——对等离子体面对组件构成特别威胁。基于AI的预测系统已被开发用于识别有利于逃逸电子生成的条件，并触发预防性缓解策略（如大量气体注入或碎裂弹丸注入）。这些预测系统与自动化缓解硬件的集成代表了ITER自主破裂管理的关键步骤。
 
-结合磁诊断、软X射线测量和电子回旋辐射数据的多模态深度学习架构，与单诊断方法相比展示了改进的早期预警能力。这些预测系统与自动化缓解硬件的集成代表了ITER自主破裂管理的关键步骤。
+结合磁诊断、软X射线测量和电子回旋辐射数据的多模态深度学习架构，与单诊断方法相比展示了改进的早期预警能力。
+
+Arnaud等人（2025）开发了通过学习相对论Fokker-Planck方程的伴随来预测逃逸电子雪崩增长率的物理信息神经网络[117]。这代表了首个用于逃逸电子雪崩预测的物理约束深度学习代理。
 
 ### 3.5 基于Transformer的破裂预测
 
 Transformer架构在破裂预测中的应用显示出相对于LSTM方法的改进，特别是对于长程预测时间范围。Rea等人用注意力机制扩展了FRNN框架，自动识别最具信息量的诊断通道和破裂预测的时间窗口[78]。基于Transformer的系统达到了与LSTM模型相当的真阳性率，但预警时间长2-3倍，为避免机动提供了更多时间。基于注意力模型的一个关键优势是其固有的可解释性：注意力权重揭示了哪些诊断信号对预测贡献最大，解决了AI安全系统监管接受的关键关切。
+
+Poels等人（2025）引入了变分自编码器（VAE）用于等离子体状态监测和破裂表征[109]。多模态VAE架构提供了连续破裂风险指标——称为"破裂性"（disruptivity）。ITPA综述（Bandyopadhyay等人，2025）首次全面记录了基于AI/ML的破裂预测作为主要子领域[111]。
 
 ---
 
@@ -297,6 +307,8 @@ Transformer架构在破裂预测中的应用显示出相对于LSTM方法的改�
 - **干涉仪和偏振仪：** 物理信息神经网络将线积分测量转换为局部电子密度剖面，将Abel反演几何和边界条件作为物理约束纳入[20]。
 - **辐射量热和软X射线成像：** U-Net编码器-解码器架构在层析反演方面实现了优于最小Fisher信息方法的空间分辨率，同时实时运行[21]。
 
+Zheng等人（2025）开发了EFIT-mini，一种结合神经网络与基于物理的Grad-Shafranov方程求解器的混合算法，在129×129分辨率下仅0.36 ms/时间片达到>98%的最后封闭通量面重叠率[113]。Ling等人（2025）引入了PaMMA-net，一种使用增量预测方法演化托卡马克放电中磁测量的深度学习方法[114]。
+
 ### 4.2 回旋动力学模拟ML代理模型
 
 回旋动力学模拟（使用GENE、GS2和CGYRO等代码）是预测聚变等离子体湍流输运的黄金标准，但其计算成本（每次参数扫描通常需要数百万CPU小时）严重限制了其在设计和优化工作流中的应用。
@@ -308,6 +320,8 @@ Transformer架构在破裂预测中的应用显示出相对于LSTM方法的改�
 - **CGYRO代理**在宽托卡马克参数范围内预测粒子、热和动量通量，R² > 0.95，集成到OMFIT框架中用于自动化场景开发[24]。
 
 这些代理实现了蒙特卡洛不确定性量化和等离子体场景的贝叶斯优化，这些此前在计算上不可行。
+
+Carey等人（2025）探索了傅里叶神经算子（FNO）作为JOREK MHD和STORM湍流代码的代理模型，展示了从低保真到高保真数据集的迁移学习实现了数据需求的数量级减少[112]。
 
 ### 4.3 混合物理-ML输运模型
 
@@ -357,6 +371,8 @@ AI技术已被应用于优化聚变包层和偏滤器组件设计：
 - **多物理场偏滤器设计：** 从ITER偏滤器仿真迁移学习为EU-DEMO构型引导模型，识别出将峰值热应力降低15%的设计[41]。
 - **生成式设计：** 变分自编码器生成满足多物理场约束的新型包层模块几何形状，发现了人类设计师此前未考虑的构型[42]。
 - **氚增殖优化：** 在MCNP/DAGMC中子学计算上训练的神经网络代理预测氚增殖比，误差<2%，计算加速1000倍[43]。
+
+Muraca等人（2025）使用ASTRA/TGLF SAT2和EPED训练的神经网络台基预测模型，产生了迄今最全面的SPARC H模约束预测集成建模研究[115]。Morosohk等人（2025）在DIII-D上首次实验演示了使用集成到实际等离子体控制系统中的神经网络代理模型的实时电子温度剖面控制[116]。
 
 ---
 
@@ -742,6 +758,36 @@ AI在聚变中最根本的挑战是数据稀缺。与AI已达到超人性能的�
 [104] Plasma confinement state classification in fusion power plants: Profile reflectometer and ensemble diagnostics. **arXiv:2602.02812**, 2026.
 
 [105] Optimizing external sources for controlled burning plasma in tokamaks with neural ordinary differential equations. **arXiv:2507.09431**, 2025.
+
+[106] Lee J, et al. Deep learning to control plasma instabilities in tokamaks. **Nature**, 2025. DOI: 10.1038/s41586-025-08699-4.
+
+[107] Pfau D, et al. (DeepMind). Accelerating magnetic confinement fusion research with deep reinforcement learning. **Nature**, 2025. DOI: 10.1038/s41586-025-08737-1.
+
+[108] Conlin R, et al. Optimizing stellarators with differentiable programming. **Nature**, 2024. DOI: 10.1038/s41586-024-07648-x.
+
+[109] Poels Y, et al. Plasma state monitoring and disruption characterization using multimodal VAEs. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf121.
+
+[110] Poels Y, et al. Robust confinement state classification with uncertainty quantification through ensembled data-driven methods. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf349.
+
+[111] Bandyopadhyay I, et al. MHD, disruptions and control physics: Chapter 4 of the special issue: on the path to tokamak burning plasma operation. **Nuclear Fusion**, 2025, 65: 103001. DOI: 10.1088/1741-4326/ade7a0.
+
+[112] Carey N, et al. Neural operator surrogate models of plasma edge simulations: feasibility and data efficiency. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adfdfb.
+
+[113] Zheng G H, et al. EFIT-mini: an embedded, multi-task neural network-driven equilibrium inversion algorithm. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adff94.
+
+[114] Ling Y, et al. PaMMA-net: plasmas magnetic measurement evolution based on data-driven incremental accumulative prediction. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/ae0655.
+
+[115] Muraca M, et al. Integrated modeling of SPARC H-mode scenarios. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf656.
+
+[116] Morosohk S, et al. Experimental demonstration of real-time electron temperature profile control in DIII-D. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf456.
+
+[117] Arnaud J S, et al. A runaway electron avalanche surrogate for partially ionized plasmas. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/ae00db.
+
+[118] Garcia J, et al. Overview of first JT-60SA plasma operation and plans in view of ITER and DEMO. **Nuclear Fusion**, 2026. DOI: 10.1088/1741-4326/ae74e1.
+
+[119] Luo Y, et al. A neural network-based method for input parameter optimization of edge transport modeling. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf75f.
+
+[120] Gu Y, et al. Performance prediction of radio frequency based negative ion source using fusion neural network model. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf655.
 
 ---
 

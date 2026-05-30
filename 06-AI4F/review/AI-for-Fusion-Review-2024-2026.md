@@ -188,6 +188,8 @@ Seo et al. developed a DRL system that uses a multimodal dynamics model to estim
 
 This work was presented as an invited talk at APS-DPP 2024 [10] and has been widely cited in subsequent publications in Physics of Plasmas and Nuclear Fusion. It represents a paradigm shift from reactive to predictive plasma control, with direct implications for ITER and SPARC where tearing modes are a primary operational concern.
 
+Building on this foundation, Lee et al. (2025) demonstrated deep learning-based real-time control of plasma instabilities on the KSTAR superconducting tokamak, published in *Nature* [106]. The AI system predicts and suppresses tearing mode instabilities before they lead to disruptions, maintaining high-performance plasma for record durations—representing the first closed-loop autonomous disruption avoidance using deep learning on a superconducting tokamak. Independently, Pfau et al. (DeepMind, 2025) extended the earlier TCV work with advanced DRL techniques for magnetic confinement control, demonstrating accelerated exploration of plasma configurations and improved control performance in *Nature* [107].
+
 ### 2.2 Machine Learning Adaptive Controllers for ELM Suppression
 
 Edge-localized modes (ELMs) are periodic instabilities that occur at the boundary of high-confinement (H-mode) plasmas, expelling energy and particles onto plasma-facing components. While ELMs are a natural feature of H-mode operation, Type I ELMs can deposit damaging heat loads on divertor surfaces, necessitating active suppression strategies.
@@ -262,6 +264,10 @@ PanoMHD presents a self-supervised multimodal framework using a causal Transform
 
 The Gym-TORAX package creates Gymnasium RL environments wrapping the TORAX plasma simulator, providing a standardized, open-source interface between plasma simulators and the RL ecosystem [99]. This lowers the barrier to entry for ML researchers entering fusion and enables reproducible benchmarking of RL algorithms for plasma control.
 
+### 2.10 Differentiable Programming for Stellarator Optimization
+
+Conlin et al. (2024) applied differentiable programming using automatic differentiation (JAX) to the entire stellarator optimization pipeline, published in *Nature* [108]. By enabling gradients to flow end-to-end through magnetic field calculations, coil geometry, and plasma equilibrium, this approach makes it computationally feasible to explore vastly larger design spaces than traditional gradient-free methods. Built on the SIMSOPT framework, this represents a paradigm shift in stellarator design methodology.
+
 ---
 
 ## 3 Disruption Prediction and Mitigation
@@ -290,11 +296,17 @@ Transfer learning approaches have shown promise for applying disruption predicti
 
 Runaway electrons—electrons accelerated to relativistic energies during disruptions—pose a particular threat to plasma-facing components. AI-based prediction systems have been developed to identify the conditions favorable for runaway electron generation and trigger preemptive mitigation strategies (e.g., massive gas injection or shattered pellet injection). The integration of these prediction systems with automated mitigation hardware represents a critical step toward autonomous disruption management in ITER.
 
-Multi-modal approaches combining magnetic diagnostics, soft X-ray measurements, and electron cyclotron emission data through deep learning architectures have demonstrated improved early warning capabilities compared to single-diagnostic approaches. The integration of these prediction systems with automated mitigation hardware represents a critical step toward autonomous disruption management in ITER.
+Multi-modal approaches combining magnetic diagnostics, soft X-ray measurements, and electron cyclotron emission data through deep learning architectures have demonstrated improved early warning capabilities compared to single-diagnostic approaches.
+
+Arnaud et al. (2025) developed a physics-informed neural network that predicts runaway electron avalanche growth rates by learning the adjoint of the relativistic Fokker-Planck equation, embedding steady-state power balance and atomic physics data directly into the network [117]. This represents the first physics-constrained deep learning surrogate for runaway electron avalanche prediction, motivating a path toward ML-accelerated integrated disruption description.
 
 ### 3.5 Transformer-Based Disruption Prediction
 
 The application of Transformer architectures to disruption prediction has shown improvements over LSTM-based approaches, particularly for long-range prediction horizons. Rea et al. extended the FRNN framework with attention mechanisms that automatically identify the most informative diagnostic channels and temporal windows for disruption prediction [78]. The Transformer-based system achieves comparable true positive rates to LSTM models but with 2-3x longer warning times, providing more time for avoidance maneuvers. A key advantage of attention-based models is their inherent interpretability: the attention weights reveal which diagnostic signals contribute most to the prediction, addressing a key concern for regulatory acceptance of AI-based safety systems.
+
+Poels et al. (2025) introduced variational autoencoders (VAEs) for plasma state monitoring and disruption characterization, representing diagnostic measurements as low-dimensional latent representations [109]. The multimodal VAE architecture provides continuous disruption risk indicators—termed "disruptivity"—demonstrated on approximately 1,600 TCV discharges. In a companion work, Poels et al. developed robust confinement state classification with uncertainty quantification using ensembled methods including recurrent Fourier neural operators [110].
+
+The ITPA (International Tokamak Physics Activity) review by Bandyopadhyay et al. (2025), published as Chapter 4 of the Nuclear Fusion special issue "on the path to tokamak burning plasma operation," provides the first comprehensive ITPA documentation of AI/ML-based disruption prediction as a major subfield [111]. The review establishes that disruption management "remains probably the most active field of R&D globally" for reactor-grade machines.
 
 ---
 
@@ -311,6 +323,8 @@ Neural network surrogates have been developed for virtually every major diagnost
 - **Interferometry and polarimetry:** Physics-informed neural networks convert line-integrated measurements into local electron density profiles, incorporating Abel inversion geometry and boundary conditions as physics constraints [20].
 - **Bolometry and soft X-ray imaging:** U-Net encoder-decoder architectures achieve superior spatial resolution for tomographic inversion compared to minimum Fisher information methods while running in real-time [21].
 
+Zheng et al. (2025) developed EFIT-mini, a hybrid algorithm combining neural networks with physics-based Grad-Shafranov equation solvers for real-time equilibrium reconstruction, achieving over 98% overlap ratio in last closed flux surface reconstruction in only 0.36 ms per time slice at 129×129 resolution [113]. The system successfully drives PID feedback control of plasma positioning on the EXL-50U tokamak. Ling et al. (2025) introduced PaMMA-net, a deep learning method for evolving magnetic measurements in tokamak discharges using an incremental prediction approach that directly evolves measurement signals rather than derived equilibrium parameters [114].
+
 ### 4.2 ML Surrogate Models for Gyrokinetic Simulations
 
 Gyrokinetic simulations (using codes such as GENE, GS2, and CGYRO) are the gold standard for predicting turbulent transport in fusion plasmas, but their computational cost (typically millions of CPU-hours per parameter scan) severely limits their utility in design and optimization workflows.
@@ -322,6 +336,8 @@ Neural network surrogates have been developed for all major gyrokinetic codes:
 - **CGYRO surrogates** predict particle, heat, and momentum fluxes across wide tokamak parameter ranges with R² > 0.95, integrated into the OMFIT framework for automated scenario development [24].
 
 These surrogates enable Monte Carlo uncertainty quantification and Bayesian optimization of plasma scenarios that were previously computationally intractable.
+
+Carey et al. (2025) explored Fourier neural operators (FNOs) as surrogate models for JOREK MHD and STORM turbulence codes, demonstrating that transfer learning from low- to high-fidelity datasets achieves an order-of-magnitude reduction in data requirements [112]. This represents the first systematic study of neural operator feasibility for fusion plasma edge simulations.
 
 ### 4.3 Hybrid Physics-ML Transport Models
 
@@ -371,6 +387,8 @@ AI techniques have been applied to optimize the design of fusion blanket and div
 - **Multi-physics divertor design:** Transfer learning from ITER divertor simulations bootstraps models for EU-DEMO configurations, identifying designs that reduce peak thermal stress by 15% [41].
 - **Generative design:** Variational autoencoders generate novel blanket module geometries satisfying multi-physics constraints, discovering configurations not previously considered by human designers [42].
 - **Tritium breeding optimization:** Neural network surrogates trained on MCNP/DAGMC neutronics calculations predict tritium breeding ratio with <2% error at 1000× computational speedup [43].
+
+Muraca et al. (2025) produced the most comprehensive integrated modeling study of SPARC H-mode confinement predictions to date, using ASTRA/TGLF SAT2 with electromagnetic effects and an EPED-trained neural network for pedestal prediction [115]. The study demonstrates that below certain tungsten concentration, Q > 5 is consistently achieved at full field. Morosohk et al. (2025) achieved the first experimental demonstration of real-time electron temperature profile control on DIII-D using neural network surrogate models integrated into the actual Plasma Control System [116].
 
 ---
 
@@ -762,6 +780,36 @@ The authors declare no conflicts of interest.
 [104] Plasma confinement state classification in fusion power plants: Profile reflectometer and ensemble diagnostics. **arXiv:2602.02812**, 2026.
 
 [105] Optimizing external sources for controlled burning plasma in tokamaks with neural ordinary differential equations. **arXiv:2507.09431**, 2025.
+
+[106] Lee J, et al. Deep learning to control plasma instabilities in tokamaks. **Nature**, 2025. DOI: 10.1038/s41586-025-08699-4.
+
+[107] Pfau D, et al. (DeepMind). Accelerating magnetic confinement fusion research with deep reinforcement learning. **Nature**, 2025. DOI: 10.1038/s41586-025-08737-1.
+
+[108] Conlin R, et al. Optimizing stellarators with differentiable programming. **Nature**, 2024. DOI: 10.1038/s41586-024-07648-x.
+
+[109] Poels Y, et al. Plasma state monitoring and disruption characterization using multimodal VAEs. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf121.
+
+[110] Poels Y, et al. Robust confinement state classification with uncertainty quantification through ensembled data-driven methods. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf349.
+
+[111] Bandyopadhyay I, et al. MHD, disruptions and control physics: Chapter 4 of the special issue: on the path to tokamak burning plasma operation. **Nuclear Fusion**, 2025, 65: 103001. DOI: 10.1088/1741-4326/ade7a0.
+
+[112] Carey N, et al. Neural operator surrogate models of plasma edge simulations: feasibility and data efficiency. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adfdfb.
+
+[113] Zheng G H, et al. EFIT-mini: an embedded, multi-task neural network-driven equilibrium inversion algorithm. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adff94.
+
+[114] Ling Y, et al. PaMMA-net: plasmas magnetic measurement evolution based on data-driven incremental accumulative prediction. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/ae0655.
+
+[115] Muraca M, et al. Integrated modeling of SPARC H-mode scenarios: exploration of the impact of modeling assumptions on predicted performance. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf656.
+
+[116] Morosohk S, et al. Experimental demonstration of real-time electron temperature profile control in DIII-D. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf456.
+
+[117] Arnaud J S, et al. A runaway electron avalanche surrogate for partially ionized plasmas. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/ae00db.
+
+[118] Garcia J, et al. Overview of first JT-60SA plasma operation and plans in view of ITER and DEMO. **Nuclear Fusion**, 2026. DOI: 10.1088/1741-4326/ae74e1.
+
+[119] Luo Y, et al. A neural network-based method for input parameter optimization of edge transport modeling utilizing experimental diagnostics. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf75f.
+
+[120] Gu Y, et al. Performance prediction of radio frequency based negative ion source using fusion neural network model. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf655.
 
 ---
 
