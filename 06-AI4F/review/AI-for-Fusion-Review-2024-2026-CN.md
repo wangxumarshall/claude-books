@@ -162,7 +162,27 @@ CFS正在建造的SPARC紧凑高场托卡马克代表了AI集成到下一代聚�
 
 ### 2.8 基于Transformer的等离子体控制架构
 
-2025-2026年，Transformer架构开始应用于等离子体控制和预测。Pangioni等人在TCV上演示了基于Transformer的等离子体状态预测器[77]，注意力机制提供了内置可解释性。
+2025-2026年，Transformer架构开始应用于等离子体控制和预测。Pangioni等人在TCV上演示了基于Transformer的等离子体状态预测器[77]，注意力机制提供了内置可解释性。PanoMHD使用因果Transformer建模等离子体动力学[97]，WEST上演示了Transformer预测全局等离子体参数[98]。
+
+### 2.9 PACMAN：DIII-D集成AI控制架构
+
+PACMAN在DIII-D上部署了端到端ML控制架构[90]，同时集成RL控制器、ELM预测器、Alfvén本征模控制器等多种ML模型，标志着从概念验证到运行AI基础设施的转变。
+
+### 2.10 离线RL与零样本泛化
+
+Sonker等人展示了纯离线数据训练的旋转剖面RL控制[91]。Wu等人提出了零样本等离子体形状控制基础策略[92]。Sorokin等人实现了容忍传感器故障的RL控制[93]。
+
+### 2.11 ML用于偏滤器与排热控制
+
+Gupta等人在KSTAR钨偏滤器上演示了ML偏滤器脱离控制[94]。DivControlNN实现了0.2ms的偏滤器等离子体实时预测[95]。
+
+### 2.12 Neural ODE用于ITER燃烧等离子体
+
+NeuralPlasmaODE扩展到ITER燃烧等离子体的敏感性分析[96]，是首个专门针对ITER验证的ML模型。
+
+### 2.13 开源工具与民主化
+
+Gym-TORAX创建了标准化的RL+等离子体仿真环境[99]，降低了AI聚变研究的门槛。
 
 ---
 

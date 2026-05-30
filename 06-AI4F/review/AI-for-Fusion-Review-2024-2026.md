@@ -224,6 +224,28 @@ CFS has partnered with Google DeepMind to develop AI-based plasma control system
 
 As of 2026, SPARC construction is approximately 80% complete, with the first six of 18 HTS toroidal field coils installed. The AI control integration effort has produced simulation-based demonstrations of autonomous scenario optimization that outperform traditional model-based controllers by factors of 100-1000 in computational efficiency [72].
 
+### 2.9 PACMAN: Integrated AI Control Architecture on DIII-D
+
+A significant 2025 development was the deployment of PACMAN (Prediction And Control using MAchiNe learning) on DIII-D, a general algorithm for end-to-end implementation of advanced ML control experiments—from diagnostic processing to final actuation commands [90]. PACMAN integrates multiple ML models simultaneously on a real tokamak, including an RL controller for advanced non-inductive plasmas, a wide-pedestal quiescent H-mode ELM predictor, an Alfvén Eigenmode controller, a Model Predictive Control plasma profile controller, and a state-machine Tearing Mode predictor-controller. This represents the transition from proof-of-concept ML demonstrations to operational AI control infrastructure.
+
+### 2.10 Offline RL and Zero-Shot Generalization for Plasma Control
+
+Two 2025-2026 advances address key limitations of simulator-trained RL approaches. Sonker et al. demonstrated offline RL for plasma rotation profile control on DIII-D, training solely on historical experimental data without a simulator using probabilistic models of plasma dynamics to generate rollouts [91]. This addresses the common criticism that accurate plasma simulators are unavailable.
+
+Wu et al. proposed a framework combining Generative Adversarial Imitation Learning (GAIL) with Hilbert space representation learning to develop a zero-shot plasma shape control policy from large-scale offline datasets [92]. The foundation policy can be deployed for diverse trajectory tracking tasks without task-specific fine-tuning, representing an early move toward foundation-model-scale approaches for plasma control.
+
+### 2.11 RL Control with Diagnostic Fault Tolerance
+
+Sorokin et al. (2026) addressed a critical real-world challenge: RL plasma shape control that tolerates arbitrary sensor failures [93]. Trained in the NSFsim simulator on 120 DIII-D experimental plasma shapes using diagnostic dropout (randomly masking 30% of magnetic sensors per episode), the agent produces a single policy robust to arbitrary sensor subsets without backup controllers. This addresses the gap between simulation demonstrations and reactor-grade control where diagnostic failures are expected.
+
+### 2.12 ML for Divertor and Exhaust Control
+
+Beyond magnetic shape control, ML has been applied to the critical exhaust problem. Gupta et al. demonstrated divertor detachment control on KSTAR's tungsten divertor using ML surrogate models of 2D UEDGE simulations [94]. The DivControlNN system achieves quasi-real-time predictions (~0.2 ms) of boundary and divertor plasma behavior, trained on over 70,000 2D UEDGE simulations [95]. These advances directly address the ITER and SPARC operating scenarios where divertor heat flux management is a primary constraint.
+
+### 2.13 Neural ODEs for ITER Burning Plasma Optimization
+
+Liu and Stacey extended NeuralPlasmaODE to perform sensitivity analysis of transport and radiation mechanisms in ITER burning plasmas [96], providing physically interpretable insights needed for ITER operational planning. This represents one of the first ML models specifically validated for ITER burning plasma conditions rather than existing tokamaks.
+
 ### 2.7 IAEA FEC 2025: AI in the International Fusion Program
 
 The 30th IAEA Fusion Energy Conference (FEC 2025, Chengdu, China) featured dedicated sessions on AI and machine learning applications in fusion, reflecting the growing institutional recognition of AI's role. Key presentations included autonomous plasma operation demonstrations on multiple devices [73], physics-informed neural network approaches for real-time plasma state estimation [74], digital twin frameworks for fusion pilot plant design [75], and machine learning for stellarator coil optimization [76]. The FEC 2025 sessions established a community consensus that AI will play an essential role in DEMO-class plant design and operation.
@@ -233,6 +255,12 @@ The 30th IAEA Fusion Energy Conference (FEC 2025, Chengdu, China) featured dedic
 Beyond the LSTM and CNN architectures that dominated earlier work, 2025-2026 has seen the adoption of Transformer-based architectures for plasma control and prediction. These attention-based models capture long-range temporal dependencies in plasma signals more effectively than recurrent architectures, particularly for multi-second prediction horizons relevant to disruption avoidance and scenario planning.
 
 Pangioni et al. demonstrated a Transformer-based plasma state predictor on TCV that achieves superior performance to LSTM baselines for multi-step ahead prediction of plasma parameters [77]. The attention mechanism provides built-in interpretability by identifying which diagnostic signals and time steps are most influential for predictions, addressing a key concern for safety-critical applications.
+
+PanoMHD presents a self-supervised multimodal framework using a causal Transformer operating on tokenized representations of multimodal physical signals to model plasma dynamics [97]. Unlike prior work that predicted binary stability labels, PanoMHD predicts the full multimodal magnetic fluctuation spectrum—a much richer representation of plasma state. Transformer-based prediction of global plasma parameters has also been demonstrated on the WEST tokamak with ITER-like tungsten divertor [98].
+
+### 2.9 Open-Source Tools and Democratization
+
+The Gym-TORAX package creates Gymnasium RL environments wrapping the TORAX plasma simulator, providing a standardized, open-source interface between plasma simulators and the RL ecosystem [99]. This lowers the barrier to entry for ML researchers entering fusion and enables reproducible benchmarking of RL algorithms for plasma control.
 
 ---
 
@@ -490,6 +518,8 @@ The 2024-2026 period has seen significant progress in the application of artific
 6. **Foundation models** for plasma physics [54-56] represent an emerging research direction, with the potential to leverage multi-device data for improved generalization capability.
 7. **SPARC AI integration** [71-72] demonstrates a new paradigm where AI is embedded from the design phase of next-step devices, with the CFS-DeepMind collaboration establishing templates for AI-first fusion plant design.
 8. **Transformer-based architectures** [77-78] are advancing disruption prediction and plasma state estimation with built-in interpretability through attention mechanisms, addressing key regulatory concerns.
+9. **Integrated AI control architectures** [90] represent the transition from proof-of-concept demonstrations to operational AI infrastructure on real tokamaks.
+10. **Offline RL and zero-shot generalization** [91-93] address the simulator fidelity gap and enable foundation-model-scale approaches for plasma control.
 
 **However, significant challenges remain:**
 
@@ -700,6 +730,38 @@ The authors declare no conflicts of interest.
 [88] Multiscale assessment of tritium behavior in preliminary fusion pilot plant design using surrogate models in TMAP8. **ArXiv**, 2026.
 
 [89] A machine learning case study in nuclear fusion: Assessment of the absolute deuterium-tritium fusion power of ITER with gamma-ray spectroscopy. **Energy and AI**, 2025. DOI: 10.1016/j.egyai.2025.100526.
+
+[90] Rothstein A, Farre-Kaga H J, Butt J, et al. Enabling integrated AI control on DIII-D: A control system design with state-of-the-art experiments (PACMAN). **arXiv:2511.08818**, 2025.
+
+[91] Sonker R, Kaga H J F, Chen J, et al. Offline reinforcement learning for rotation profile control on DIII-D. **arXiv:2605.05857**, 2026.
+
+[92] Wu N, Li R, Yang Z, et al. Plasma shape control via zero-shot generative reinforcement learning. **arXiv:2510.17531**, 2025.
+
+[93] Sorokin D, Stokolesov M, Granovskiy A, et al. Dynamic plasma shape control with arbitrary sensor subsets. **arXiv:2605.15935**, 2026.
+
+[94] Gupta A, Eldon D, Bang E, et al. Detachment control in KSTAR with tungsten divertor. **arXiv:2505.07978**, 2025.
+
+[95] DivControlNN: Latent space mapping for divertor plasma detachment control. **arXiv:2502.19654**, 2025.
+
+[96] Liu Z, Stacey W M. Sensitivity analysis of transport and radiation in NeuralPlasmaODE for ITER burning plasmas. **arXiv:2507.09432**, 2025.
+
+[97] PanoMHD: Multimodal modelling of plasma dynamics towards tokamak control. **arXiv:2603.02672**, 2026.
+
+[98] Wan C, Almuhisen F, Moreau P, et al. Transformer-based prediction of global plasma parameters on WEST tokamak. **arXiv:2602.19110**, 2026.
+
+[99] Mouchamps A, Malherbe A, Bolland A, Ernst D. Gym-TORAX: Open-source software for integrating reinforcement learning with plasma control simulators. **arXiv:2510.11283**, 2025.
+
+[100] Ding S, Zhang Z, Shi G, et al. Physics-informed neural operator learning for nonlinear Grad-Shafranov equation. **arXiv:2511.19114**, 2025.
+
+[101] Ling Y, Liu Z, Du J, et al. PaMMA-Net: Plasma magnetic measurement evolution based on data-driven incremental accumulative prediction. **arXiv:2501.14003**, 2025.
+
+[102] MPEX AI Digital Twins milestone report. **arXiv:2605.12116**, 2026.
+
+[103] Subbotin G F, Sorokin D I, Nurgaliev M R, et al. First application of deep reinforcement learning for magnetic plasma control on DIII-D. **arXiv:2506.13267**, 2025.
+
+[104] Plasma confinement state classification in fusion power plants: Profile reflectometer and ensemble diagnostics. **arXiv:2602.02812**, 2026.
+
+[105] Optimizing external sources for controlled burning plasma in tokamaks with neural ordinary differential equations. **arXiv:2507.09431**, 2025.
 
 ---
 
