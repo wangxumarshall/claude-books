@@ -93,6 +93,8 @@ Digital twins & 3--4 & Framework & Multi-physics~\citep{Chen2024DT} \\
 Bayesian optimization & 5--6 & Applied & PROCESS surrogates~\citep{Griffiths2025} \\
 Materials ML potentials & 4--5 & DFT-validated & W, Fe-Cr systems~\citep{Byggmastar2024} \\
 Foundation models & 2--3 & Early research & Multi-device~\citep{Zhu2025} \\
+Transformer control & 3--4 & TCV-validated & Attention-based~\citep{Pangioni2025} \\
+SPARC AI integration & 4--5 & Design phase & DeepMind-CFS~\citep{CFS2025DeepMind} \\
 Safety certification & 2--3 & Proposal & V\&V framework~\citep{Bozhenkov2024} \\
 \bottomrule
 \end{tabular}
@@ -164,7 +166,9 @@ Year & Milestone & Ref. \\
 
 \subsection{Deep Reinforcement Learning for Tearing Mode Avoidance}
 
-The most impactful AI-for-fusion result of 2024--2026 was the demonstration by Seo et al.~\citep{Seo2024Nature} of deep reinforcement learning (DRL) for avoiding tearing mode instabilities on the DIII-D tokamak, published in \textit{Nature}. The system uses a multimodal dynamics model to estimate the future probability of tearing mode onset in real-time and proactively adjusts plasma control parameters to maintain stable operation.
+A significant AI-for-fusion result of 2024--2026 was the demonstration by Seo et al.~\citep{Seo2024Nature} of deep reinforcement learning (DRL) for avoiding tearing mode instabilities on the DIII-D tokamak, published in \textit{Nature}. The system uses a multimodal dynamics model to estimate the future probability of tearing mode onset in real-time and proactively adjusts plasma control parameters to maintain stable operation.
+
+Building on this foundation, Lee et al.~\citep{Lee2025Nature} demonstrated deep learning-based real-time control of plasma instabilities on the KSTAR superconducting tokamak, published in \textit{Nature}. Pfau et al.~\citep{Pfau2025Nature} (DeepMind) extended the earlier TCV work with advanced DRL techniques for magnetic confinement control, also in \textit{Nature}.
 
 \subsection{Machine Learning Adaptive Controllers for ELM Suppression}
 
@@ -192,7 +196,35 @@ The 30th IAEA FEC (Chengdu, 2025) featured dedicated AI/ML sessions covering aut
 
 \subsection{Transformer-Based Architectures for Plasma Control}
 
-Transformer-based architectures have been adopted for plasma control beyond LSTM/CNN. Pangioni et al.~\citep{Pangioni2025} demonstrated a Transformer-based plasma state predictor on TCV with built-in interpretability via attention mechanisms.
+Transformer-based architectures have been adopted for plasma control beyond LSTM/CNN. Pangioni et al.~\citep{Pangioni2025} demonstrated a Transformer-based plasma state predictor on TCV with built-in interpretability via attention mechanisms. PanoMHD presents a self-supervised multimodal framework using a causal Transformer~\citep{PanoMHD2026}. Transformer-based prediction of global plasma parameters has been demonstrated on WEST~\citep{Wan2026WEST}.
+
+\subsection{PACMAN: Integrated AI Control Architecture on DIII-D}
+
+PACMAN (Prediction And Control using MAchiNe learning) was deployed on DIII-D in 2025 as a general algorithm for end-to-end ML control experiments~\citep{Rothstein2025PACMAN}. It integrates multiple ML models simultaneously including an RL controller, ELM predictor, Alfv\'{e}n Eigenmode controller, and tearing mode predictor-controller.
+
+\subsection{Offline RL and Zero-Shot Generalization}
+
+Sonker et al.~\citep{Sonker2026} demonstrated offline RL for plasma rotation profile control on DIII-D, training solely on historical experimental data without a simulator. Wu et al.~\citep{Wu2025} proposed zero-shot plasma shape control using GAIL with Hilbert space representation learning.
+
+\subsection{RL Control with Diagnostic Fault Tolerance}
+
+Sorokin et al.~\citep{Sorokin2026} addressed RL plasma shape control that tolerates arbitrary sensor failures, trained using diagnostic dropout on 120 DIII-D experimental plasma shapes.
+
+\subsection{ML for Divertor and Exhaust Control}
+
+Gupta et al.~\citep{Gupta2025} demonstrated divertor detachment control on KSTAR's tungsten divertor using ML surrogate models. DivControlNN achieves quasi-real-time predictions ($\sim$0.2~ms) trained on over 70,000 2D UEDGE simulations~\citep{DivControlNN2025}.
+
+\subsection{Neural ODEs for ITER Burning Plasma}
+
+Liu and Stacey~\citep{Liu2025} extended NeuralPlasmaODE for sensitivity analysis of transport and radiation in ITER burning plasmas.
+
+\subsection{Open-Source Tools}
+
+The Gym-TORAX package creates Gymnasium RL environments wrapping the TORAX plasma simulator~\citep{Mouchamps2025}.
+
+\subsection{Differentiable Programming for Stellarator Optimization}
+
+Conlin et al.~\citep{Conlin2024Nature} applied differentiable programming using automatic differentiation (JAX) to the entire stellarator optimization pipeline, published in \textit{Nature}.
 
 \section{Disruption Prediction and Mitigation}
 
@@ -210,7 +242,11 @@ The ITPA disruption database has been expanded with contributions from DIII-D, J
 
 \subsection{Runaway Electron Prediction}
 
-Multi-modal approaches combining magnetic diagnostics, soft X-ray measurements, and electron cyclotron emission through deep learning have demonstrated improved early warning for runaway electron generation. The integration of these prediction systems with automated mitigation hardware represents a critical step toward autonomous disruption management in ITER.
+Multi-modal approaches combining magnetic diagnostics, soft X-ray measurements, and electron cyclotron emission through deep learning have demonstrated improved early warning for runaway electron generation. Arnaud et al.~\citep{Arnaud2025} developed a physics-informed neural network that predicts runaway electron avalanche growth rates by learning the adjoint of the relativistic Fokker-Planck equation.
+
+\subsection{Transformer-Based Disruption Prediction}
+
+Rea et al.~\citep{Rea2025} extended the FRNN framework with attention mechanisms for disruption prediction, achieving 2--3x longer warning times. Poels et al.~\citep{Poels2025VAE} introduced variational autoencoders for disruption characterization with continuous risk indicators. The ITPA review by Bandyopadhyay et al.~\citep{Bandyopadhyay2025} documents AI/ML-based disruption prediction as a major subfield.
 
 \section{ML-Enhanced Plasma Diagnostics and State Estimation}
 
@@ -220,7 +256,9 @@ Neural network surrogates have been developed for Thomson scattering~\citep{Parr
 
 \subsection{ML Surrogate Models for Gyrokinetic Simulations}
 
-Neural network surrogates for GENE~\citep{Mathews2024}, QuaLiKiz~\citep{Ho2024}, and CGYRO~\citep{Belli2024} enable Monte Carlo uncertainty quantification and Bayesian optimization previously computationally intractable.
+Neural network surrogates for GENE~\citep{Mathews2024}, QuaLiKiz~\citep{Ho2024}, and CGYRO~\citep{Belli2024} enable Monte Carlo uncertainty quantification and Bayesian optimization previously computationally intractable. Carey et al.~\citep{Carey2025} explored Fourier neural operators as surrogate models for JOREK MHD and STORM turbulence codes.
+
+Zheng et al.~\citep{Zheng2025} developed EFIT-mini, achieving over 98\% overlap ratio in flux surface reconstruction in only 0.36~ms. Ling et al.~\citep{Ling2025} introduced PaMMA-net for evolving magnetic measurements using incremental prediction.
 
 \subsection{Hybrid Physics-ML Transport Models}
 
@@ -247,6 +285,8 @@ Neural network surrogates of PROCESS~\citep{Sips2024} and integrated tokamak mod
 \subsection{AI-Assisted Blanket and Divertor Design}
 
 AI techniques optimize tungsten monoblock geometry~\citep{Merola2024}, multi-physics divertor design~\citep{You2024}, and generative blanket module design~\citep{Ihli2024}.
+
+Muraca et al.~\citep{Muraca2025} produced the most comprehensive integrated modeling study of SPARC H-mode confinement predictions, demonstrating Q~$>$~5 at full field. Morosohk et al.~\citep{Morosohk2025} achieved the first experimental demonstration of real-time electron temperature profile control on DIII-D using neural network surrogates.
 
 \section{AI Applications in Fusion Materials Science}
 
@@ -310,7 +350,7 @@ Research priorities: multi-agent systems~\citep{Char2024FEC}, digital twins~\cit
 
 \section{Conclusion}
 
-The 2024--2026 period has seen significant progress in AI applications to fusion research. Key achievements include DRL for plasma control~\citep{Seo2024Nature}, cross-device ML controllers~\citep{Kim2024APSDPP}, digital twin frameworks~\citep{Chen2024DT}, Bayesian optimization~\citep{Griffiths2025}, ML interatomic potentials~\citep{Byggmastar2024}, and foundation models~\citep{Zhu2025}. Significant challenges remain in explainability, generalization, rare events, and regulation. The successful deployment of AI in ITER, SPARC, and DEMO will depend on addressing these through sustained interdisciplinary research.
+The 2024--2026 period has seen significant progress in AI applications to fusion research. Key achievements include: (1)~DRL for plasma control~\citep{Seo2024Nature}; (2)~cross-device ML controllers~\citep{Kim2024APSDPP}; (3)~digital twin frameworks~\citep{Chen2024DT}; (4)~Bayesian optimization~\citep{Griffiths2025}; (5)~ML interatomic potentials~\citep{Byggmastar2024}; (6)~foundation models~\citep{Zhu2025}; (7)~SPARC AI integration~\citep{CFS2025DeepMind}; (8)~Transformer architectures~\citep{Pangioni2025,Rea2025}; (9)~integrated AI control (PACMAN)~\citep{Rothstein2025PACMAN}; and (10)~offline RL and zero-shot generalization~\citep{Sonker2026,Wu2025,Sorokin2026}. Significant challenges remain in explainability, generalization, rare events, and regulation. The successful deployment of AI in ITER, SPARC, and DEMO will depend on addressing these through sustained interdisciplinary research.
 
 \begin{thebibliography}{70}
 
@@ -746,6 +786,76 @@ Ding S, Zhang Z, Shi G, et~al.
 Subbotin G F, Sorokin D I, Nurgaliev M R, et~al.
 \newblock First application of deep RL for magnetic plasma control on DIII-D.
 \newblock \textit{arXiv:2506.13267}, 2025.
+
+\bibitem[Lee et~al.(2025)]{Lee2025Nature}
+Lee J, et~al.
+\newblock Deep learning to control plasma instabilities in tokamaks.
+\newblock \textit{Nature}, 2025. DOI: 10.1038/s41586-025-08699-4.
+
+\bibitem[Pfau et~al.(2025)]{Pfau2025Nature}
+Pfau D, et~al.
+\newblock Accelerating magnetic confinement fusion research with deep reinforcement learning.
+\newblock \textit{Nature}, 2025. DOI: 10.1038/s41586-025-08737-1.
+
+\bibitem[Conlin et~al.(2024)]{Conlin2024Nature}
+Conlin R, et~al.
+\newblock Optimizing stellarators with differentiable programming.
+\newblock \textit{Nature}, 2024. DOI: 10.1038/s41586-024-07648-x.
+
+\bibitem[Poels et~al.(2025a)]{Poels2025VAE}
+Poels Y, et~al.
+\newblock Plasma state monitoring and disruption characterization using multimodal VAEs.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adf121.
+
+\bibitem[Poels et~al.(2025b)]{Poels2025Class}
+Poels Y, et~al.
+\newblock Robust confinement state classification with uncertainty quantification.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adf349.
+
+\bibitem[Bandyopadhyay et~al.(2025)]{Bandyopadhyay2025}
+Bandyopadhyay I, et~al.
+\newblock MHD, disruptions and control physics: Chapter 4.
+\newblock \textit{Nuclear Fusion}, 65:103001, 2025. DOI: 10.1088/1741-4326/ade7a0.
+
+\bibitem[Carey et~al.(2025)]{Carey2025}
+Carey N, et~al.
+\newblock Neural operator surrogate models of plasma edge simulations.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adfdfb.
+
+\bibitem[Zheng et~al.(2025)]{Zheng2025}
+Zheng G H, et~al.
+\newblock EFIT-mini: an embedded, multi-task neural network equilibrium inversion.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adff94.
+
+\bibitem[Ling et~al.(2025)]{Ling2025}
+Ling Y, et~al.
+\newblock PaMMA-net: plasma magnetic measurement evolution.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/ae0655.
+
+\bibitem[Muraca et~al.(2025)]{Muraca2025}
+Muraca M, et~al.
+\newblock Integrated modeling of SPARC H-mode scenarios.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adf656.
+
+\bibitem[Morosohk et~al.(2025)]{Morosohk2025}
+Morosohk S, et~al.
+\newblock Experimental demonstration of real-time electron temperature profile control in DIII-D.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adf456.
+
+\bibitem[Arnaud et~al.(2025)]{Arnaud2025}
+Arnaud J S, et~al.
+\newblock A runaway electron avalanche surrogate for partially ionized plasmas.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/ae00db.
+
+\bibitem[Garcia et~al.(2026)]{Garcia2026}
+Garcia J, et~al.
+\newblock Overview of first JT-60SA plasma operation.
+\newblock \textit{Nuclear Fusion}, 2026. DOI: 10.1088/1741-4326/ae74e1.
+
+\bibitem[Luo et~al.(2025)]{Luo2025}
+Luo Y, et~al.
+\newblock Neural network for edge transport modeling on W7-X.
+\newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adf75f.
 
 \end{thebibliography}
 
