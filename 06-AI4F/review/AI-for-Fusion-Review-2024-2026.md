@@ -354,6 +354,8 @@ Molecular dynamics simulations of radiation damage in fusion structural material
 
 Byggmastar et al. developed moment tensor potentials for tungsten trained on DFT data including high-energy collision cascades and point defects, reproducing DFT-quality defect formation energies within 0.1 eV [44]. Neural network potentials for tungsten-helium systems enable simulation of helium bubble nucleation and growth over microsecond timescales [45]. Gaussian approximation potentials for the quaternary Fe-Cr-W-V system capture the essential physics of displacement cascades in RAFM steels [46].
 
+The field has matured to systematic benchmarking: Roy et al. (2026) compared six MLIP frameworks for radiation-damage simulations in fusion-relevant ceramics, providing practical guidance for potential selection [79]. ML-accelerated ab initio simulations have revealed strong anharmonic effects in tungsten self-diffusion at fusion-relevant temperatures [80]. For multi-element systems, ML potentials have been applied to study radiation damage in the MoNbTaVW refractory high-entropy alloy, demonstrating enhanced radiation tolerance [82], while small vanadium additions to W-Ta alloys have been shown to create a new paradigm for radiation-resistant fusion materials [83].
+
 ### 6.2 AI for Radiation Damage Prediction
 
 Deep learning surrogate models trained on displacement cascade simulation datasets predict cascade morphology, Frenkel pair production, and surviving defect populations with 90% accuracy at 1000× speedup over full MD simulations [47]. Machine learning-accelerated kinetic Monte Carlo simulations predict void swelling, dislocation loop growth, and helium bubble formation up to 10 dpa [48].
@@ -367,6 +369,14 @@ Bayesian optimization combined with CALPHAD thermodynamic modeling searches the 
 ### 6.4 AI for Manufacturing Quality Control
 
 Deep learning-based automated defect detection in X-ray and ultrasonic inspection images of tungsten divertor components achieves 96% detection rate for critical defects with 3× throughput improvement over manual inspection [52]. Bayesian optimization of electron beam melting parameters for tungsten and EUROFER97 reduces experimental parameter space exploration by 80% [53].
+
+### 6.5 ML for Neutronics and Nuclear Data
+
+Deep learning has been applied to nuclear cross-section prediction: the DINo (Deep Intelligence for Nuclear) algorithm introduces a novel architecture for handling complex resonance structures in fusion-relevant nuclides [84]. Physics-informed neural networks have been applied to the neutron diffusion equation with heterogeneous coefficients [85]. ML surrogate models enable Monte Carlo-based uncertainty quantification for reactor diagnostics that was previously computationally intractable [86].
+
+### 6.6 ML for Tritium Behavior Prediction
+
+ML potential-based molecular dynamics simulations have been used to study hydrogen isotope interactions with tungsten surfaces at plasma-relevant energies (0.1-100 eV), providing atomistic insight into the sticking, reflection, and abstraction mechanisms that govern tritium retention [87]. Surrogate models within the TMAP8 framework enable multiscale tritium inventory and permeation assessment in fusion pilot plant designs, allowing rapid design iteration [88]. ML has also been applied to gamma-ray spectroscopy data for absolute DT fusion power measurement in ITER [89].
 
 ---
 
@@ -668,6 +678,28 @@ The authors declare no conflicts of interest.
 [77] Pangioni S, Felici F, et al. Transformer-based plasma state prediction on TCV. **Nuclear Fusion**, 2025. (*Note: citation to be verified*)
 
 [78] Rea C, Granetz R S, et al. Transformer-enhanced disruption prediction with attention-based interpretability. **Nuclear Fusion**, 2025. (*Note: citation to be verified*)
+
+[79] Roy A, Devanathan R, Allec S I, et al. Comparison of DeePMD, MTP, GAP, ACE and MACE machine-learned potentials for radiation-damage simulations: A user perspective. **Advanced Intelligent Discovery**, 2026. DOI: 10.1002/aidi.202500196.
+
+[80] Ab initio machine-learning unveils strong anharmonicity in non-Arrhenius self-diffusion of tungsten. **Nature Communications**, 2025. DOI: 10.1038/s41467-024-55759-w.
+
+[81] A high accuracy machine-learning potential model for Mo-Re binary alloy. **Computational Materials Science**, 2025. DOI: 10.1016/j.commatsci.2025.113870.
+
+[82] Utilizing a machine-learned potential to explore enhanced radiation tolerance in the MoNbTaVW high-entropy alloy. **Journal of Nuclear Materials**, 2025. DOI: 10.1016/j.jnucmat.2025.156004.
+
+[83] Tunes M A, Parkison D, Sun B, et al. High radiation resistance in the binary W-Ta system through small V additions: A new paradigm for nuclear fusion materials. **Advanced Science**, 2025. DOI: 10.1002/advs.202417659.
+
+[84] Gesson L, Henning G, Collin J, Vanstalle M. Enhancing nuclear cross-section predictions with deep learning: the DINo algorithm. **The European Physical Journal Plus**, 2025. DOI: 10.1140/epjp/s13360-025-06562-z.
+
+[85] Physics informed neural networks for the mixed dual form of the neutron diffusion equation with heterogeneous coefficients. **Annals of Nuclear Energy**, 2025. DOI: 10.1016/j.anucene.2025.111607.
+
+[86] Sensitivity analysis and uncertainty quantification of neutron noise simulations in WWER-type reactors using machine learning-based surrogate models. **Nuclear Engineering and Design**, 2025. DOI: 10.1016/j.nucengdes.2025.113881.
+
+[87] Sticking, reflection, and abstraction behavior of hydrogen irradiated on (110) tungsten surfaces at 0.1-100 eV by molecular dynamics simulations using a machine learning potential. **Acta Materialia**, 2025. DOI: 10.1016/j.actamat.2025.121306.
+
+[88] Multiscale assessment of tritium behavior in preliminary fusion pilot plant design using surrogate models in TMAP8. **ArXiv**, 2026.
+
+[89] A machine learning case study in nuclear fusion: Assessment of the absolute deuterium-tritium fusion power of ITER with gamma-ray spectroscopy. **Energy and AI**, 2025. DOI: 10.1016/j.egyai.2025.100526.
 
 ---
 
