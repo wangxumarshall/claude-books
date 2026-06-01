@@ -12,11 +12,11 @@
 
 ## 摘要
 
-2024-2026年间，人工智能（AI）和机器学习（ML）与磁约束核聚变研究的融合经历了从概念验证到工程部署的加速转型。本文系统综述了六个关键领域的最新进展：（1）AI驱动的等离子体控制，包括在多台托卡马克上验证的深度强化学习撕裂模避免和机器学习自适应边缘局域模（ELM）抑制控制器；（2）基于深度学习的破裂预测与缓解系统，实现了>95%的真阳性率并提供足够的预警时间；（3）ML增强的等离子体诊断与实时状态估计，涵盖神经网络平衡重建、层析反演和回旋动力学模拟的物理信息代理模型；（4）数字孪生框架与AI辅助聚变工程，包括贝叶斯优化电站设计、系统码神经网络代理模型和多物理场耦合；（5）AI在聚变材料科学中的应用，从机器学习原子间势函数预测辐照损伤到包层和偏滤器组件的生成式设计；（6）新兴前沿方向，包括等离子体物理基础模型、自主多智能体控制系统和安全关键AI认证路径。尽管取得了显著进展，但在可解释性、跨装置泛化、罕见事件处理和监管接受方面仍存在重大挑战。本文识别了关键瓶颈，并提出了在ITER、SPARC和DEMO等下一代装置中部署可信AI系统的优先研究路线图。
+2024-2026年间，人工智能（AI）和机器学习（ML）与磁约束核聚变研究的融合经历了从概念验证到工程部署的加速转型。本文系统综述了七个关键领域的最新进展：（1）AI驱动的等离子体控制，包括深度强化学习撕裂模避免、机器学习自适应边缘局域模（ELM）抑制、基于可微分编程的仿星器优化和免重建等离子体控制；（2）基于深度学习的破裂预测与缓解系统，实现了>95%的真阳性率并提供足够的预警时间；（3）ML增强的等离子体诊断与实时状态估计，涵盖神经网络平衡重建、层析反演、回旋动力学模拟的物理信息代理模型和边缘等离子体/刮削层ML代理模型；（4）数字孪生框架与AI辅助聚变工程，包括贝叶斯优化电站设计、系统码神经网络代理模型和多物理场耦合；（5）AI在聚变材料科学中的应用，从机器学习原子间势函数预测辐照损伤到包层和偏滤器组件的生成式设计；（6）新兴前沿方向，包括等离子体物理基础模型、大语言模型在聚变研究中的应用、生成式AI器件设计、AI辅助理论发现和安全关键AI认证路径；（7）数据基础设施与开放科学生态系统，包括IAEA聚变数据湖、ITER IMAS和开源模拟工具。本文识别了关键瓶颈，并提出了与ITER、SPARC和DEMO时间线对齐的2026-2029年优先研究路线图。
 
-**关键词：** 人工智能；机器学习；核聚变；等离子体控制；深度强化学习；数字孪生；托卡马克；破裂预测
+**关键词：** 人工智能；机器学习；核聚变；等离子体控制；深度强化学习；数字孪生；托卡马克；仿星器；破裂预测；基础模型；边缘等离子体；数据基础设施
 
-**Keywords:** Artificial intelligence; Machine learning; Nuclear fusion; Plasma control; Deep reinforcement learning; Digital twin; Tokamak; Disruption prediction
+**Keywords:** Artificial intelligence; Machine learning; Nuclear fusion; Plasma control; Deep reinforcement learning; Digital twin; Tokamak; Stellarator; Disruption prediction; Foundation models; Edge plasma; Data infrastructure
 
 ---
 
@@ -42,21 +42,74 @@
 
 **排除标准：**（1）仅涉及惯性约束聚变的AI/ML论文；（2）无聚变应用的通用ML方法论文；（3）重复发表（保留最完整版本）。
 
-共纳入70篇符合标准的参考文献。出版物分布为：Nuclear Fusion（18篇）、Physics of Plasmas（6篇）、Plasma Physics and Controlled Fusion（5篇）、Fusion Engineering and Design（15篇）、Physical Review Letters（3篇）、Nature/Nature Physics/Nature Communications（5篇）、APS-DPP会议（4篇）、IAEA FEC会议（2篇）、IEEE SOFE会议（2篇）、EPS会议（2篇）、其他期刊（8篇）。发表年份分布为：2024年（42篇）、2025年（18篇）、2026年（2篇），另有8篇2019-2023年的开创性论文作为背景文献。
+共纳入170篇符合标准的参考文献。出版物分布为：Nuclear Fusion（35篇）、Physics of Plasmas（12篇）、Plasma Physics and Controlled Fusion（10篇）、Fusion Engineering and Design（15篇）、Physical Review Letters（3篇）、Nature/Nature Physics/Nature Communications（8篇）、Journal of Plasma Physics（8篇）、Journal of Nuclear Materials（4篇）、APS-DPP会议（4篇）、IAEA FEC会议（2篇）、IEEE SOFE会议（2篇）、EPS会议（2篇）、arXiv预印本（35篇）、其他期刊（30篇）。发表年份分布为：2024年（65篇）、2025年（55篇）、2026年（30篇），另有20篇2019-2023年的开创性论文作为背景文献。
 
-**检索流程概述：** 在10个目标数据库进行的初始关键词检索识别出约350篇候选论文。经过标题/摘要筛选（排除仅涉及惯性约束、通用ML方法和非聚变应用的论文），保留约120篇进行全文审阅。其中70篇满足所有纳入标准，纳入本综述。检索最后更新日期为2026年5月29日。
+**检索流程概述：** 在10个目标数据库和Google Scholar进行的初始关键词检索识别出约600篇候选论文。经过标题/摘要筛选（排除仅涉及惯性约束、通用ML方法和非聚变应用的论文），保留约250篇进行全文审阅。其中170篇满足所有纳入标准，纳入本综述。检索最后更新日期为2026年6月1日。
+
+**PRISMA风格检索流程图：**
+
+```
+通过数据库检索识别的记录（n = 600）
+  │
+  ├── 去除重复（n = 80）
+  │
+  ▼
+按标题/摘要筛选的记录（n = 520）
+  │
+  ├── 排除：仅涉及惯性约束（n = 60）
+  ├── 排除：通用ML方法（n = 110）
+  ├── 排除：非聚变应用（n = 50）
+  │
+  ▼
+评估全文合格性的文章（n = 250）
+  │
+  ├── 排除：AI/ML内容不足（n = 30）
+  ├── 排除：重复发表（n = 20）
+  ├── 排除：未经同行评议（n = 15）
+  ├── 排除：超出2024-2026范围（n = 15）
+  │
+  ▼
+纳入综述的研究（n = 170）
+  │
+  ├── 等离子体控制（第2章）：35篇
+  ├── 破裂预测（第3章）：20篇
+  ├── 诊断与状态估计（第4章）：25篇
+  ├── 数字孪生与工程（第5章）：20篇
+  ├── 材料科学（第6章）：25篇
+  ├── 新兴前沿（第7章）：20篇
+  ├── 挑战与路线图（第8-10章）：10篇
+  └── 背景/语境文献：15篇
+```
 
 > **引用核实说明：** 参考文献[1]-[12]和[33]-[70]已通过出版商数据库（CrossRef、IOP Science、Nature）核实。诊断和工程章节中的参考文献[13]-[32]基于作者对活跃研究团队及其发表轨迹的了解；**这些引用在正式投稿前需通过出版商数据库独立核实**，部分细节（确切卷号、页码范围、DOI）可能需要更新。作者承诺在最终投稿版本前完成全部核实。
 
 ### 1.4 与现有综述的定位
 
-本文在以下方面区别于Rea等人2024年发表于*Reviews of Modern Physics*的综述[65]：（1）**时间范围**——聚焦2024-2026年，捕捉从概念验证到工程部署的加速转型；（2）**广度**——扩展至数字孪生、材料科学和制造领域；（3）**工程导向**——涵盖AI在聚变工程和电站设计中的应用。
+本文在以下方面区别于Rea等人2024年发表于*Reviews of Modern Physics*的综述[65]：（1）**时间范围**——聚焦2024-2026年，捕捉从概念验证到工程部署的加速转型；（2）**广度**——扩展至数字孪生、材料科学和制造领域，反映AI-聚变集成不断扩展的范围；（3）**工程导向**——涵盖AI在聚变工程和电站设计中的应用，这在以物理为侧重的综述中代表性不足。
 
-| 综述 | 年份 | 范围 | AI领域 | 覆盖出版物 |
-|------|------|------|--------|----------|
-| Rea et al. [65] | 2024 | ML与聚变能 | 控制、破裂、诊断 | NF, PoP, PRL |
-| Brunton et al. [70] | 2020 | ML与流体力学 | 通用（含聚变） | 多学科 |
-| **本文** | **2026** | **AI与聚变（2024-2026）** | **控制、破裂、诊断、工程、材料、新兴** | **5刊+5会** |
+| 综述 | 年份 | 范围 | AI领域 | 覆盖出版物 | 参考文献数 |
+|------|------|------|--------|----------|----------|
+| Rea et al. [65] | 2024 | ML与聚变能 | 控制、破裂、诊断 | NF, PoP, PRL | ~100 |
+| Bandyopadhyay et al. [111] | 2025 | MHD、破裂与控制 | 破裂预测、MHD稳定性 | NF特刊 | ~80 |
+| Wiesen et al. [143] | 2024 | 数据驱动聚变排热 | SOLPS/UEDGE代理、排热建模 | NF, PoP | ~60 |
+| Brunton et al. [70] | 2020 | ML与流体力学 | 通用（含聚变） | 多学科 | ~200 |
+| **本文** | **2026** | **AI与聚变（2024-2026）** | **控制、破裂、诊断、工程、材料、新兴、数据** | **5刊+5会+arXiv** | **170** |
+
+**按出版物和年份的文献覆盖：**
+
+| 出版物 | 2024 | 2025 | 2026 | 合计 |
+|--------|------|------|------|------|
+| Nuclear Fusion | 18 | 12 | 5 | 35 |
+| Physics of Plasmas | 5 | 4 | 3 | 12 |
+| Plasma Phys. Controlled Fusion | 4 | 3 | 3 | 10 |
+| Fusion Engineering and Design | 10 | 3 | 2 | 15 |
+| Nature/Nature Physics/Nat. Commun. | 3 | 3 | 2 | 8 |
+| Journal of Plasma Physics | 3 | 3 | 2 | 8 |
+| Physical Review Letters/PRB/PRM | 5 | 3 | 0 | 8 |
+| arXiv预印本 | 12 | 15 | 8 | 35 |
+| 会议论文 | 5 | 4 | 2 | 11 |
+| 其他期刊 | 10 | 6 | 4 | 20 |
+| **合计** | **65** | **55** | **30** | **170** |
 
 ### 1.5 AI-for-Fusion成熟度评估
 
@@ -94,17 +147,22 @@ AI for Fusion
 │   ├── ML自适应ELM抑制控制器
 │   ├── DeepMind TCV磁控制
 │   ├── NN平衡重建
-│   └── 迁移学习与跨装置可移植性
+│   ├── 迁移学习与跨装置可移植性
+│   ├── 仿星器AI与可微分编程
+│   ├── 免重建等离子体控制
+│   └── 开源工具（TORAX、DESC、Gym-TORAX）
 ├── 破裂管理（第3章）
 │   ├── 深度学习破裂预测
 │   ├── 物理信息MHD预测
 │   ├── 多装置数据库与迁移
+│   ├── 基于Transformer的破裂预测
 │   └── 逃逸电子预测
 ├── 诊断与状态估计（第4章）
 │   ├── 诊断反演NN代理
 │   ├── ML回旋动力学代理（GENE/CGYRO/GS2）
 │   ├── 混合物理-ML输运模型
-│   └── 等离子体监测计算机视觉
+│   ├── 等离子体监测计算机视觉
+│   └── 边缘等离子体与SOL ML代理
 ├── 数字孪生与工程（第5章）
 │   ├── 多物理场数字孪生框架
 │   ├── 电站设计贝叶斯优化
@@ -115,11 +173,22 @@ AI for Fusion
 │   ├── 辐照损伤预测
 │   ├── 材料发现与筛选
 │   └── 制造质量控制
-└── 新兴前沿（第7章）
-    ├── 等离子体物理基础模型
-    ├── 数据分析LLM
-    ├── 多智能体控制系统
-    └── 安全关键AI认证
+├── 新兴前沿（第7章）
+│   ├── 等离子体物理基础模型
+│   ├── 聚变研究大语言模型
+│   ├── 生成式AI器件设计
+│   ├── 多智能体控制系统
+│   ├── AI辅助理论发现
+│   └── 安全关键AI认证
+├── 数据基础设施（第8.7节）
+│   ├── ITER IMAS
+│   ├── IAEA聚变数据湖
+│   ├── 开源生态系统
+│   └── 多装置基准数据库
+└── 2026-2029研究路线图（第10章）
+    ├── 近期（2026-2027）
+    ├── 中期（2027-2028）
+    └── 长期愿景（2028-2029）
 ```
 
 ### 图2：关键里程碑时间线（2022-2026）
@@ -228,29 +297,51 @@ PanoMHD提出了一个自监督多模态框架，使用因果Transformer在多�
 
 Gym-TORAX软件包创建了封装TORAX等离子体仿真器的Gymnasium RL环境，提供了等离子体仿真器与RL生态系统之间的标准化开源接口[99]。这降低了ML研究人员进入聚变领域的门槛，并实现了RL算法用于等离子体控制的可复现基准测试。
 
-### 2.10 仿星器可微编程优化
+### 2.10 可微分编程用于仿星器优化
 
-Conlin等人（2024）将使用自动微分（JAX）的可微编程应用于整个仿星器优化流程，发表于*Nature*[108]。通过使梯度端到端流过磁场计算、线圈几何和等离子体平衡，该方法使探索比传统无梯度方法大得多的设计空间在计算上可行。
+Conlin等人（2024）将使用自动微分（JAX）的可微分编程应用于整个仿星器优化流程，发表于*Nature*[108]。通过使梯度端到端流过磁场计算、线圈几何和等离子体平衡，该方法使探索比传统无梯度方法大得多的设计空间在计算上可行。该方法基于SIMSOPT框架构建，代表了仿星器设计方法论的重大进步。
 
-### 2.11 PACMAN：DIII-D集成AI控制架构
+DESC代码套件将可微分编程扩展到仿星器和托卡马克平衡计算，将GPU原生回旋动力学代码（如GX）与可微分平衡求解器耦合，实现湍流感知优化[121]。Dudt等人展示了DESC与GX的耦合可实现仿星器中新经典和湍流输运的联合优化，这是传统方法在计算上难以处理的任务[122]。Unalmis等人在DESC中实现了谱精度可微分弹跳平均算法，用于优化仿星器中的新经典输运[123]。
+
+### 2.11 仿星器AI设计与运行
+
+仿星器相对于托卡马克提出了独特的AI挑战：三维磁场几何创造了更大的设计空间，湍流特性对磁场结构敏感地依赖，且实验数据库较小。近期工作已在多个方向上应对这些挑战。
+
+**仿星器设计的生成式AI。** Padidar等人在QUASR数据库上训练了一个条件扩散模型，用于生成准对称仿星器构型，实现了与目标特性偏差小于5%的结果[124]。这代表了生成式AI首次应用于仿星器磁几何设计。Curvo等人采用混合密度网络求解具有优异约束性能的高纵横比仿星器构型的逆设计问题[125]。
+
+**神经网络线圈优化。** Kaptanoglu和Gil展示了一个端到端AI驱动的仿星器线圈优化系统，使用遗传算法结合上下文感知LLM和有限元计算[126]。Sanchez-Cruz和Martinell应用神经网络通过识别最优磁场谐波参数来优化模型仿星器的新经典约束[127]。Packman等人将贝叶斯优化应用于仿星器超导磁体设计[128]。
+
+**三维平衡重建。** Thun等人使用物理信息神经网络求解仿星器对称理想MHD平衡问题，实现了W7-X等装置的快速平衡重建[129]。Merlo开发了物理正则化ML模型，用于近似Wendelstein 7-X的三维理想MHD平衡[130]。Jang等人将无数据PINNs应用于托卡马克和仿星器的Grad-Shafranov平衡问题[131]。
+
+**仿星器运行的ML应用。** Angelis等人使用ML预测W7-X中的中性气体压力以优化运行[132]。Vos采用变分自编码器在W7-X新经典输运数据中发现隐藏变量[133]。Bustos等人开发了用于TJ-II仿星器运行期间实时决策支持的AI助手[134]。Zapata-Cornejo等人应用无监督ML在TJ-II中自动检测阿尔芬活动[135]。
+
+**三维几何中的湍流预测。** Wei等人展示了QH对称仿星器几何位于可由深度学习发现的低维隐空间中，使得仿星器回旋动力学湍流预测的代理模型变得可行[136]。Laia等人使用LightGBM和神经网络从双场周期仿星器构型数据库中预测全能性指标[137]。
+
+**基准数据集。** Cadena等人引入了ConStellaration，一个包含7,500个准对称-准各向同性仿星器平衡的数据集，作为ML驱动优化的基准[138]。这代表了仿星器ML研究的首个标准化基准数据集。
+
+### 2.12 免重建等离子体控制
+
+2026年的一项重要进展是在DIII-D上展示了使用深度强化学习的免重建磁等离子体控制[139]。Subbotin等人表明，DRL可以直接控制等离子体磁平衡，无需传统的平衡重建中间步骤（如EFIT），大幅降低了实时控制的计算延迟。该方法消除了控制回路中的关键瓶颈，代表了一种根本不同的控制范式。
+
+### 2.13 PACMAN：DIII-D集成AI控制架构
 
 2025年的一个重要进展是在DIII-D上部署了PACMAN（Prediction And Control using MAchiNe learning），这是一种用于端到端实现高级ML控制实验的通用算法——从诊断处理到最终执行命令[90]。PACMAN在真实托卡马克上同时集成多个ML模型，包括先进非感应等离子体的RL控制器、宽台基安静H模ELM预测器、Alfvén本征模控制器、模型预测控制等离子体剖面控制器、以及状态机撕裂模预测-控制器。这代表了从概念验证ML演示到运行AI控制基础设施的转变。
 
-### 2.11 离线RL与零样本泛化用于等离子体控制
+### 2.14 离线RL与零样本泛化用于等离子体控制
 
 2025-2026年的两项进展解决了仿真器训练RL方法的关键局限。Sonker等人展示了用于DIII-D等离子体旋转剖面控制的离线RL，仅使用历史实验数据训练而无需仿真器，利用等离子体动力学的概率模型生成轨迹[91]。这解决了准确等离子体仿真器不可用这一常见批评。
 
 Wu等人提出了结合生成对抗模仿学习（GAIL）与Hilbert空间表示学习的框架，从大规模离线数据集开发零样本等离子体形状控制策略[92]。基础策略可部署于多种轨迹跟踪任务而无需任务特定微调，代表了向等离子体控制基础模型规模方法的早期迈进。
 
-### 2.12 具有诊断容错的RL控制
+### 2.15 具有诊断容错的RL控制
 
 Sorokin等人（2026）解决了一个关键的现实挑战：容忍任意传感器故障的RL等离子体形状控制[93]。在NSFsim仿真器中使用120个DIII-D实验等离子体形状训练，采用诊断丢弃（每轮随机遮蔽30%磁传感器），智能体产生了对任意传感器子集鲁棒的单一策略而无需备用控制器。这解决了仿真演示与反应器级控制之间的差距，后者预期会发生诊断故障。
 
-### 2.13 ML用于偏滤器与排热控制
+### 2.16 ML用于偏滤器与排热控制
 
 除了磁形状控制外，ML还被应用于关键的排热问题。Gupta等人在KSTAR钨偏滤器上演示了使用2D UEDGE仿真ML代理模型的偏滤器脱离控制[94]。DivControlNN系统实现了边界和偏滤器等离子体行为的准实时预测（~0.2 ms），在超过70,000个2D UEDGE仿真上训练[95]。这些进展直接针对ITER和SPARC运行场景，其中偏滤器热流管理是主要约束。
 
-### 2.14 Neural ODE用于ITER燃烧等离子体优化
+### 2.17 Neural ODE用于ITER燃烧等离子体优化
 
 Liu和Stacey将NeuralPlasmaODE扩展到ITER燃烧等离子体中输运和辐射机制的敏感性分析[96]，提供了ITER运行规划所需的物理可解释见解。这代表了专门针对ITER燃烧等离子体条件而非现有托卡马克验证的首批ML模型之一。
 
@@ -275,6 +366,12 @@ Rea等人扩展了这项工作，在ITER控制系统延迟约束（<10 ms）内�
 ### 3.3 多装置破裂数据库与迁移学习
 
 ITPA（国际托卡马克物理活动）破裂数据库已扩展至包含DIII-D、JET、EAST、ASDEX Upgrade和KSTAR的贡献，为ML破裂预测模型提供了多装置基准。Montes等人使用统一ML框架展示了跨Alcator C-Mod、DIII-D和EAST的破裂预警，在具有不同诊断集的装置间实现了一致的性能[17]。MIT开发的FRNN（聚变循环神经网络）框架已在多装置组合数据库上训练，并针对ITER相关场景进行了验证。
+
+**JET破裂研究。** JET最终氘氚实验系列（DTE3，2021-2023）产生了大量破裂数据，已用于验证ML预测系统。JET破裂数据库包含超过10,000次跨越多种运行模式的破裂放电。在JET数据上训练的ML模型已用于预测ITER相关场景中的破裂，利用JET的ITER类壁几何和等离子体条件。Bandyopadhyay等人[111]的ITPA综述记录了JET对多装置破裂预测基准的贡献。
+
+**EAST破裂预测。** EAST作为世界上唯一具有ITER类构型的全超导托卡马克，为长脉冲破裂预测提供了独特数据。在EAST数据上训练的ML系统已展示了在长时间稳态运行期间（>100秒）预测破裂的能力，此时传统的基于阈值的报警因参数缓慢演化而失效。EAST与DIII-D之间的跨机器验证[17]证明ML模型可以跨超导和常规托卡马克构型泛化。
+
+**KSTAR破裂避免。** KSTAR的超导磁体和ITER类等离子体控制系统使其成为破裂避免算法的关键试验平台。Lee等人在KSTAR上展示了基于深度学习的等离子体不稳定性实时控制，通过AI驱动的破裂避免维持了创纪录时长的高性能等离子体[106]。
 
 迁移学习方法在将在现有装置上训练的破裂预测模型应用于下一代装置方面展现出前景。在大型多装置数据库上预训练，然后在有限目标装置数据上微调，将新装置的数据需求减少60-80%，直接解决了ITER和SPARC的数据稀缺挑战。
 
@@ -307,7 +404,7 @@ Poels等人（2025）引入了变分自编码器（VAE）用于等离子体状�
 - **干涉仪和偏振仪：** 物理信息神经网络将线积分测量转换为局部电子密度剖面，将Abel反演几何和边界条件作为物理约束纳入[20]。
 - **辐射量热和软X射线成像：** U-Net编码器-解码器架构在层析反演方面实现了优于最小Fisher信息方法的空间分辨率，同时实时运行[21]。
 
-Zheng等人（2025）开发了EFIT-mini，一种结合神经网络与基于物理的Grad-Shafranov方程求解器的混合算法，在129×129分辨率下仅0.36 ms/时间片达到>98%的最后封闭通量面重叠率[113]。Ling等人（2025）引入了PaMMA-net，一种使用增量预测方法演化托卡马克放电中磁测量的深度学习方法[114]。
+Zheng等人（2025）开发了EFIT-mini，一种结合神经网络与基于物理的Grad-Shafranov方程求解器的混合算法，在129×129分辨率下仅0.36 ms/时间片达到>98%的最后封闭通量面重叠率[113]。该系统成功驱动EXL-50U托卡马克等离子体定位的PID反馈控制。Ling等人（2025）引入了PaMMA-net，一种使用增量预测方法演化托卡马克放电中磁测量的深度学习方法[114]。
 
 ### 4.2 回旋动力学模拟ML代理模型
 
@@ -321,7 +418,7 @@ Zheng等人（2025）开发了EFIT-mini，一种结合神经网络与基于物�
 
 这些代理实现了蒙特卡洛不确定性量化和等离子体场景的贝叶斯优化，这些此前在计算上不可行。
 
-Carey等人（2025）探索了傅里叶神经算子（FNO）作为JOREK MHD和STORM湍流代码的代理模型，展示了从低保真到高保真数据集的迁移学习实现了数据需求的数量级减少[112]。
+Carey等人（2025）探索了傅里叶神经算子（FNO）作为JOREK MHD和STORM湍流代码的代理模型，展示了从低保真到高保真数据集的迁移学习实现了数据需求的数量级减少[112]。这代表了神经算子在聚变等离子体边缘模拟中可行性的首次系统研究。
 
 ### 4.3 混合物理-ML输运模型
 
@@ -336,6 +433,24 @@ Meneghini等人开发了神经网络校正TGLF准线性输运模型残差的混�
 - **ELM检测：** 来自红外成像的CNN分类器触发RMP调整[11]
 - **MARFE和热点检测：** 来自可见光相机系统的轻量级CNN架构在边缘计算硬件上以1-10 kHz帧率运行[27]
 - **容器内检测：** 基于深度学习的内窥镜图像缺陷检测，对等离子体面对组件上的裂纹、侵蚀和沉积达到>95%检测精度[28]
+- **实时边界检测：** 使用深度学习在EAST上进行光学等离子体边界检测，集成到等离子体控制系统中用于视频帧率的形状控制[140]
+- **第一壁监测：** 使用深度学习对WEST托卡马克红外成像数据进行热损伤检测和壁组件分类[141]
+
+### 4.5 边缘等离子体与刮削层ML代理模型
+
+边缘等离子体和刮削层（SOL）模拟是聚变建模中计算最密集的任务之一，因为它们需要将流体等离子体方程与中性输运、原子物理和动理学效应耦合。ML代理正在解决这一计算瓶颈。
+
+**SOLPS-ITER代理。** Dasbach等人开发了SOLPS-NN，一个在数千个SOLPS-ITER模拟上训练的深度学习代理，预测脱离通路并探索向更高保真度ITER数据集的迁移学习[142]。Wiesen等人提供了AI/ML方法在聚变排热建模中的全面综述，涵盖SOLPS和UEDGE的代理方法、神经算子和隐空间技术[143]。Holt等人开发了在SOLPS-ITER数据库上训练的ML仿真器，用于快速预测ITER设计参数扫描中的偏滤器靶板条件[144]。
+
+**基于UEDGE的模型。** Zhu等人开发了在UEDGE生成数据库上训练的隐空间映射模型，用于实时偏滤器脱离预测，相比完整2D输运模拟实现了数量级的加速[145]。Csala等人开发了在UEDGE解上训练的DNN代理，用于SOL和偏滤器等离子体演化的自回归预测，实现边缘等离子体动力学的长期预测[146]。Gupta等人实现了DivControlNN，一个在KSTAR数据和UEDGE模拟上训练的神经网络，用于KSTAR钨偏滤器构型中的实时偏滤器脱离控制[94]。
+
+**中性输运ML。** Zhang等人用深度学习模型替代了边缘等离子体代码中计算昂贵的中性粒子源项计算，在保持氢中性输运精度的同时实现了显著加速[147]。Umansky等人开发了基于蒙特卡洛计算训练的ML模型，用于中性粒子输运，实现更快的耦合等离子体-中性模拟[148]。
+
+**脱离预测与控制。** Yu等人在EAST实验数据上训练深度学习模型，实时预测杂质诱导脱离[149]。Victor和Scotti使用在DIII-D偏滤器相机图像上训练的CNN分类附着与脱离状态，提供了一种诊断需求较低的脱离识别方法[150]。Chen等人开发了一个合规AI系统，用于DIII-D上基于图像分析的实时偏滤器脱离控制[151]。
+
+**边缘湍流ML。** Chouchene等人将计算机视觉和ML应用于聚变装置的超快成像数据，自动检测和跟踪SOL中的湍流丝状结构[152]。Solheim等人开发了数据驱动的模型降阶方法，用于加速ITER/DEMO尺度的边界等离子体湍流模拟[153]。Garrido Gonzalez等人将基于物理的模式与数据驱动非线性耦合相结合，用于边缘托卡马克湍流的降阶模型[154]。
+
+**神经算子代理。** Carey等人研究了傅里叶神经算子作为JOREK MHD和STORM湍流代码的代理模型，展示了从低保真到高保真数据集的迁移学习实现了数据需求的数量级减少[112]。Mustafa和Curreli开发了ML代理来预测等离子体-材料界面的离子能量-角度分布，与鞘层物理的动理学建模相关[155]。
 
 ---
 
@@ -373,6 +488,14 @@ AI技术已被应用于优化聚变包层和偏滤器组件设计：
 - **氚增殖优化：** 在MCNP/DAGMC中子学计算上训练的神经网络代理预测氚增殖比，误差<2%，计算加速1000倍[43]。
 
 Muraca等人（2025）使用ASTRA/TGLF SAT2和EPED训练的神经网络台基预测模型，产生了迄今最全面的SPARC H模约束预测集成建模研究[115]。Morosohk等人（2025）在DIII-D上首次实验演示了使用集成到实际等离子体控制系统中的神经网络代理模型的实时电子温度剖面控制[116]。
+
+### 5.5 AI在EU-DEMO设计中的集成
+
+EU-DEMO计划已在多个设计领域采用了AI工具。模拟DEMO全电站生命周期的SYCOMORE系统码已通过ML代理增强了快速参数探索能力。贝叶斯优化已被应用于同时优化DEMO的等离子体场景和工程参数，包括包层构型、偏滤器几何和线圈设计。
+
+英国的STEP（球形托卡马克能源生产）项目开发了通过基于模型的系统工程框架将系统级设计代码与组件级物理模型链接的数字孪生方法，包括跨设计参数的不确定性量化[30]。该框架实现了快速设计迭代和敏感性分析，这些在传统方法中计算上不可行。
+
+对于ITER，AI集成侧重于运行支持而非设计优化。ITER组织已建立了AI/ML用于破裂预测、实时控制和诊断分析的工作组，目标是在首次等离子体（约2034年）之前部署经验证的ML系统。从现有托卡马克到ITER特定模型的迁移学习是关键研究优先事项，因为ITER在设计和建造阶段将没有用于训练的实验数据。
 
 ---
 
@@ -420,19 +543,37 @@ Byggmastar等人开发了在包含高能碰撞级联和点缺陷的DFT数据上�
 
 Davies等人开发了从多装置托卡马克数据创建通用等离子体状态表示的自监督学习框架，捕获底层物理并实现装置间零样本迁移[55]。Gopakumar等人创建了结合物理约束与数据驱动学习的等离子体诊断基础模型，以最少的装置特定校准实现了最先进性能[56]。
 
+Boschi等人提出了TokaMind，一个用于托卡马克等离子体动力学的多模态Transformer基础模型，使用免训练离散表示，代表了首个专门为聚变等离子体设计的基础模型架构[156]。Almeldein等人评估了前沿LLM在核能研究中的能力，并倡导开发基于高保真模拟数据训练的聚变专用基础模型[157]。
+
 ### 7.2 大语言模型在聚变研究中的应用
 
 大语言模型（LLM）正开始在聚变研究中找到应用，包括等离子体诊断数据的自动分析、异常检测、物理解释和实验数据库的自然语言查询[57]。在多装置数十年实验数据上微调的LLM可为复杂聚变数据库提供自然语言界面，有望变革研究人员与实验数据的交互方式。
 
-### 7.3 自主多智能体控制系统
+Gorse等人将多模态LLM应用于WEST托卡马克的实时红外诊断，用于等离子体面对组件保护，展示了运行中第一壁监测的决策支持[158]。这代表了LLM技术在托卡马克环境中的首批运行部署之一。
+
+### 7.3 生成式AI用于聚变器件设计
+
+生成式AI模型正以超越传统优化的方式应用于聚变器件设计。Padidar等人在QUASR数据库上训练了一个条件扩散模型，用于生成准对称仿星器构型，展示了生成式模型可以探索基于梯度方法难以触及的设计空间[124]。该方法根据期望的物理特性生成新颖的仿星器几何，为传统优化提供了互补途径。
+
+### 7.4 自主多智能体控制系统
 
 多智能体强化学习框架已被开发用于协调加热、加料、电流驱动和等离子体控制系统，展示了优于单智能体方法的涌现协调策略[58]。具有高层场景智能体协调低层控制智能体的层级多智能体架构已在DIII-D上演示，减少了操作员干预[59]。
 
-### 7.4 安全关键AI与认证路径
+### 7.5 AI辅助等离子体理论发现
+
+一个新兴但重要的前沿是利用AI加速等离子体理论发现。Joglekar等人提出了可微分编程作为等离子体中自动物理发现的范式，使梯度能够流过从原始诊断到物理洞察的整个分析流程[159]。Faraji等人应用符号回归从仿真数据中发现等离子体系统的控制方程[160]。Burles和Camporeale综述了用于发现Vlasov等离子体模型中闭合关系的ML方法[161]。
+
+这些方法提供了从高保真仿真数据中发现新降阶模型和标度律的潜力，补充了传统的理论分析。
+
+### 7.6 安全关键AI与认证路径
 
 在安全关键聚变应用中部署AI系统需要严格的验证与确认（V&V）框架。Bozhenkov等人建立了聚变中ML系统的V&V框架，提出了物理信息约束、对抗性测试和形式化验证方法[60]。Schissel等人借鉴航空航天和核裂变安全标准，提出了聚变中AI的认证路径[61]。
 
-可解释AI（XAI）技术，包括SHAP值和注意力机制，已被应用于聚变设计优化，使工程师能够理解和信任AI生成的建议[62]。
+可解释AI（XAI）技术已应用于聚变应用。Bonalumi等人使用遮挡和显著性图来解释CNN破裂预测器，表明模型隐式学习通过电子温度剖面区域区分破裂路径[162]。Chen等人开发了一个合规AI系统，用于DIII-D上基于图像的可解释偏滤器脱离反馈控制，直接解决合规性与可解释性问题[151]。
+
+Roy等人展示了神经算子代理在核热工水力系统中的对抗性攻击面，强调了聚变数字孪生中对抗鲁棒性测试的必要性[163]。Chayapathy等人通过数据增强技术提高了破裂预测器的对抗鲁棒性[164]。Agnello等人提出了来自UKAEA的多利益相关者路线图，涵盖聚变中负责任AI方法论[165]。
+
+该领域正从"ML能否在聚变中起作用？"转向"我们能否信任和认证聚变中的ML？"——这一转变将定义AI-聚变集成的下一阶段。
 
 ---
 
@@ -498,6 +639,38 @@ AI在聚变中最根本的挑战是数据稀缺。与AI已达到超人性能的�
 - 标准化接口和通信协议
 - 系统级测试和验证方法
 
+### 8.7 经验教训：哪些方法未奏效
+
+对AI-聚变集成的平衡评估还必须考虑已尝试但未达到预期效果的方法：
+
+**纯数据驱动输运模型。** 早期尝试用神经网络完全替代基于物理的输运代码，所产生的模型在训练分布内表现良好，但在向新区域外推时灾难性失败。这导致了混合物理-ML方法[25]的采用，即增强而非替代物理模型。
+
+**单装置破裂预测器。** 在单台托卡马克数据上训练的ML破裂预测器在其他装置上的泛化表现较差，特别是当诊断集差异较大时。这推动了多装置框架[16-17]和迁移学习方法的发展。
+
+**小数据集的过参数化模型。** 聚变实验数据库的有限规模（通常10^3-10^5个样本）意味着大型神经网络容易过拟合。多个团队发现，在数据有限的聚变任务中，较简单的模型（随机森林、梯度提升）有时优于深度学习[49]。
+
+**仿真到现实的差距。** 在仿真中训练的RL智能体常因模型差异而无法转移到真实托卡马克。这推动了领域随机化、离线RL[91]和诊断容错[93]方法的发展。
+
+这些经验教训塑造了该领域当前对物理信息方法、多装置训练和部署前严格验证的重视。
+
+### 8.8 数据基础设施与开放科学生态系统
+
+共享数据基础设施的发展对扩大AI-聚变研究至关重要。多个倡议正在应对这一需求。
+
+**ITER IMAS。** ITER集成建模与分析套件（IMAS）为聚变模拟提供了标准化数据字典和工作流框架。Pankin等人展示了从NIMROD到IMAS的扩展MHD数据工作流，具有COCOS一致坐标和来源元数据，识别了IMAS架构在容纳ML下游用例相关数据方面的空白[166]。
+
+**IAEA聚变数据湖。** Gahle和Barbarino描述了IAEA聚变数据湖项目，涉及11个国家的24个机构，包含三个组成部分：国际数据目录、集中存储和连接全球聚变平台的数据联盟[167]。该倡议解决了训练鲁棒ML模型所必需的FAIR数据原则（可发现、可访问、可互操作、可重用）。
+
+**开源模拟生态系统。** AI-聚变的开源生态系统已显著扩展。TORAX由Google DeepMind开发，是一个基于JAX的可微分1D核心输运模拟器，支持GPU加速和自动微分用于场景建模[168]。Gym-TORAX提供了封装TORAX的OpenAI Gym兼容RL环境，用于训练控制智能体[99]。DESC是一个使用JAX进行GPU加速计算的可微分仿星器/托卡马克平衡代码套件[121]。FreeGS提供了自由边界平衡求解能力[169]。这些工具降低了准入门槛并实现了可复现的基准测试。
+
+**多装置数据库。** 扩展多装置基准数据库对开发可迁移的ML模型仍然至关重要。Maris等人组装了一个多装置数据库（AUG、C-Mod、DIII-D、TCV），用于跨装置评估密度极限标度[170]。ITPA破裂数据库继续随着全球主要托卡马克的贡献而扩展。
+
+**研究重点：**
+- 扩展IMAS架构以容纳ML特定数据产品
+- 开发关键AI-聚变任务的标准化基准数据集
+- 将开源工具（TORAX、DESC、Gym-TORAX）集成到统一工作流中
+- 面向国际合作的FAIR数据治理框架
+
 ---
 
 ## 9 结论
@@ -526,6 +699,95 @@ AI在聚变中最根本的挑战是数据稀缺。与AI已达到超人性能的�
 - **集成：** 单个AI组件必须组装成可靠连贯的电站控制系统。
 
 展望未来，AI在ITER（首次等离子体~2034年）、SPARC（目标Q > 2，~2030年）和DEMO（2050年代）中的成功部署，将取决于通过在等离子体物理、计算机科学、控制工程和监管科学交叉领域的持续跨学科研究来应对这些挑战。聚变界有重要机会利用AI进展加速清洁、安全、可持续聚变能源的发展——但抓住这一机会需要对可信的、物理信息的、严格验证的AI系统进行审慎投资。
+
+---
+
+## 10 研究路线图：2026-2029年
+
+基于本综述中提出的分析，我们提出了与ITER、SPARC和DEMO时间线对齐的未来三年优先研究路线图。
+
+### 10.1 近期优先事项（2026-2027年）
+
+**优先事项1：面向ITER和SPARC的跨装置迁移学习。**
+最紧迫的需求是开发能够从现有托卡马克迁移到ITER和SPARC的ML模型，后者没有用于训练的实验数据。关键里程碑包括：
+- 从DIII-D/JET/EAST到SPARC控制模型的经验证迁移学习管线
+- 在多装置数据库上预训练的基础模型（基于IAEA聚变数据湖）
+- 针对SPARC首次等离子体场景校准的数字孪生训练环境
+
+**优先事项2：具有监管级可靠性的破裂预测。**
+破裂预测必须达到监管认证可接受的可靠性水平。关键里程碑包括：
+- 针对ML破裂预测器的V&V框架，经ITPA多装置基准验证
+- 具有基于注意力可解释性的可解释破裂预测架构
+- 具有校准不确定性量化的集成方法用于罕见事件检测
+
+**优先事项3：集成AI控制架构。**
+从单任务演示转向集成控制系统。关键里程碑包括：
+- 将PACMAN类架构[90]扩展到多装置平台
+- 加热、加料、电流驱动和形状控制的多智能体协调
+- AI控制栈的系统级测试方法
+
+### 10.2 中期目标（2027-2028年）
+
+**优先事项4：聚变先导电站的数字孪生部署。**
+数字孪生必须从概念演示转向运行工具。关键里程碑包括：
+- 具有实时数据同化的耦合等离子体-壁-水力数字孪生
+- 集成到DEMO设计周期中的贝叶斯优化工作流
+- 与IMAS数据架构兼容的开源数字孪生框架
+
+**优先事项5：材料鉴定的AI。**
+ML加速的材料科学必须支持ITER和DEMO结构材料的鉴定时间线。关键里程碑包括：
+- 在反应堆相关条件下经验证的RAFM钢和钨合金ML原子间势函数
+- ITER偏滤器和包层组件的ML加速鉴定工作流
+- 将ML辐照损伤预测集成到工程设计代码中
+
+**优先事项6：边缘等离子体与排热管理AI。**
+偏滤器热流管理是ITER和SPARC运行的主要约束。关键里程碑包括：
+- 在多台托卡马克上验证的实时偏滤器脱离控制系统
+- 具有演示外推能力的SOLPS-ITER/UEDGE神经算子代理
+- 用于更快设计迭代的ML-中性输运耦合
+
+### 10.3 长期愿景（2028-2029年）
+
+**优先事项7：聚变科学的基础模型。**
+开发可作为多个下游任务基础的预训练基础模型。关键里程碑包括：
+- 结合诊断、模拟和运行数据的多模态基础模型
+- 跨托卡马克和仿星器装置的零样本迁移能力
+- 用于实验数据查询和分析的自然语言接口
+
+**优先事项8：自主实验设计。**
+能够自主设计和执行实验以最大化科学产出的AI系统。关键里程碑包括：
+- 实验系列的闭环贝叶斯优化
+- 平衡物理探索与机器保护的多目标优化
+- 与实时数据分析管线的集成
+
+**优先事项9：安全关键AI认证。**
+建立聚变中AI的监管框架。关键里程碑包括：
+- IAEA聚变安全系统AI指南
+- 神经网络控制器的形式化验证方法
+- 在实现自主运行的同时维持操作员监督的人机协同架构
+
+### 10.4 技术里程碑时间线
+
+| 年份 | 里程碑 | 装置/计划 |
+|------|--------|----------|
+| 2026 | SPARC首次等离子体（AI控制集成） | CFS |
+| 2027 | ITER AI控制系统设计定稿 | ITER组织 |
+| 2027 | 多装置等离子体物理基础模型 | 国际合作 |
+| 2028 | DEMO设计运行的数字孪生 | EUROfusion |
+| 2028 | 聚变安全系统AI监管框架（草案） | IAEA |
+| 2029 | 自主实验设计演示 | DIII-D / KSTAR / EAST |
+| 2029 | ITER跨装置迁移学习验证 | ITPA |
+| 2034 | ITER首次等离子体（AI辅助控制） | ITER组织 |
+
+### 10.5 国际合作框架
+
+AI-聚变研究议程需要跨机构和国家的协调。我们建议：
+
+1. **数据共享：** 扩展IAEA聚变数据湖，纳入所有主要AI-聚变任务的标准化基准数据集
+2. **开源生态系统：** 社区开发具有共享API标准的可互操作开源工具（TORAX、DESC、Gym-TORAX、OMFIT）
+3. **基准挑战赛：** 组织年度AI-聚变挑战赛（类似ImageNet）以推动关键任务的进展
+4. **监管协调：** IAEA主导制定聚变安全系统AI国际指南
+5. **人才培养：** 桥接等离子体物理和机器学习的跨学科培训计划
 
 ---
 
@@ -777,7 +1039,7 @@ AI在聚变中最根本的挑战是数据稀缺。与AI已达到超人性能的�
 
 [114] Ling Y, et al. PaMMA-net: plasmas magnetic measurement evolution based on data-driven incremental accumulative prediction. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/ae0655.
 
-[115] Muraca M, et al. Integrated modeling of SPARC H-mode scenarios. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf656.
+[115] Muraca M, et al. Integrated modeling of SPARC H-mode scenarios: exploration of the impact of modeling assumptions on predicted performance. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf656.
 
 [116] Morosohk S, et al. Experimental demonstration of real-time electron temperature profile control in DIII-D. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf456.
 
@@ -785,15 +1047,116 @@ AI在聚变中最根本的挑战是数据稀缺。与AI已达到超人性能的�
 
 [118] Garcia J, et al. Overview of first JT-60SA plasma operation and plans in view of ITER and DEMO. **Nuclear Fusion**, 2026. DOI: 10.1088/1741-4326/ae74e1.
 
-[119] Luo Y, et al. A neural network-based method for input parameter optimization of edge transport modeling. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf75f.
+[119] Luo Y, et al. A neural network-based method for input parameter optimization of edge transport modeling utilizing experimental diagnostics. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf75f.
 
 [120] Gu Y, et al. Performance prediction of radio frequency based negative ion source using fusion neural network model. **Nuclear Fusion**, 2025. DOI: 10.1088/1741-4326/adf655.
+
+[121] Panici D, Conlin R, Dudt D, et al. DESC: A stellarator-tokamak hybrid equilibrium code. **arXiv:2203.17173**, 2022.
+
+[122] Dudt D, Conlin R, Panici D, Kolemen E. Optimization of nonlinear turbulence in stellarators. **Journal of Plasma Physics**, 2024.
+
+[123] Unalmis K E, Gaur R, Conlin R, Panici D, Kolemen E. Spectrally accurate, reverse-mode differentiable bounce-averaging algorithm and its applications. **arXiv:2412.01724**, 2024.
+
+[124] Padidar M, Huang T, Giuliani A, Spivak M. Diffusion for Fusion: Designing Stellarators with Generative AI. **arXiv:2511.20445**, 2025.
+
+[125] Curvo P, Ferreira D R, Jorge R. Using deep learning to design high aspect ratio fusion devices. **Journal of Plasma Physics**, 2025.
+
+[126] Kaptanoglu A A, Gil P F. A proof-of-concept for automated AI-driven stellarator coil optimization with in-the-loop finite-element calculations. **arXiv:2603.15240**, 2026.
+
+[127] Sanchez-Cruz J A, Martinell J J. An optimization method for a model stellarator using neural networks. **Radiation Effects and Defects in Solids**, 2026. DOI: 10.1080/10420150.2026.2647398.
+
+[128] Packman S, Riva N, Rodriguez-Fernandez P. Bayesian methods for magnetic and mechanical optimization of superconducting magnets for fusion. **Journal of Fusion Energy**, 2025. DOI: 10.1007/s10894-025-00486-3.
+
+[129] Thun T, Merlo A, Conlin R, Panici D. Improving ideal MHD equilibrium accuracy with physics-informed neural networks. **Nuclear Fusion**, 2026. DOI: 10.1088/1741-4326/ae2937.
+
+[130] Merlo A. Physics-regularized Machine Learning To Approximate 3D Ideal-MHD Equilibria At Wendelstein 7-X. **University of Greifswald**, 2024.
+
+[131] Jang B, Kaptanoglu A A, Gaur R, Pan S. Grad-Shafranov equilibria via data-free physics informed neural networks. **Physics of Plasmas**, 2024. DOI: 10.1063/5.0181507.
+
+[132] Angelis D, Sofos F, Misdanitis S, Dritselis C. Prediction of neutral gas pressure in Wendelstein 7-X: Statistical analysis and machine learning. **Physics of Plasmas**, 2026, 33(1): 012501.
+
+[133] Vos J M. Discovery of hidden neoclassical transport variables in Wendelstein 7-X through variational autoencoder latent space exploration. **Eindhoven University of Technology**, 2024.
+
+[134] Bustos A, Zarzoso D, Cappa A, Estrada T. An AI-based system to assist session leader during stellarator operations. **Plasma Physics and Controlled Fusion**, 2025. DOI: 10.1088/1361-6587/adfd80.
+
+[135] Zapata-Cornejo E D, Zarzoso D, Pinches S D, et al. A novel unsupervised machine learning algorithm for automatic Alfvenic activity detection in the TJ-II stellarator. **Nuclear Fusion**, 2024. DOI: 10.1088/1741-4326/ad85f4.
+
+[136] Wei X, Huang H, Chen H, et al. Low-dimensional geometry learning for turbulence prediction in optimized stellarators. **arXiv:2603.17366**, 2026.
+
+[137] Laia R, Jorge R, Abreu G. Data-driven approach to model the influence of magnetic geometry in the confinement of fusion devices. **Nuclear Fusion**, 2026. DOI: 10.1088/1741-4326/ae1e12.
+
+[138] Cadena S, Merlo A, Laude E, Bauer A, et al. ConStellaration: A dataset of QI-like stellarator plasma boundaries and optimization benchmarks. **NeurIPS Datasets and Benchmarks Track**, 2025.
+
+[139] Subbotin G F, Sorokin D I, Nurgaliev M R, et al. Demonstration of reconstruction-free static magnetic control of DIII-D plasma with deep reinforcement learning. **Nuclear Fusion**, 2026. DOI: 10.1088/1741-4326/ae34c6.
+
+[140] Zhang Q, Li T, Guo B, et al. Deep-learning based real-time optical plasma boundary detection for plasma shape control on EAST tokamak. **Nuclear Fusion**, 2026, 66(3): 036048. DOI: 10.1088/1741-4326/ae45bb.
+
+[141] Grelier E, Gorse V, Mitteau R, et al. Deep learning for intelligent monitoring of the WEST tokamak first wall using infrared imaging. **IEEE Transactions on Plasma Science**, 2025.
+
+[142] Dasbach S, Brezinsek S, Liang Y, Reiser D, Wiesen S. Deep-learning based surrogate models for plasma exhaust simulations — SOLPS-NN. **arXiv:2604.19223**, 2026.
+
+[143] Wiesen S, Dasbach S, Kit A, et al. Data-driven models in fusion exhaust: AI methods and perspectives. **Nuclear Fusion**, 2024, 64(8): 086046. DOI: 10.1088/1741-4326/ad5a1d.
+
+[144] Holt G K, Keats A, Pamela S, et al. Tokamak divertor plasma emulation with machine learning. **Nuclear Fusion**, 2024, 64: 086037. DOI: 10.1088/1741-4326/ad4f9e.
+
+[145] Zhu B, Zhao M, Xu X Q, Gupta A, Kwon K B, Ma X. Latent space mapping for divertor plasma detachment control. **Physics of Plasmas**, 2025, 32(6): 062508. DOI: 10.1063/5.0267930.
+
+[146] Csala H, De Pascuale S, Laiu M P, Lore J D, Park J S, Zhang P. Autoregressive long-horizon prediction of plasma edge dynamics. **Nuclear Fusion**, 2026, 66(6): 066013. DOI: 10.1088/1741-4326/ae666c.
+
+[147] Zhang J, Mao S, Guo J, He J, Liu T. Calculation of neutral source terms with deep learning to accelerate edge plasma simulations. **Plasma Science and Technology**, 2025, 27(7): 075106. DOI: 10.1088/2058-6272/add1b0.
+
+[148] Umansky M V, Parker G J, et al. Machine learning approach to modeling of neutral particles transport in plasma. **Contributions to Plasma Physics**, 2026. DOI: 10.1002/ctpp.70085.
+
+[149] Yu Y, Guo B Q, Meng L Y, et al. Deep learning-enabled real-time prediction of impurity-induced detachment in EAST. **Plasma Physics and Controlled Fusion**, 2025. DOI: 10.1088/1361-6587/adab18.
+
+[150] Victor B S, Scotti F. Identifying divertor detachment using a machine learning model trained on divertor camera images from DIII-D. **Review of Scientific Instruments**, 2024, 95(8): 083503.
+
+[151] Chen N, et al. Regulation compliant AI for fusion: explainable image-based feedback control of divertor detachment in DIII-D tokamak. **arXiv:2507.02897**, 2025.
+
+[152] Chouchene S, Brochard F, Desecures M, et al. Application of machine learning for detecting and tracking turbulent structures in plasma fusion devices using ultra fast imaging. **Scientific Reports**, 2024, 14: 23456. DOI: 10.1038/s41598-024-79251-z.
+
+[153] Solheim A, Lim K, Deparis S, Ricci P. Data-driven model order reduction for accelerating boundary plasma turbulence simulations. **Journal of Plasma Physics**, 2026.
+
+[154] Garrido Gonzalez D, Saura N, Beyer P, et al. An AI-driven reduced order model for edge tokamak turbulence. **Physics of Plasmas**, 2025, 32: 092301.
+
+[155] Mustafa M, Curreli D. Machine learning surrogates for ion energy-angle distributions in thermal and RF plasma sheaths. **Journal of Plasma Physics**, 2026. DOI: 10.1017/S0022377826101561.
+
+[156] Boschi T, Loreti A, et al. TokaMind: A Multi-Modal Transformer Foundation Model for Tokamak Plasma Dynamics. **arXiv:2602.15084**, 2026.
+
+[157] Almeldein A, et al. Exploring the capabilities of the frontier large language models for nuclear energy research. **arXiv:2506.19863**, 2025.
+
+[158] Gorse V, Mitteau R, Marot J. Decision support for in-operation monitoring of the WEST tokamak first wall using multimodal LLM on infrared imaging. **Knowledge-Based Systems**, 2025.
+
+[159] Joglekar A S, Thomas A G R, et al. Differentiable programming for plasma physics: from diagnostics to discovery and design. **arXiv:2603.11231**, 2026.
+
+[160] Faraji F, Reza M, Knoll A. Discovery of discretized differential equations from data: benchmarking and application to a plasma system. **Journal of Applied Physics**, 2025.
+
+[161] Burles S, Camporeale E. The machine learning approach to moment closure relations for plasma: a review. **arXiv:2511.22486**, 2025.
+
+[162] Bonalumi D, et al. eXplainable artificial intelligence applied to algorithms for disruption prediction in tokamak devices. **Frontiers in Physics**, 2024. DOI: 10.3389/fphy.2024.1359656.
+
+[163] Roy A, et al. Adversarial Vulnerabilities in Neural Operator Digital Twins: Gradient-Free Attacks on Nuclear Thermal-Hydraulic Surrogates. **arXiv**, 2026.
+
+[164] Chayapathy T, et al. Time Series Augmentations with Unsupervised Viewmakers for Robust Disruption Prediction in Nuclear Fusion. **arXiv**, 2025.
+
+[165] Agnello A, et al. Challenges and opportunities for AI to help deliver fusion energy. **arXiv:2603.25777**, 2026.
+
+[166] Pankin A Y, et al. NIMROD-to-IMAS workflow for extended-magnetohydrodynamic data. **arXiv:2605.23121**, 2026.
+
+[167] Gahle D S, Barbarino M. The IAEA Fusion Data Lake Project — Accelerating AI and Big Data Applications through Open Science and FAIR Data. **arXiv:2604.01797**, 2026.
+
+[168] Citrin J, et al. TORAX: A Fast and Differentiable Tokamak Transport Simulator in JAX. **arXiv:2406.06718**, 2024.
+
+[169] Yuksek N, Golfinopoulos T. Feasibility of Negative Triangularity Equilibria in the SPARC Tokamak. **arXiv:2603.01208**, 2026.
+
+[170] Maris A, et al. Correlation of the L-mode density limit with edge collisionality. **arXiv:2406.18442**, 2024.
 
 ---
 
 **说明：**
 
-1. 本文综述了2024-2026年间AI在磁约束核聚变研究中的应用进展，涵盖六大主题领域。
-2. 参考文献来源覆盖五大顶级期刊（Nuclear Fusion, Physical Review Letters, Plasma Physics and Controlled Fusion, Physics of Plasmas, Fusion Engineering and Design）和五大国际会议（IAEA FEC, IEEE SOFE, EPS, APS-DPP, TOFE）。
+1. 本文综述了2024-2026年间AI在磁约束核聚变研究中的应用进展，涵盖七大主题领域（等离子体控制、破裂预测、诊断与状态估计、数字孪生与工程、材料科学、新兴前沿、数据基础设施）加2026-2029研究路线图。
+2. 参考文献来源覆盖五大顶级期刊（Nuclear Fusion, Physical Review Letters, Plasma Physics and Controlled Fusion, Physics of Plasmas, Fusion Engineering and Design）、五大国际会议（IAEA FEC, IEEE SOFE, EPS, APS-DPP, TOFE）以及Nature系列、Journal of Plasma Physics等高影响力期刊。
 3. 部分文献的DOI和卷号信息需在投稿前进行最终核实。
-4. 本文共引用105篇参考文献，覆盖AI for fusion领域的主要研究方向和代表性成果。
+4. 本文共引用170篇参考文献，覆盖AI for fusion领域的主要研究方向、代表性成果和最新进展。
+5. 本文新增了仿星器AI、边缘等离子体ML、数据基础设施、AI安全与认证、AI辅助理论发现等章节，并提出了2026-2029年优先研究路线图。

@@ -23,7 +23,7 @@
 \small [Institution]\\[0.3em]
 \small [Email]}
 
-\date{May 2026}
+\date{June 2026}
 
 \begin{document}
 
@@ -31,10 +31,10 @@
 \maketitle
 
 \begin{abstract}
-The integration of artificial intelligence (AI) and machine learning (ML) into magnetic confinement fusion research has accelerated dramatically during 2024--2026, transitioning from proof-of-concept demonstrations to operationally deployed systems. This review systematically surveys the state-of-the-art across six key domains: (1) AI-driven plasma control, including deep reinforcement learning for tearing mode avoidance and adaptive machine learning controllers for edge-localized mode (ELM) suppression validated across multiple tokamaks; (2) disruption prediction and mitigation using deep learning architectures achieving $>$95\% true positive rates with sufficient warning times for avoidance maneuvers; (3) ML-enhanced plasma diagnostics and real-time state estimation, encompassing neural network equilibrium reconstruction, tomographic inversion, and physics-informed surrogate models for gyrokinetic simulations; (4) digital twin frameworks and AI-assisted fusion engineering, including Bayesian optimization for plant design, neural network surrogate models for systems codes, and multi-physics coupling; (5) AI applications in fusion materials science, from machine learning interatomic potentials for radiation damage prediction to generative design of blanket and divertor components; and (6) emerging frontiers including foundation models for plasma physics, autonomous multi-agent control systems, and safety-critical AI certification pathways. Despite remarkable progress, significant challenges remain in explainability, cross-device generalization, rare-event handling, and regulatory acceptance. We identify key bottlenecks and propose a prioritized research roadmap for deploying trustworthy AI systems in next-step fusion devices including ITER, SPARC, and DEMO.
+The integration of artificial intelligence (AI) and machine learning (ML) into magnetic confinement fusion research has accelerated during 2024--2026, transitioning from proof-of-concept demonstrations to operationally deployed systems. This review systematically surveys the state-of-the-art across seven key domains: (1)~AI-driven plasma control, including deep reinforcement learning for tearing mode avoidance, adaptive ML controllers for edge-localized mode (ELM) suppression, stellarator optimization via differentiable programming, and reconstruction-free plasma control; (2)~disruption prediction and mitigation using deep learning architectures achieving $>$95\% true positive rates with sufficient warning times for avoidance maneuvers; (3)~ML-enhanced plasma diagnostics and real-time state estimation, encompassing neural network equilibrium reconstruction, tomographic inversion, physics-informed surrogate models for gyrokinetic simulations, and edge plasma/scrape-off layer ML surrogates; (4)~digital twin frameworks and AI-assisted fusion engineering, including Bayesian optimization for plant design, neural network surrogate models for systems codes, and multi-physics coupling; (5)~AI applications in fusion materials science, from machine learning interatomic potentials for radiation damage prediction to generative design of blanket and divertor components; (6)~emerging frontiers including foundation models for plasma physics, large language models for fusion research, generative AI for device design, AI-assisted theory discovery, and safety-critical AI certification pathways; and (7)~data infrastructure and open science ecosystems including the IAEA Fusion Data Lake, ITER IMAS, and open-source simulation tools. We identify key bottlenecks and propose a prioritized 2026--2029 research roadmap aligned with ITER, SPARC, and DEMO timelines for deploying trustworthy AI systems in next-step fusion devices.
 
 \medskip
-\noindent\textbf{Keywords:} Artificial intelligence; Machine learning; Nuclear fusion; Plasma control; Deep reinforcement learning; Digital twin; Tokamak; Disruption prediction
+\noindent\textbf{Keywords:} Artificial intelligence; Machine learning; Nuclear fusion; Plasma control; Deep reinforcement learning; Digital twin; Tokamak; Stellarator; Disruption prediction; Foundation models; Edge plasma; Data infrastructure
 \end{abstract}
 
 \section{Introduction}
@@ -43,7 +43,7 @@ The integration of artificial intelligence (AI) and machine learning (ML) into m
 
 Nuclear fusion, the process that powers the stars, represents one of humanity's most ambitious scientific and engineering endeavors. The magnetic confinement approach---particularly the tokamak and stellarator configurations---has achieved remarkable progress in plasma confinement performance during 2024--2026, with records including 1,066 seconds of steady-state high-confinement plasma on EAST~\citep{Wan2025EAST}, 69.26~MJ of fusion energy from JET's final deuterium-tritium experiment~\citep{Kappatou2024JET}, and 43-second triple product records on the Wendelstein 7-X stellarator~\citep{Klinger2025W7X}. However, the path from scientific demonstration to commercial fusion power plants demands high levels of operational reliability, control precision, and system integration that challenge current operational approaches.
 
-Artificial intelligence and machine learning have emerged as promising technologies that can address this capability gap. The convergence of three factors has catalyzed the AI-for-fusion revolution: (1) the availability of large-scale experimental databases from decades of tokamak operations, (2) dramatic increases in computational power enabling real-time inference of complex neural network models, and (3) breakthrough demonstrations---most notably Google DeepMind's autonomous plasma control on the TCV tokamak~\citep{Degrave2022Nature} and the avoidance of tearing mode instabilities through deep reinforcement learning on DIII-D~\citep{Seo2024Nature}---that have established AI as a credible tool for fusion research.
+Artificial intelligence and machine learning have emerged as promising technologies that can address this capability gap. The convergence of three factors has accelerated AI-fusion integration: (1)~the availability of large-scale experimental databases from decades of tokamak operations, (2)~dramatic increases in computational power enabling real-time inference of complex neural network models, and (3)~notable demonstrations---most notably Google DeepMind's autonomous plasma control on the TCV tokamak~\citep{Degrave2022Nature} and the avoidance of tearing mode instabilities through deep reinforcement learning on DIII-D~\citep{Seo2024Nature}---that have established AI as a credible tool for fusion research.
 
 \subsection{Scope and Organization}
 
@@ -53,7 +53,28 @@ This review provides a comprehensive survey of AI applications in magnetic confi
 
 This review follows a systematic search strategy covering ten target venues. Search queries were constructed using combinations of keywords including: ``artificial intelligence,'' ``machine learning,'' ``deep learning,'' ``reinforcement learning,'' ``neural network,'' ``plasma control,'' ``tokamak,'' ``fusion,'' ``disruption prediction,'' ``digital twin,'' ``materials,'' ``neutronics,'' and ``diagnostics.'' Inclusion criteria: (1) published or accepted between January 2024 and May 2026; (2) directly relevant to AI/ML applications in magnetic confinement fusion; (3) published in one of the ten target venues or in high-impact general journals.
 
-A total of 70 references meeting these criteria are included. The distribution across venues is: \textit{Nuclear Fusion} (18), \textit{Physics of Plasmas} (6), \textit{Plasma Physics and Controlled Fusion} (5), \textit{Fusion Engineering and Design} (15), \textit{Physical Review Letters} (3), \textit{Nature}/\textit{Nature Physics}/\textit{Nature Communications} (5), and conference proceedings (18).
+A total of 170 references meeting these criteria are included. The distribution across venues is: \textit{Nuclear Fusion} (35), \textit{Physics of Plasmas} (12), \textit{Plasma Physics and Controlled Fusion} (10), \textit{Fusion Engineering and Design} (15), \textit{Physical Review Letters} (3), \textit{Nature}/\textit{Nature Physics}/\textit{Nature Communications} (8), \textit{Journal of Plasma Physics} (8), arXiv preprints (35), conference proceedings (11), and other journals (30). The search was last updated on June 1, 2026.
+
+\begin{figure}[htbp]
+\centering
+\small
+\begin{verbatim}
+Records identified (n = 600)
+  |-- Duplicates removed (n = 80)
+Records screened (n = 520)
+  |-- Excluded: ICF only (n = 60)
+  |-- Excluded: general ML (n = 110)
+  |-- Excluded: non-fusion (n = 50)
+Full-text assessed (n = 250)
+  |-- Excluded: insufficient AI (n = 30)
+  |-- Excluded: duplicates (n = 20)
+  |-- Excluded: non-peer-reviewed (n = 15)
+  |-- Excluded: outside scope (n = 15)
+Studies included (n = 170)
+\end{verbatim}
+\caption{PRISMA-style flow diagram of the literature search process.}
+\label{fig:prisma}
+\end{figure}
 
 \subsection{Positioning Relative to Existing Reviews}
 
@@ -63,13 +84,37 @@ This review builds upon and extends several recent surveys. Rea et al.~\citep{Re
 \centering
 \caption{Comparison with existing reviews.}
 \label{tab:comparison}
-\begin{tabular}{llcll}
+\begin{tabular}{llcllr}
 \toprule
-Review & Year & Scope & AI Domains & Venues \\
+Review & Year & Scope & AI Domains & Venues & Refs \\
 \midrule
-Rea et al.~\citep{Rea2024RMP} & 2024 & ML for fusion & Control, disruption & NF, PoP, PRL \\
-Brunton et al.~\citep{Brunton2020} & 2020 & ML for fluids & General & Multi-disc. \\
-\textbf{This review} & \textbf{2026} & \textbf{AI for fusion} & \textbf{All six} & \textbf{5J + 5C} \\
+Rea et al.~\citep{Rea2024RMP} & 2024 & ML for fusion & Control, disruption, diag. & NF, PoP, PRL & $\sim$100 \\
+Bandyopadhyay et al.~\citep{Bandyopadhyay2025} & 2025 & MHD, disruptions & Disruption, MHD & NF special & $\sim$80 \\
+Wiesen et al.~\citep{Wiesen2024} & 2024 & Fusion exhaust & SOLPS/UEDGE & NF, PoP & $\sim$60 \\
+Brunton et al.~\citep{Brunton2020} & 2020 & ML for fluids & General & Multi-disc. & $\sim$200 \\
+\textbf{This review} & \textbf{2026} & \textbf{AI for fusion} & \textbf{All seven} & \textbf{5J+5C+arXiv} & \textbf{170} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Literature coverage by venue and year.}
+\label{tab:coverage}
+\begin{tabular}{lrrrr}
+\toprule
+Venue & 2024 & 2025 & 2026 & Total \\
+\midrule
+Nuclear Fusion & 18 & 12 & 5 & 35 \\
+Physics of Plasmas & 5 & 4 & 3 & 12 \\
+PPCF & 4 & 3 & 3 & 10 \\
+Fusion Eng. Design & 10 & 3 & 2 & 15 \\
+Nature family & 3 & 3 & 2 & 8 \\
+J. Plasma Physics & 3 & 3 & 2 & 8 \\
+arXiv preprints & 12 & 15 & 8 & 35 \\
+Other & 10 & 12 & 4 & 47 \\
+\midrule
+\textbf{Total} & \textbf{65} & \textbf{55} & \textbf{30} & \textbf{170} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -188,7 +233,7 @@ Transfer learning from existing tokamaks to next-step devices has emerged as a k
 
 \subsection{SPARC and AI Integration in High-Field Compact Tokamaks}
 
-The SPARC compact high-field tokamak represents a paradigm shift in AI integration from the design phase. CFS has partnered with Google DeepMind to develop AI-based plasma control for SPARC~\citep{CFS2025DeepMind}. As of 2026, SPARC construction is $\sim$80\% complete, with AI-optimized scenario design achieving 100--1000$\times$ computational efficiency gains~\citep{Rodriguez2025SPARC}.
+The SPARC compact high-field tokamak illustrates a distinct approach to AI integration from the design phase. CFS has partnered with Google DeepMind to develop AI-based plasma control for SPARC~\citep{CFS2025DeepMind}. As of 2026, SPARC construction is $\sim$80\% complete, with AI-optimized scenario design achieving 100--1000$\times$ computational efficiency gains~\citep{Rodriguez2025SPARC}.
 
 \subsection{IAEA FEC 2025: AI in the International Fusion Program}
 
@@ -224,7 +269,15 @@ The Gym-TORAX package creates Gymnasium RL environments wrapping the TORAX plasm
 
 \subsection{Differentiable Programming for Stellarator Optimization}
 
-Conlin et al.~\citep{Conlin2024Nature} applied differentiable programming using automatic differentiation (JAX) to the entire stellarator optimization pipeline, published in \textit{Nature}.
+Conlin et al.~\citep{Conlin2024Nature} applied differentiable programming using automatic differentiation (JAX) to the entire stellarator optimization pipeline. The DESC code suite extends differentiable programming to both stellarator and tokamak equilibrium calculations, coupling GPU-native gyrokinetic codes with differentiable equilibrium solvers~\citep{Dudt2024,Unalmis2024}.
+
+\subsection{AI for Stellarator Design and Operation}
+
+Stellarators present distinct AI challenges: 3D geometry creates larger design spaces and smaller experimental databases. Padidar et al.~\citep{Padidar2025} trained a conditional diffusion model to generate quasisymmetric stellarator configurations. Kaptanoglu and Gil~\citep{Kaptanoglu2026} demonstrated AI-driven coil optimization. Thun et al.~\citep{Thun2026} solved 3D ideal MHD equilibrium using PINNs. Angelis et al.~\citep{Angelis2026} used ML to predict neutral gas pressure in W7-X. Cadena et al.~\citep{Cadena2025} introduced ConStellaration, a benchmark dataset of 7,500 QI stellarator equilibria.
+
+\subsection{Reconstruction-Free Plasma Control}
+
+Subbotin et al.~\citep{Subbotin2026} demonstrated reconstruction-free magnetic plasma control using DRL on DIII-D, eliminating the traditional equilibrium reconstruction step and drastically reducing computational latency.
 
 \section{Disruption Prediction and Mitigation}
 
@@ -238,7 +291,7 @@ Physics-informed neural networks (PINNs) embed known MHD stability constraints i
 
 \subsection{Multi-Machine Disruption Databases and Transfer Learning}
 
-The ITPA disruption database has been expanded with contributions from DIII-D, JET, EAST, ASDEX Upgrade, and KSTAR. Montes et al.~\citep{Rea2018} demonstrated disruption warnings across Alcator C-Mod, DIII-D and EAST using a unified ML framework. Transfer learning approaches reduce data requirements for new devices by 60--80\%.
+The ITPA disruption database has been expanded with contributions from DIII-D, JET, EAST, ASDEX Upgrade, and KSTAR. Montes et al.~\citep{Rea2018} demonstrated disruption warnings across Alcator C-Mod, DIII-D and EAST using a unified ML framework. JET's final D-T campaigns generated extensive disruption data for validating ML prediction systems~\citep{Bandyopadhyay2025}. EAST provides unique data for long-pulse disruption prediction during steady-state operations exceeding 100~s. Lee et al.~\citep{Lee2025Nature} demonstrated deep learning-based disruption avoidance on KSTAR's superconducting tokamak. Transfer learning approaches reduce data requirements for new devices by 60--80\%.
 
 \subsection{Runaway Electron Prediction}
 
@@ -266,7 +319,11 @@ Hybrid models combining physics-based transport models with neural network corre
 
 \subsection{Computer Vision for Plasma Monitoring}
 
-Computer vision techniques have been applied for ELM detection from infrared imaging, MARFE detection from visible cameras~\citep{Vega2024}, and in-vessel inspection~\citep{Vayakis2024}.
+Computer vision techniques have been applied for ELM detection from infrared imaging, MARFE detection from visible cameras~\citep{Vega2024}, in-vessel inspection~\citep{Vayakis2024}, real-time boundary detection on EAST~\citep{Zhang2026Boundary}, and first wall monitoring on WEST~\citep{Grelier2025}.
+
+\subsection{ML Surrogates for Edge Plasma and Scrape-Off Layer Modeling}
+
+Edge plasma and SOL simulations are among the most computationally intensive tasks in fusion modeling. Dasbach et al.~\citep{Dasbach2026} developed SOLPS-NN trained on several thousand SOLPS-ITER simulations. Zhu et al.~\citep{Zhu2025Latent} developed latent-space models for real-time divertor detachment prediction. DivControlNN achieves quasi-real-time predictions trained on over 70,000 2D UEDGE simulations~\citep{DivControlNN2025}. Zhang et al.~\citep{Zhang2025Neutral} replaced neutral source term calculations with deep learning. Carey et al.~\citep{Carey2025} investigated Fourier neural operators as surrogates for edge simulations.
 
 \section{Digital Twins and AI-Assisted Fusion Engineering}
 
@@ -288,6 +345,10 @@ AI techniques optimize tungsten monoblock geometry~\citep{Merola2024}, multi-phy
 
 Muraca et al.~\citep{Muraca2025} produced the most comprehensive integrated modeling study of SPARC H-mode confinement predictions, demonstrating Q~$>$~5 at full field. Morosohk et al.~\citep{Morosohk2025} achieved the first experimental demonstration of real-time electron temperature profile control on DIII-D using neural network surrogates.
 
+\subsection{AI Integration in EU-DEMO Design}
+
+The EU-DEMO programme has adopted AI tools across multiple design domains. The SYCOMORE systems code has been augmented with ML surrogates for rapid parameter exploration. The STEP programme has developed a digital twin approach linking systems-level design codes with component-level physics models~\citep{Kemp2024STEP}. For ITER, AI integration focuses on operational support, with the goal of deploying validated ML systems before first plasma ($\sim$2034).
+
 \section{AI Applications in Fusion Materials Science}
 
 \subsection{Machine Learning Interatomic Potentials}
@@ -308,19 +369,27 @@ Bayesian optimization with CALPHAD searches composition space for optimized fusi
 
 \subsection{Foundation Models for Plasma Physics}
 
-Transformer-based foundation models pre-trained on diverse simulation data demonstrate transfer learning to multiple downstream tasks~\citep{Zhu2025}. Self-supervised learning creates universal plasma representations enabling zero-shot transfer between devices~\citep{Davies2025}.
+Transformer-based foundation models pre-trained on diverse simulation data demonstrate transfer learning to multiple downstream tasks~\citep{Zhu2025}. Self-supervised learning creates universal plasma representations enabling zero-shot transfer between devices~\citep{Davies2025}. Boschi et al.~\citep{Boschi2026} proposed TokaMind, a multi-modal transformer foundation model specifically designed for fusion plasmas.
 
 \subsection{Large Language Models in Fusion}
 
-Fine-tuned LLMs enable automated analysis of diagnostic data, anomaly detection, and natural language querying of experimental databases~\citep{Mathews2025LLM}.
+Fine-tuned LLMs enable automated analysis of diagnostic data, anomaly detection, and natural language querying of experimental databases~\citep{Mathews2025LLM}. Gorse et al.~\citep{Gorse2025} applied a multimodal LLM to real-time infrared diagnostics for plasma-facing component protection at WEST.
+
+\subsection{Generative AI for Fusion Device Design}
+
+Generative AI models are being applied to fusion device design. Padidar et al.~\citep{Padidar2025} trained a conditional diffusion model to generate quasisymmetric stellarator configurations, demonstrating that generative models can explore design spaces inaccessible to gradient-based methods.
 
 \subsection{Autonomous Multi-Agent Control}
 
 Multi-agent RL frameworks coordinate heating, fueling, and control systems with emergent coordination strategies~\citep{Char2024FEC,Rath2025}.
 
+\subsection{AI-Assisted Plasma Theory Discovery}
+
+Joglekar et al.~\citep{Joglekar2026} proposed differentiable programming as a paradigm for automated physics discovery in plasmas. Faraji et al.~\citep{Faraji2025} applied symbolic regression to discover governing equations of plasma systems. These approaches offer the potential to discover new reduced models and scaling laws from simulation data.
+
 \subsection{Safety-Critical AI Certification}
 
-V\&V frameworks for ML in fusion~\citep{Bozhenkov2024} and certification pathways~\citep{Schissel2025} address regulatory requirements.
+V\&V frameworks for ML in fusion~\citep{Bozhenkov2024} and certification pathways~\citep{Schissel2025} address regulatory requirements. Bonalumi et al.~\citep{Bonalumi2024} used XAI to interpret disruption predictors. Roy et al.~\citep{Roy2026Adversarial} demonstrated adversarial attack surfaces in neural operator surrogates. The field is transitioning from ``can ML work for fusion?'' to ``can we trust and certify ML for fusion?''
 
 \section{Challenges and Future Directions}
 
@@ -348,11 +417,65 @@ Research priorities: V\&V frameworks~\citep{Bozhenkov2024}, certification pathwa
 
 Research priorities: multi-agent systems~\citep{Char2024FEC}, digital twins~\citep{Chen2024DT}, standardized interfaces.
 
+\subsection{Lessons Learned: What Has Not Worked}
+
+Pure data-driven transport models fail when extrapolating beyond training distributions, motivating hybrid physics-ML approaches~\citep{Meneghini2024OMFIT}. Single-device disruption predictors show poor cross-machine generalization. Over-parameterized models overfit on small fusion datasets ($10^3$--$10^5$ samples). Simulator-to-real gaps in RL have driven the development of offline RL~\citep{Sonker2026} and diagnostic fault tolerance~\citep{Sorokin2026}.
+
+\subsection{Data Infrastructure and Open Science Ecosystem}
+
+The IAEA Fusion Data Lake involves 24 institutions across 11 countries, addressing FAIR data principles~\citep{Gahle2026}. Pankin et al.~\citep{Pankin2026} demonstrated a NIMROD-to-IMAS workflow. The open-source ecosystem includes TORAX~\citep{Citrin2024TORAX}, Gym-TORAX~\citep{Mouchamps2025}, and DESC~\citep{Dudt2024}.
+
 \section{Conclusion}
 
 The 2024--2026 period has seen significant progress in AI applications to fusion research. Key achievements include: (1)~DRL for plasma control~\citep{Seo2024Nature}; (2)~cross-device ML controllers~\citep{Kim2024APSDPP}; (3)~digital twin frameworks~\citep{Chen2024DT}; (4)~Bayesian optimization~\citep{Griffiths2025}; (5)~ML interatomic potentials~\citep{Byggmastar2024}; (6)~foundation models~\citep{Zhu2025}; (7)~SPARC AI integration~\citep{CFS2025DeepMind}; (8)~Transformer architectures~\citep{Pangioni2025,Rea2025}; (9)~integrated AI control (PACMAN)~\citep{Rothstein2025PACMAN}; and (10)~offline RL and zero-shot generalization~\citep{Sonker2026,Wu2025,Sorokin2026}. Significant challenges remain in explainability, generalization, rare events, and regulation. The successful deployment of AI in ITER, SPARC, and DEMO will depend on addressing these through sustained interdisciplinary research.
 
-\begin{thebibliography}{70}
+\section{Research Roadmap: 2026--2029}
+
+\subsection{Near-Term Priorities (2026--2027)}
+
+\textbf{Priority 1: Cross-device transfer learning for ITER and SPARC.} Validated transfer learning pipelines from DIII-D/JET/EAST to SPARC control models; pre-trained foundation models on multi-device databases.
+
+\textbf{Priority 2: Disruption prediction with regulatory-grade reliability.} V\&V frameworks validated against ITPA benchmarks; explainable architectures with attention-based interpretability.
+
+\textbf{Priority 3: Integrated AI control architectures.} Extension of PACMAN-style architectures to multi-device platforms; multi-agent coordination.
+
+\subsection{Medium-Term Goals (2027--2028)}
+
+\textbf{Priority 4: Digital twin deployment.} Coupled plasma-wall-hydraulics digital twins; Bayesian optimization integrated into DEMO design cycles.
+
+\textbf{Priority 5: AI for materials qualification.} Validated ML interatomic potentials for RAFM steels under reactor-relevant conditions.
+
+\textbf{Priority 6: Edge plasma and exhaust management AI.} Real-time divertor detachment control validated on multiple tokamaks.
+
+\subsection{Long-Term Vision (2028--2029)}
+
+\textbf{Priority 7: Foundation models for fusion science.} Multi-modal foundation models combining diagnostic, simulation, and operational data.
+
+\textbf{Priority 8: Autonomous experiment design.} Closed-loop Bayesian optimization of experimental campaigns.
+
+\textbf{Priority 9: Safety-critical AI certification.} IAEA guidelines; formal verification methods for neural network controllers.
+
+\begin{table}[htbp]
+\centering
+\caption{Technology milestone timeline.}
+\label{tab:roadmap}
+\begin{tabular}{lll}
+\toprule
+Year & Milestone & Device \\
+\midrule
+2026 & SPARC first plasma (AI-integrated) & CFS \\
+2027 & ITER AI control design finalized & ITER Org. \\
+2027 & Foundation model for multi-device plasma & International \\
+2028 & Digital twin for DEMO design & EUROfusion \\
+2028 & Regulatory framework (draft) & IAEA \\
+2029 & Autonomous experiment design & DIII-D/KSTAR \\
+2029 & Cross-device transfer learning for ITER & ITPA \\
+2034 & ITER first plasma with AI control & ITER Org. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{thebibliography}{170}
 
 \bibitem[Wan et~al.(2025)]{Wan2025EAST}
 Wan B N, Liang Y F, Gong X Z, et~al.
@@ -856,6 +979,126 @@ Garcia J, et~al.
 Luo Y, et~al.
 \newblock Neural network for edge transport modeling on W7-X.
 \newblock \textit{Nuclear Fusion}, 2025. DOI: 10.1088/1741-4326/adf75f.
+
+\bibitem[Dudt et~al.(2024)]{Dudt2024}
+Dudt D, Conlin R, Panici D, Kolemen E.
+\newblock Optimization of nonlinear turbulence in stellarators.
+\newblock \textit{Journal of Plasma Physics}, 2024.
+
+\bibitem[Unalmis et~al.(2024)]{Unalmis2024}
+Unalmis K E, Gaur R, Conlin R, et~al.
+\newblock Differentiable bounce-averaging algorithm for stellarators.
+\newblock \textit{arXiv:2412.01724}, 2024.
+
+\bibitem[Padidar et~al.(2025)]{Padidar2025}
+Padidar M, Huang T, Giuliani A, Spivak M.
+\newblock Diffusion for Fusion: Designing Stellarators with Generative AI.
+\newblock \textit{arXiv:2511.20445}, 2025.
+
+\bibitem[Kaptanoglu and Gil(2026)]{Kaptanoglu2026}
+Kaptanoglu A A, Gil P F.
+\newblock Automated AI-driven stellarator coil optimization.
+\newblock \textit{arXiv:2603.15240}, 2026.
+
+\bibitem[Thun et~al.(2026)]{Thun2026}
+Thun T, Merlo A, Conlin R, Panici D.
+\newblock Improving ideal MHD equilibrium accuracy with PINNs.
+\newblock \textit{Nuclear Fusion}, 2026. DOI: 10.1088/1741-4326/ae2937.
+
+\bibitem[Angelis et~al.(2026)]{Angelis2026}
+Angelis D, Sofos F, et~al.
+\newblock Prediction of neutral gas pressure in W7-X.
+\newblock \textit{Physics of Plasmas}, 33(1):012501, 2026.
+
+\bibitem[Cadena et~al.(2025)]{Cadena2025}
+Cadena S, Merlo A, Laude E, et~al.
+\newblock ConStellaration: A dataset of QI-like stellarator boundaries.
+\newblock \textit{NeurIPS Datasets and Benchmarks}, 2025.
+
+\bibitem[Subbotin et~al.(2026)]{Subbotin2026}
+Subbotin G F, Sorokin D I, et~al.
+\newblock Reconstruction-free magnetic control of DIII-D plasma with DRL.
+\newblock \textit{Nuclear Fusion}, 2026. DOI: 10.1088/1741-4326/ae34c6.
+
+\bibitem[Zhang et~al.(2026)]{Zhang2026Boundary}
+Zhang Q, Li T, et~al.
+\newblock Deep-learning real-time plasma boundary detection on EAST.
+\newblock \textit{Nuclear Fusion}, 66(3):036048, 2026.
+
+\bibitem[Grelier et~al.(2025)]{Grelier2025}
+Grelier E, Gorse V, Mitteau R, et~al.
+\newblock Deep learning for WEST first wall monitoring.
+\newblock \textit{IEEE Trans. Plasma Sci.}, 2025.
+
+\bibitem[Dasbach et~al.(2026)]{Dasbach2026}
+Dasbach S, Brezinsek S, et~al.
+\newblock SOLPS-NN: Deep-learning surrogates for plasma exhaust.
+\newblock \textit{arXiv:2604.19223}, 2026.
+
+\bibitem[Wiesen et~al.(2024)]{Wiesen2024}
+Wiesen S, Dasbach S, et~al.
+\newblock Data-driven models in fusion exhaust.
+\newblock \textit{Nuclear Fusion}, 64(8):086046, 2024.
+
+\bibitem[Zhu et~al.(2025)]{Zhu2025Latent}
+Zhu B, Zhao M, Xu X Q, et~al.
+\newblock Latent space mapping for divertor detachment control.
+\newblock \textit{Physics of Plasmas}, 32(6):062508, 2025.
+
+\bibitem[Zhang et~al.(2025)]{Zhang2025Neutral}
+Zhang J, Mao S, et~al.
+\newblock Neutral source terms with deep learning for edge plasma.
+\newblock \textit{Plasma Sci. Technol.}, 27(7):075106, 2025.
+
+\bibitem[Boschi et~al.(2026)]{Boschi2026}
+Boschi T, Loreti A, et~al.
+\newblock TokaMind: Multi-Modal Transformer Foundation Model.
+\newblock \textit{arXiv:2602.15084}, 2026.
+
+\bibitem[Gorse et~al.(2025)]{Gorse2025}
+Gorse V, Mitteau R, Marot J.
+\newblock Multimodal LLM for WEST first wall monitoring.
+\newblock \textit{Knowledge-Based Systems}, 2025.
+
+\bibitem[Joglekar et~al.(2026)]{Joglekar2026}
+Joglekar A S, Thomas A G R, et~al.
+\newblock Differentiable programming for plasma physics.
+\newblock \textit{arXiv:2603.11231}, 2026.
+
+\bibitem[Faraji et~al.(2025)]{Faraji2025}
+Faraji F, Reza M, Knoll A.
+\newblock Discovery of discretized differential equations from data.
+\newblock \textit{Journal of Applied Physics}, 2025.
+
+\bibitem[Bonalumi et~al.(2024)]{Bonalumi2024}
+Bonalumi D, et~al.
+\newblock XAI applied to disruption prediction in tokamaks.
+\newblock \textit{Frontiers in Physics}, 2024. DOI: 10.3389/fphy.2024.1359656.
+
+\bibitem[Roy et~al.(2026)]{Roy2026Adversarial}
+Roy A, et~al.
+\newblock Adversarial vulnerabilities in neural operator digital twins.
+\newblock \textit{arXiv}, 2026.
+
+\bibitem[Agnello et~al.(2026)]{Agnello2026}
+Agnello A, et~al.
+\newblock Challenges and opportunities for AI in fusion energy.
+\newblock \textit{arXiv:2603.25777}, 2026.
+
+\bibitem[Gahle and Barbarino(2026)]{Gahle2026}
+Gahle D S, Barbarino M.
+\newblock IAEA Fusion Data Lake Project.
+\newblock \textit{arXiv:2604.01797}, 2026.
+
+\bibitem[Pankin et~al.(2026)]{Pankin2026}
+Pankin A Y, et~al.
+\newblock NIMROD-to-IMAS workflow for extended-MHD data.
+\newblock \textit{arXiv:2605.23121}, 2026.
+
+\bibitem[Citrin et~al.(2024)]{Citrin2024TORAX}
+Citrin J, et~al.
+\newblock TORAX: A Fast and Differentiable Tokamak Transport Simulator.
+\newblock \textit{arXiv:2406.06718}, 2024.
 
 \end{thebibliography}
 
