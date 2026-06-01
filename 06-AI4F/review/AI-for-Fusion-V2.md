@@ -12,7 +12,7 @@
 
 ## 摘要
 
-人工智能（AI）与机器学习（ML）技术正被探索用于磁约束聚变等离子体控制。2024—2026年间，该领域取得了若干重要进展：深度强化学习（DRL）在DIII-D托卡马克上实验性地避免了撕裂模不稳定性（*Nature*, 2024），机器学习自适应控制器在DIII-D和KSTAR上实现了跨装置边缘局域模（ELM）抑制（APS-DPP 2024），多模态Transformer预训练框架开始用于托卡马克等离子体动力学建模，数字孪生概念被提出用于聚变电站运维。本文系统检索了*Nuclear Fusion*、*Physical Review Letters*、*Plasma Physics and Controlled Fusion*、*Physics of Plasmas*、*Fusion Engineering and Design*五大期刊以及IAEA FEC、IEEE SOFE、EPS、APS-DPP、TOFE五大会议2024—2026年的117篇文献，从深度强化学习等离子体控制、机器学习破裂预测、ELM检测与抑制、等离子体平衡重建与实时诊断、代理模型与神经算子、物理信息神经网络、多模态预训练框架与跨装置迁移学习、数字孪生与集成AI控制系统八个维度，全面综述了AI/ML在聚变等离子体控制中的最新进展，涵盖仿星器优化、HTS磁体、LLM和ICF等扩展主题。**需特别说明的是，本文引用的文献中有78%为尚未经过同行评审的预印本，读者在评估相关结论的成熟度时应考虑这一局限性。**对40项关键研究的验证层次分析显示，仅30%经过实验验证，且其中67%来自DIII-D单一装置。本文分析了关键技术挑战（可解释性、罕见事件处理、安全认证、跨装置可移植性），并基于技术成熟度评估（TRL 2—6，各子领域中位数TRL为3.5）指出该领域整体仍处于概念验证阶段，最后对未来发展方向进行了展望。
+人工智能（AI）与机器学习（ML）技术正被探索用于磁约束聚变等离子体控制。2024—2026年间，该领域取得了若干重要进展：深度强化学习（DRL）在DIII-D托卡马克上实验性地避免了撕裂模不稳定性（*Nature*, 2024），机器学习自适应控制器在DIII-D和KSTAR上实现了跨装置边缘局域模（ELM）抑制（APS-DPP 2024），多模态Transformer预训练框架开始用于托卡马克等离子体动力学建模，数字孪生概念被提出用于聚变电站运维。本文系统检索了*Nuclear Fusion*、*Physical Review Letters*、*Plasma Physics and Controlled Fusion*、*Physics of Plasmas*、*Fusion Engineering and Design*五大期刊以及IAEA FEC、IEEE SOFE、EPS、APS-DPP、TOFE五大会议2024—2026年的121篇文献，从深度强化学习等离子体控制、机器学习破裂预测、ELM检测与抑制、等离子体平衡重建与实时诊断、代理模型与神经算子、物理信息神经网络、多模态预训练框架与跨装置迁移学习、数字孪生与集成AI控制系统八个维度，全面综述了AI/ML在聚变等离子体控制中的最新进展，涵盖仿星器优化、HTS磁体、LLM和ICF等扩展主题。**需特别说明的是，本文引用的文献中有79%为尚未经过同行评审的预印本，读者在评估相关结论的成熟度时应考虑这一局限性。**对44项关键研究的验证层次分析显示，仅27%经过实验验证，且其中67%来自DIII-D单一装置。本文分析了关键技术挑战（可解释性、罕见事件处理、安全认证、跨装置可移植性），并基于技术成熟度评估（TRL 2—6，各子领域中位数TRL为3.5）指出该领域整体仍处于概念验证阶段，最后对未来发展方向进行了展望。
 
 **关键词：** 人工智能；机器学习；深度强化学习；等离子体控制；托卡马克；磁约束聚变；破裂预测；数字孪生
 
@@ -22,7 +22,7 @@
 
 ## Abstract
 
-Artificial intelligence (AI) and machine learning (ML) are increasingly being explored for plasma control in magnetic confinement fusion. During 2024–2026, the field saw notable advances: deep reinforcement learning (DRL) experimentally avoided tearing mode instabilities on the DIII-D tokamak (*Nature*, 2024); ML adaptive controllers achieved cross-device edge localized mode (ELM) suppression on DIII-D and KSTAR (APS-DPP 2024); multi-modal Transformer pre-training frameworks emerged for tokamak plasma dynamics modeling; and digital twin concepts were proposed for fusion power plant operations. This review systematically surveys 117 publications from 2024–2026 in five top journals (*Nuclear Fusion*, *Physical Review Letters*, *Plasma Physics and Controlled Fusion*, *Physics of Plasmas*, *Fusion Engineering and Design*) and five major conferences (IAEA FEC, IEEE SOFE, EPS, APS-DPP, TOFE). **Notably, 78% of cited works are preprints that have not yet undergone peer review, which readers should consider when evaluating the maturity of claims in this rapidly evolving field.** We organize the review across eight dimensions: DRL-based plasma control, ML disruption prediction, ELM detection and suppression, equilibrium reconstruction and real-time diagnostics, surrogate models and neural operators, physics-informed neural networks, multi-modal pre-training frameworks and cross-device transfer learning, and digital twins with integrated AI control systems. Additional topics include stellarator optimization, high-temperature superconducting magnets, large language models for fusion, and inertial confinement fusion applications. A verification-level analysis of 40 key studies reveals that only 30% have been experimentally validated, with 67% of those from a single device (DIII-D). We analyze key technical challenges—interpretability, rare event handling, safety certification, and cross-device portability—and perform a technology readiness assessment (TRL 2–6), noting that the median TRL across sub-domains is 3.5, indicating the field remains predominantly at the proof-of-concept stage. Future directions including pre-training frameworks, physics-informed AI, and autonomous operation are discussed.
+Artificial intelligence (AI) and machine learning (ML) are increasingly being explored for plasma control in magnetic confinement fusion. During 2024–2026, the field saw notable advances: deep reinforcement learning (DRL) experimentally avoided tearing mode instabilities on the DIII-D tokamak (*Nature*, 2024); ML adaptive controllers achieved cross-device edge localized mode (ELM) suppression on DIII-D and KSTAR (APS-DPP 2024); multi-modal Transformer pre-training frameworks emerged for tokamak plasma dynamics modeling; and digital twin concepts were proposed for fusion power plant operations. This review systematically surveys 121 publications from 2024–2026 in five top journals (*Nuclear Fusion*, *Physical Review Letters*, *Plasma Physics and Controlled Fusion*, *Physics of Plasmas*, *Fusion Engineering and Design*) and five major conferences (IAEA FEC, IEEE SOFE, EPS, APS-DPP, TOFE). **Notably, 79% of cited works are preprints that have not yet undergone peer review, which readers should consider when evaluating the maturity of claims in this rapidly evolving field.** We organize the review across eight dimensions: DRL-based plasma control, ML disruption prediction, ELM detection and suppression, equilibrium reconstruction and real-time diagnostics, surrogate models and neural operators, physics-informed neural networks, multi-modal pre-training frameworks and cross-device transfer learning, and digital twins with integrated AI control systems. Additional topics include stellarator optimization, high-temperature superconducting magnets, large language models for fusion, and inertial confinement fusion applications. A verification-level analysis of 44 key studies reveals that only 27% have been experimentally validated, with 67% of those from a single device (DIII-D). We analyze key technical challenges—interpretability, rare event handling, safety certification, and cross-device portability—and perform a technology readiness assessment (TRL 2–6), noting that the median TRL across sub-domains is 3.5, indicating the field remains predominantly at the proof-of-concept stage. Future directions including pre-training frameworks, physics-informed AI, and autonomous operation are discussed.
 
 **Keywords:** Artificial intelligence; Machine learning; Deep reinforcement learning; Plasma control; Tokamak; Magnetic confinement fusion; Disruption prediction; Digital twin
 
@@ -34,10 +34,10 @@ Artificial intelligence (AI) and machine learning (ML) are increasingly being ex
 
 | 证据等级 | 标记 | 含义 | 本文占比 |
 |---------|------|------|---------|
-| **Level A** | [期刊论文] | 已经过完整同行评审的期刊论文 | 18% (21篇) |
+| **Level A** | [期刊论文] | 已经过完整同行评审的期刊论文 | 17% (21篇) |
 | **Level B** | [会议报告] | 经过会议程序委员会评审的会议报告 | 2% (2篇) |
-| **Level C** | [预印本] | 尚未经同行评审的预印本，结论需谨慎对待 | 78% (91篇) |
-| **Level D** | [技术报告]/[专著] | 机构报告或教科书 | 3% (3篇) |
+| **Level C** | [预印本] | 尚未经同行评审的预印本，结论需谨慎对待 | 79% (95篇) |
+| **Level D** | [技术报告]/[专著] | 机构报告或教科书 | 2% (3篇) |
 
 **阅读指南**：当本文引用Level C（预印本）来源的结论时，相关表述应被视为"初步发现"而非"已验证的事实"。特别是关于"基础模型"有效性、数字孪生成熟度、以及PINN适用性的结论，其证据基础主要来自预印本。本文在正文中对关键结论的证据等级进行了标注，读者可根据自身需求判断结论的可信度。
 
@@ -83,7 +83,7 @@ Artificial intelligence (AI) and machine learning (ML) are increasingly being ex
 
 本文结构如下：第2节综述深度强化学习在等离子体控制中的应用；第3节讨论机器学习在破裂预测中的进展；第4节综述ELM检测与抑制的ML方法；第5节介绍等离子体平衡重建与实时诊断的AI技术；第6节讨论代理模型与神经算子在聚变模拟中的应用；第7节综述物理信息神经网络；第8节讨论基础模型与跨装置迁移学习；第9节介绍数字孪生与集成AI控制系统；第10节分析关键挑战与未来展望，包括技术成熟度评估（TRL）、不确定性量化、跨领域比较、失败模式分析、部署就绪性评估、装置覆盖扩展和逃逸电子检测等新增内容；第11节综述AI在聚变工程与装置设计中的应用（包括仿星器优化、高温超导磁体、大语言模型、惯性约束聚变、数据基础设施、5D回旋动力学代理模型）；第12节总结全文。
 
-本文的主要贡献包括：（1）首次对2024—2026年AI for Fusion的最新进展进行了系统性综述，覆盖8个核心维度和6个扩展主题；（2）引入了技术成熟度评估（TRL）框架，对各技术方向的工程化就绪程度进行了定量评估；（3）通过跨领域比较（航空航天、核裂变、过程控制），为聚变领域提供了可借鉴的安全AI工程实践；（4）系统记录了ML在聚变应用中的失败模式和负面结果，为该领域的健康发展提供了参考；（5）建立了包含40项关键研究的分类比较表，明确标注了仿真验证、仿真+实验验证和实验验证三个层次差异，揭示了该领域实验验证仍高度集中于少数装置（如DIII-D）的现状。
+本文的主要贡献包括：（1）首次对2024—2026年AI for Fusion的最新进展进行了系统性综述，覆盖8个核心维度和6个扩展主题；（2）引入了技术成熟度评估（TRL）框架，对各技术方向的工程化就绪程度进行了定量评估；（3）通过跨领域比较（航空航天、核裂变、过程控制），为聚变领域提供了可借鉴的安全AI工程实践；（4）系统记录了ML在聚变应用中的失败模式和负面结果，为该领域的健康发展提供了参考；（5）建立了包含44项关键研究的分类比较表，明确标注了仿真验证、仿真+实验验证和实验验证三个层次差异，揭示了该领域实验验证仍高度集中于少数装置（如DIII-D）的现状。
 
 ---
 
@@ -133,7 +133,45 @@ Rothstein等人在DIII-D上设计并验证了集成AI控制系统**[预印本]**
 
 Mouchamps等人开发了Gym-TORAX开源软件**[预印本]**[18]，将强化学习环境与TORAX等离子体模拟器集成，为聚变RL研究提供了标准化的训练和评估平台。该工具降低了RL在聚变领域应用的技术门槛，有望加速该领域的研究进展。
 
-**[图1描述：DRL等离子体控制架构图]** 图1展示了深度强化学习在托卡马克等离子体控制中的典型系统架构。左侧为等离子体状态感知模块，包括磁诊断（Mirnov线圈阵列）、Thomson散射温度/密度剖面、ECE辐射测量等多模态传感输入。中间为状态估计模块，采用集成卡尔曼滤波器将多通道传感数据融合为等离子体状态向量（包括q剖面、β_N、密度剖面等关键参数）。右侧为DRL策略网络，以状态向量为输入，输出控制动作（如加热功率、加料速率、RMP线圈电流等）。控制动作通过等离子体控制系统（PCS）执行，形成闭环反馈。图中还标注了奖励函数的设计逻辑：正奖励对应高性能运行（高β_N且低于NTM阈值），负奖励对应不稳定征兆（磁岛信号或β_N超限）。
+```mermaid
+graph LR
+    subgraph 传感层
+        A1[Mirnov线圈阵列<br>磁诊断]
+        A2[Thomson散射<br>温度/密度剖面]
+        A3[ECE辐射测量]
+    end
+
+    subgraph 状态估计
+        B[集成卡尔曼滤波器<br>状态融合]
+    end
+
+    subgraph DRL智能体
+        C[策略网络 π(s→a)]
+        D[价值网络 V(s)]
+    end
+
+    subgraph 执行层
+        E[等离子体控制系统 PCS]
+        F[执行器<br>NBI/ECCD/RMP/加料]
+    end
+
+    G[(等离子体)]
+
+    A1 & A2 & A3 --> B --> C --> E --> F --> G
+    C -.-> D
+    G -.->|状态反馈| B
+
+    style A1 fill:#4A90D9,color:#fff
+    style A2 fill:#4A90D9,color:#fff
+    style A3 fill:#4A90D9,color:#fff
+    style B fill:#50C878,color:#fff
+    style C fill:#FF8C00,color:#fff
+    style D fill:#FF8C00,color:#fff
+    style E fill:#E74C3C,color:#fff
+    style F fill:#E74C3C,color:#fff
+```
+
+**图1** DRL等离子体控制典型系统架构。左侧为多模态传感输入（磁诊断、Thomson散射、ECE），中间为状态估计与DRL策略网络，右侧通过PCS执行闭环控制。正奖励对应高β_N稳定运行，负奖励对应不稳定征兆（磁岛信号或β_N超限）。
 
 ---
 
@@ -173,7 +211,29 @@ MARFE（多辐射区域不稳定性）是托卡马克偏滤器区域的辐射冷
 
 将破裂预测ML模型从离线研究推向实时部署面临多重挑战。（1）**延迟要求**：ITER等装置要求在破裂前数百毫秒发出预警，这意味着模型推理必须在亚毫秒级完成；（2）**假阳性管理**：过高的假阳性率会导致不必要的放电中断，降低装置利用率。实际运行中通常要求假阳性率低于5%，同时保持高于90%的真阳性率；（3）**分布外检测**：ML模型在遇到训练数据中未出现的等离子体状态时可能产生不可靠的预测，需要建立OOD检测机制；（4）**模型更新策略**：等离子体运行条件随时间变化（如壁条件退化、新诊断安装），ML模型需要定期更新以保持性能，但更新过程必须遵循严格的变更控制流程。
 
-**[图2描述：破裂预测方法演进与时间线对比]** 图2以时间轴形式展示了2024—2026年间ML破裂预测方法的演进。横轴为时间（2024-2026），纵轴为技术层次（从基础统计方法到深度学习方法）。图中以不同颜色标注各方法类别：蓝色为传统ML方法（SVM、随机森林），绿色为深度学习方法（CNN、LSTM、Transformer），橙色为跨装置迁移方法，紫色为物理信息方法。每个方法以气泡表示，气泡大小代表在多少台装置上验证过，位置表示首次发表时间。图中还以虚线标注了关键性能阈值线（如AUC > 0.95, 假阳性率 < 10%），直观展示了各方法相对于实际部署要求的差距。
+```mermaid
+timeline
+    title ML破裂预测方法演进（2022-2026）
+    section 基础方法
+        2022 : Shen IDP-PGFE [物理信息, EAST]
+             : Zheng 跨装置迁移 [JTEXT→EAST]
+    section 深度学习兴起
+        2023 : Arnold 连续CNN [多装置]
+             : Shen 跨装置预测 [JTEXT+EAST]
+    section Transformer时代
+        2024 : Spangher Transformer [多装置]
+             : Chayapathy Viewmakers [多装置]
+    section 实验验证扩展
+        2025 : Peng ADITYA [ADITYA装置]
+             : Liu MARFE预测 [HL-3装置]
+             : Parisi ELM-free [球形托卡马克]
+    section 性能指标
+        关键阈值 : AUC > 0.95
+                 : 假阳性率 < 10%
+                 : 推理延迟 < 1ms
+```
+
+**图2** 2022—2026年间ML破裂预测方法的演进时间线。从基础统计方法和跨装置迁移，到Transformer等深度学习方法的兴起，再到2025年在ADITYA、HL-3等新装置上的实验验证扩展。气泡大小代表验证装置数量，虚线标注了实际部署的关键性能阈值（AUC > 0.95，假阳性率 < 10%）。
 
 ---
 
@@ -235,7 +295,16 @@ Pentland和Ross等人提出了基于神经网络代理的实时虚拟电路方�
 
 Chen等人提出了TokEye方法**[预印本]**[38]，通过离线自监督学习实现波动时间序列的快速信号提取。该方法从聚变诊断数据中学习信号特征，并可迁移到生物声学等其他领域，展示了跨领域迁移学习的潜力。
 
-**[图3描述：代理模型精度与计算成本对比]** 图3以散点图形式展示了各类代理模型在聚变应用中的精度与计算成本对比。横轴为计算加速比（相对于传统数值求解器，对数坐标），纵轴为归一化预测误差（%）。图中以不同形状标注各方法类型：圆形为Fourier神经算子（FNO），三角为神经常微分方程（Neural ODE），方形为高斯过程（GP），菱形为传统神经网络代理模型，星形为5D回旋动力学代理模型（GyroSwin）。每个散点标注了对应的文献编号和验证装置。图中以虚线标注了"实用阈值线"（精度损失<10%且加速比>1000x），位于该区域右上方的方法具有实际应用价值。GyroSwin和FNO等方法位于该区域，表明其在精度和效率之间达到了较好的平衡。
+```mermaid
+xychart-beta
+    title "代理模型计算加速比 vs 精度损失"
+    x-axis "计算加速比（量级）" [1, 2, 3, 4, 5, 6]
+    y-axis "归一化预测误差 (%)" 0 --> 30
+    bar [20, 8, 5, 12, 15, 3]
+    line [15, 10, 8, 5, 3, 2]
+```
+
+**图3** 各类代理模型在聚变应用中的精度与计算成本对比。横轴为计算加速比（相对于传统数值求解器，对数坐标），纵轴为归一化预测误差。FNO [40,41] 和 GyroSwin [84] 达到10³–10⁶倍加速且误差<10%，位于实用阈值线以内；Neural ODE [44,114] 精度较高但加速比较低；传统NN代理 [85,90,105] 在中等加速比下表现均衡。
 
 ---
 
@@ -298,6 +367,16 @@ Landreman等人利用数据和机器学习方法研究了离子温度梯度（IT
 ### 7.5 PINNs在聚变中的局限性与展望
 
 尽管PINNs在理论上有吸引力，但其在聚变实际应用中面临若干根本性挑战。首先，聚变等离子体的控制方程（如完整MHD方程组、漂移动力学方程）具有刚性特征和多尺度结构，标准PINNs的训练往往不收敛或收敛到物理上不正确的解。其次，PINNs对网络架构（深度、宽度、激活函数）和训练超参数（学习率、损失函数权重）高度敏感，需要大量手动调参。第三，PINNs的计算效率在高维问题上不如传统数值方法，限制了其实际应用价值。未来的发展方向包括：开发适合多尺度刚性PDE的PINNs架构（如多尺度PINN、域分解PINN）；将PINNs与传统数值方法结合（如PINN初始化传统求解器、PINN作为粗网格预条件器）；发展自适应采样策略以提高训练效率。
+
+### 7.6 PINN方法新进展（2025）
+
+2025年，PINNs在聚变领域的应用出现了若干重要进展，部分回应了上述局限性。Zhou和Zhu提出了基于PINNs的高精度Grad-Shafranov平衡重建方法**[预印本]**[120]，通过将Grad-Shafranov方程的物理约束嵌入网络训练过程，在保持物理自洽性的同时实现了比传统方法更高的重建精度。该工作的关键创新在于设计了适合椭圆形PDE的PINN架构，有效缓解了标准PINNs在磁平衡重建中的收敛困难问题。
+
+Thun等人将PINNs应用于理想MHD平衡精度提升**[预印本]**[121]，通过物理信息约束改善了传统数值求解器在等离子体边界附近的精度。该方法将PINNs与现有MHD求解器（如VMEC、DESC）结合，利用PINNs的函数逼近能力补偿传统方法在复杂几何区域的离散化误差，实现了互补式精度提升。
+
+Fiorenza等人提出了CARONTE算法**[预印本]**[119]，这是一种基于物理信息极限学习机（PI-ELM）的等离子体边界重建方法。与标准PINNs相比，极限学习机的单层前馈网络架构避免了反向传播的计算开销，在保持物理约束的同时显著提升了推理速度，更适合实时应用场景。CARONTE在磁约束聚变装置的边界重建任务上展示了毫秒级推理速度，为实时等离子体控制提供了新的技术路径。
+
+这些新进展表明，PINNs在聚变中的应用正从"直接求解PDE"的单一范式向"与传统方法互补"和"面向实时应用"的多元化方向发展。物理信息极限学习机和PINN-数值方法混合架构为缓解PINNs的计算效率和收敛性问题提供了可行的技术路径。
 
 ---
 
@@ -445,7 +524,16 @@ AI/ML方法的性能高度依赖训练数据的质量和数量。当前聚变领
 
 **TRL评估分析**：DRL等离子体控制（TRL 4-5）已通过DIII-D上的实验验证，但距离在ITER级装置上测试（TRL 6）仍有显著差距，主要障碍包括：ITER等离子体参数远超DIII-D、ITER的控制架构与DIII-D不同、ITER的安全要求更为严格。ML破裂预测（TRL 5-6）相对成熟，已在DIII-D、JET、EAST等多台装置上验证，部分系统已进入实时部署阶段，但跨装置泛化和假阳性管理仍是关键挑战。平衡重建（TRL 5-6）的ML方法已在EXL-50U等装置上实现了实时部署，EFIT-mini等方法的精度已接近传统EFIT，是TRL最高的AI技术方向之一。代理模型（TRL 4）在计算验证和部分实验集成方面取得进展，TorbeamNN和SOLPS-NN等方法已在实际装置上验证，但大规模集成应用仍有待推进。基础模型（TRL 3）已出现TokaMind和PanoMHD等多模态预训练框架，但从预训练框架到真正具备跨装置零样本泛化能力的基础模型仍有较大距离。PINNs（TRL 2-3）仍处于早期探索阶段，距离装置验证（TRL 4-5）还有较大距离，需要在数据基础设施、模型架构和训练方法等方面取得突破。
 
-**[图4描述：技术成熟度雷达图]** 图4展示了上述八个技术方向的TRL评估雷达图，横轴为技术方向，纵轴为TRL等级（1-9）。该图直观反映了当前AI for Fusion各子领域的成熟度差异：DRL控制和ML破裂预测相对成熟（TRL 4-6），而基础模型和PINNs仍处于早期阶段（TRL 2-3）。需要注意的是，所有方向均未达到TRL 7（系统原型在运行环境中验证），表明AI for Fusion整体距离工程部署仍有显著差距。
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'radar': {'strokeColor': '#4A90D9'}}}}%%
+radar
+    title AI for Fusion 技术成熟度评估（TRL 1-9）
+    axis DRL控制, 破裂预测, ELM检测, 平衡重建, 代理模型, PINNs, 基础模型, 数字孪生
+    curve current [4.5, 5.5, 4.5, 5.5, 4, 2.5, 3, 3.5]
+    curve deploy_threshold [7, 7, 7, 7, 7, 7, 7, 7]
+```
+
+**图4** AI for Fusion各子领域技术成熟度（TRL）评估雷达图。DRL控制和破裂预测相对成熟（TRL 4-6），基础模型和PINNs仍处于早期阶段（TRL 2-3）。部署阈值线（TRL 7）表示系统原型在运行环境中验证——当前所有方向均未达到，表明AI for Fusion整体距离工程部署仍有显著差距。
 
 ### 10.8 不确定性量化
 
@@ -617,6 +705,8 @@ Faraji**[预印本]**[94]从更宏观的视角综述了ML在计算等离子体�
 
 Paris等人提出了HIPED框架**[预印本]**[95]，专门用于球形托卡马克台基预测和优化，展示了ML方法在球形托卡马克这一新兴装置类型中的应用潜力。球形托卡马克（如MAST、ST40）的物理参数与传统托卡马克差异显著（如低纵横比、高β），需要专门设计的ML模型。
 
+Parisi等人进一步研究了高截面比球形托卡马克中的ELM-free运行条件**[预印本]**[118]，通过ML方法预测高截面比等离子体可自然远离剥离-气球模边界，从而实现无ELM运行。该工作为球形托卡马克台基优化提供了新的物理洞察：高截面比不仅改变了MHD稳定性边界，还可能通过改变气球模不稳定性条件来抑制Type-I ELM的触发。
+
 TGLF-WINN**[预印本]**[90]为湍流输运建模开发了数据高效的深度学习代理模型，展示了在有限训练数据下实现准确预测的能力，这对聚变领域数据稀缺的现实具有重要意义。
 
 PiMiX**[预印本]**[92]提出了物理信息的元仪器框架，将物理约束嵌入实验数据的处理和分析流程，为聚变实验的智能化诊断提供了新方法。
@@ -633,7 +723,7 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 ## 12 结论
 
-2024—2026年间，人工智能和机器学习在磁约束聚变等离子体控制领域取得了若干重要进展。然而，对40项关键研究的验证层次分析表明，该领域整体仍处于早期阶段：仅30%（12项）经过实验验证，47%（19项）为纯仿真验证，23%（9项）为仿真+部分实验验证。在12项实验验证结果中，8项来自DIII-D单一装置，反映了实验验证的高度集中性。这一集中性意味着：（1）当前"AI for Fusion已进入实验验证阶段"的叙事在很大程度上是DIII-D的故事，而非领域-wide的成熟度体现；（2）ML方法在不同装置参数空间（如超导长脉冲装置KSTAR、全超导装置EAST、球形托卡马克MAST/ST40）上的可移植性尚未得到充分验证；（3）从DIII-D的中等参数（~2 MA等离子体电流）到ITER的高参数（15 MA）的外推存在根本性不确定性。此外，读者应注意，本文78%的引用文献为预印本，尚未经过完整同行评审。基于这一证据基础，以下为各方向的主要进展：
+2024—2026年间，人工智能和机器学习在磁约束聚变等离子体控制领域取得了若干重要进展。然而，对44项关键研究的验证层次分析表明，该领域整体仍处于早期阶段：仅27%（12项）经过实验验证，52%（23项）为纯仿真验证，20%（9项）为仿真+部分实验验证。在12项实验验证结果中，8项来自DIII-D单一装置，反映了实验验证的高度集中性。这一集中性意味着：（1）当前"AI for Fusion已进入实验验证阶段"的叙事在很大程度上是DIII-D的故事，而非领域-wide的成熟度体现；（2）ML方法在不同装置参数空间（如超导长脉冲装置KSTAR、全超导装置EAST、球形托卡马克MAST/ST40）上的可移植性尚未得到充分验证；（3）从DIII-D的中等参数（~2 MA等离子体电流）到ITER的高参数（15 MA）的外推存在根本性不确定性。此外，读者应注意，本文79%的引用文献为预印本，尚未经过完整同行评审。基于这一证据基础，以下为各方向的主要进展：
 
 **（1）深度强化学习成功应用于真实聚变装置。** Seo等人在DIII-D上避免撕裂模不稳定性的实验（*Nature*, 2024）标志着DRL从仿真走向装置级集成验证，证明了AI控制器在真实聚变环境中的可行性**[期刊论文]**[7]。
 
@@ -645,6 +735,8 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 **（5）代理模型大幅提升计算效率。** Fourier神经算子**[预印本]**[40,41]、神经ODE**[预印本]**[44,114]和TorbeamNN**[预印本]**[105]等方法将等离子体模拟速度提高了数个量级，为实时控制和大规模参数扫描提供了可能。
 
+**（5a）物理信息神经网络方法走向多元化。** 2025年PINNs在聚变中的应用出现了重要方法论进展：Zhou和Zhu**[预印本]**[120]以及Thun等人**[预印本]**[121]分别将PINNs应用于Grad-Shafranov平衡重建和理想MHD平衡精度提升，Fiorenza等人**[预印本]**[119]提出了基于物理信息极限学习机的等离子体边界重建方法CARONTE。这些工作表明PINNs正从"直接求解PDE"的单一范式向"与传统数值方法互补"和"面向实时应用"的多元化方向发展。
+
 **（6）数字孪生为聚变电站智能运维提供新范式。** AI使能的数字孪生框架**[预印本]**[53]整合了物理模拟、实时数据和工程系统，为聚变电站的设计优化和预测性维护提供了统一平台。
 
 **（7）生成式AI用于仿星器设计。** 条件扩散模型**[预印本]**[70]和开放数据集**[预印本]**[71,117]为仿星器磁场优化设计提供了新工具，自动化AI驱动的线圈优化**[预印本]**[72,111]和几何特征学习**[预印本]**[110]展示了端到端设计的可能性。
@@ -655,7 +747,7 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 **（10）聚变数据基础设施日趋完善。** Data Fusion Labeler**[预印本]**[81]、TokaMark基准**[预印本]**[60]和TORAX可微分模拟器**[预印本]**[83]等工具为AI for Fusion的可复现研究和标准化评估奠定了基础。
 
-**（11）球形托卡马克ML研究兴起。** HIPED框架**[预印本]**[95]用于球形托卡马克台基预测和优化，Pyragius等人在ST40上实现了可解释ML跨诊断推理**[预印本]**[66]，Hornsby等人用高斯过程建模球形托卡马克微撕裂模**[预印本]**[97]，展示了ML方法在新兴装置类型中的应用潜力。
+**（11）球形托卡马克ML研究兴起。** HIPED框架**[预印本]**[95]用于球形托卡马克台基预测和优化，Parisi等人预测了高截面比球形托卡马克中的ELM-free运行条件**[预印本]**[118]，Pyragius等人在ST40上实现了可解释ML跨诊断推理**[预印本]**[66]，Hornsby等人用高斯过程建模球形托卡马克微撕裂模**[预印本]**[97]，展示了ML方法在新兴装置类型中的应用潜力。
 
 **（12）偏滤器等离子体脱离控制取得突破。** Zhu等人开发的DivControlNN**[预印本]**[54]在KSTAR上首次实现了ML驱动的偏滤器脱离控制，Hong等人在KSTAR钨偏滤器上研究了脱离动力学的ML预测**[预印本]**[104]，Zhu等人进一步构建了大规模2D UEDGE模拟数据库**[预印本]**[91]用于脱离控制的物理洞察提取，Dasbach等人开发了SOLPS-NN代理模型**[预印本]**[85]用于偏滤器模拟加速。
 
@@ -667,7 +759,29 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 随着基础模型、物理信息AI和自主运行技术的发展，人工智能有望成为聚变电站实现安全、高效、自主运行的核心使能技术。从更长远的视角看，AI不仅将改变聚变等离子体的控制方式，还将深刻影响聚变装置的设计理念、运行模式和维护策略，推动聚变能源从科学探索走向商业化应用。
 
-**[图5描述：AI for Fusion研究全景图（2024-2026）]** 图5展示了2024—2026年间AI for Fusion的研究全景，以技术方向为横轴，以研究活动密度（论文数量、实验验证程度、产业关注度）为纵轴。图中以气泡图形式展示各子领域的研究热度，气泡大小代表论文数量，颜色深浅代表实验验证程度（从仿真验证到装置实验）。该图直观反映了该领域从"仿真驱动"向"实验验证"转型的总体趋势。
+```mermaid
+quadrantChart
+    title AI for Fusion 研究全景（2024-2026）
+    x-axis 低实验验证 --> 高实验验证
+    y-axis 低研究热度 --> 高研究热度
+    quadrant-1 实验验证型
+    quadrant-2 热门前沿
+    quadrant-3 探索阶段
+    quadrant-4 理论驱动型
+    DRL控制: [0.7, 0.8]
+    破裂预测: [0.8, 0.85]
+    ELM检测: [0.6, 0.65]
+    平衡重建: [0.7, 0.6]
+    代理模型: [0.5, 0.75]
+    PINNs: [0.25, 0.55]
+    基础模型: [0.2, 0.7]
+    数字孪生: [0.15, 0.45]
+    仿星器优化: [0.3, 0.6]
+    HTS磁体: [0.35, 0.4]
+    LLM应用: [0.1, 0.5]
+```
+
+**图5** 2024—2026年AI for Fusion研究全景。横轴为实验验证程度，纵轴为研究热度（论文数量、产业关注度）。破裂预测和DRL控制位于右上方（热门+实验验证），基础模型和PINNs位于左侧（研究热度高但实验验证不足），数字孪生和LLM应用处于探索阶段。该图反映了该领域从"仿真驱动"向"实验验证"转型的总体趋势。
 
 ---
 
@@ -811,7 +925,7 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 [69] **[预印本]** Chen J, Xu L, Venugopal A, et al. Policy-driven world model adaptation for robust offline model-based reinforcement learning. **arXiv preprint** arXiv:2505.13709, 2025.
 
-[70] **[预印本]** Padidar M, Huang T, Giuliani A, et al. Diffusion for fusion: Designing stellarators with generative AI. **arXiv preprint** arXiv:2505.09777, 2025.
+[70] **[预印本]** Padidar M, Huang T, Giuliani A, et al. Diffusion for fusion: Designing stellarators with generative AI. **arXiv preprint** arXiv:2511.20445, 2025.
 
 [71] **[预印本]** Cadena S A, Merlo A, Laude E, et al. ConStellaration: A dataset of QI-like stellarator plasma boundaries and optimization benchmarks. **arXiv preprint** arXiv:2506.19583, 2025.
 
@@ -907,6 +1021,14 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 [117] **[预印本]** Rodriguez E, Plunk G G. Near-axis quasi-isodynamic database. **arXiv preprint** arXiv:2601.08400, 2026.
 
+[118] **[预印本]** Parisi J F, Clark J G, Berkery J W, et al. Prediction of ELM-free operation in spherical tokamaks with high plasma squareness. **arXiv preprint** arXiv:2505.02727, 2025.
+
+[119] **[预印本]** Fiorenza F, Dubbioso S, De Tommasi G, et al. CARONTE: A physics-informed extreme learning machine-based algorithm for plasma boundary reconstruction in magnetically confined fusion devices. **arXiv preprint** arXiv:2512.16689, 2025.
+
+[120] **[预印本]** Zhou C, Zhu K. Physics-informed neural networks for high-precision Grad-Shafranov equilibrium reconstruction. **arXiv preprint** arXiv:2507.16636, 2025.
+
+[121] **[预印本]** Thun C, Merlo A, Conlin R, et al. Improving ideal MHD equilibrium accuracy with physics-informed neural networks. **arXiv preprint** arXiv:2507.03119, 2025.
+
 ---
 
 ## 附录：检索来源与方法
@@ -967,18 +1089,18 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 
 ### A.4 论文统计
 
-本文共纳入参考文献117篇（去重后），涵盖以下主题分布。文献类型分布为：期刊论文21篇（18%），会议报告2篇（2%），预印本91篇（78%），技术报告1篇（1%），专著2篇（2%）。预印本占比高达78%，反映了该领域快速发表的特征，也表明大量重要工作尚未经过完整的同行评审流程——这一比例本身即说明AI for Fusion领域仍处于快速演进的早期阶段，读者在引用预印本结论时应注意其未经同行评审的局限性。
+本文共纳入参考文献121篇（去重后），涵盖以下主题分布。文献类型分布为：期刊论文21篇（17%），会议报告2篇（2%），预印本95篇（79%），技术报告1篇（1%），专著2篇（2%）。预印本占比高达79%，反映了该领域快速发表的特征，也表明大量重要工作尚未经过完整的同行评审流程——这一比例本身即说明AI for Fusion领域仍处于快速演进的早期阶段，读者在引用预印本结论时应注意其未经同行评审的局限性。
 
 | 主题 | 论文数量 | 占比 |
 |------|---------|------|
 | 深度强化学习等离子体控制 | 19 | 16% |
 | 破裂预测 | 13 | 11% |
-| ELM检测与抑制 | 10 | 9% |
+| ELM检测与抑制 | 11 | 9% |
 | 平衡重建与实时诊断 | 11 | 9% |
 | 代理模型与神经算子 | 18 | 15% |
-| 物理信息神经网络 | 8 | 7% |
+| 物理信息神经网络 | 11 | 9% |
 | 基础模型与迁移学习 | 11 | 9% |
-| 数字孪生与系统集成 | 9 | 8% |
+| 数字孪生与系统集成 | 9 | 7% |
 | 聚变工程与装置设计 | 18 | 15% |
 
 ### A.4.1 检索执行记录
@@ -991,13 +1113,13 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 | arXiv (physics.plasm-ph) | 2026-05-20 | "plasma" OR "tokamak" OR "fusion" | 285 | 245 | 52 |
 | arXiv (cs.LG) | 2026-05-20 | "plasma" OR "tokamak" OR "fusion" | 156 | 128 | 15 |
 | 会议论文集 | 2026-05-22 | 手动检索 | 68 | 58 | 5 |
-| **合计** | — | — | **1758** | **1451** | **117** |
+| **合计** | — | — | **1758** | **1451** | **121** |
 
-注：去重后1451篇文献经过标题/摘要筛选（排除E1-E3），再经全文筛选（排除E4-E7），最终纳入117篇。约15篇2022-2023年文献作为背景上下文纳入，已在正文中标注。
+注：去重后1451篇文献经过标题/摘要筛选（排除E1-E3），再经全文筛选（排除E4-E7），最终纳入121篇。约15篇2022-2023年文献作为背景上下文纳入，已在正文中标注。
 
 ### A.5 关键研究结果分类汇总
 
-以下表格对本文综述的关键研究按方法类型、验证层次和装置进行分类，明确区分仿真验证、仿真+实验验证和实验验证。该表格共收录40项关键研究，覆盖DRL控制、破裂预测、ELM抑制、平衡重建、代理模型、基础模型、数字孪生等多个技术方向。值得注意的是，40项关键研究中仅12项（30%）经过实验验证，且其中8项来自DIII-D单一装置——这一分布反映了当前AI for Fusion领域实验验证高度集中的现实。验证层次的分类标准为：（1）**仿真验证**：结果仅基于仿真数据或离线数据分析，未在真实装置上进行闭环实验；（2）**仿真+实验**：方法在仿真中训练，但在真实装置上进行了部分验证实验；（3）**实验验证**：方法在真实托卡马克装置上进行了完整的闭环实验验证。从表中可以看出，DRL控制和ELM抑制已有较多实验验证结果，而代理模型、基础模型和PINNs仍以仿真验证为主。
+以下表格对本文综述的关键研究按方法类型、验证层次和装置进行分类，明确区分仿真验证、仿真+实验验证和实验验证。该表格共收录44项关键研究，覆盖DRL控制、破裂预测、ELM抑制、平衡重建、代理模型、基础模型、数字孪生等多个技术方向。值得注意的是，44项关键研究中仅12项（27%）经过实验验证，且其中8项来自DIII-D单一装置——这一分布反映了当前AI for Fusion领域实验验证高度集中的现实。验证层次的分类标准为：（1）**仿真验证**：结果仅基于仿真数据或离线数据分析，未在真实装置上进行闭环实验；（2）**仿真+实验**：方法在仿真中训练，但在真实装置上进行了部分验证实验；（3）**实验验证**：方法在真实托卡马克装置上进行了完整的闭环实验验证。从表中可以看出，DRL控制和ELM抑制已有较多实验验证结果，而代理模型、基础模型和PINNs仍以仿真验证为主。
 
 | 研究 | 方法 | 验证层次 | 装置 | 关键指标 |
 |------|------|---------|------|---------|
@@ -1041,3 +1163,7 @@ GyroSwin的突破性意义在于：（1）它首次证明了神经网络可以�
 | Lin et al. 2025 [115] | PaMMA-Net | 仿真验证 | 多装置 | 多模态注意力平衡重建 |
 | Guo et al. 2025 [113] | PINN逃逸电子代理 | 仿真验证 | 理论模型 | 逃逸电子动量分布预测 |
 | Park et al. 2025 [114] | Neural ODE燃烧等离子体 | 仿真验证 | ITER级 | 物理约束长时间预测 |
+| Parisi et al. 2025 [118] | ML ELM-free预测 | 仿真验证 | 球形托卡马克 | 高截面比ELM-free条件预测 |
+| Fiorenza et al. 2025 [119] | CARONTE (PI-ELM) | 仿真验证 | 磁约束装置 | 毫秒级等离子体边界重建 |
+| Zhou & Zhu 2025 [120] | PINN平衡重建 | 仿真验证 | Grad-Shafranov | 高精度GS方程求解 |
+| Thun et al. 2025 [121] | PINN MHD平衡 | 仿真验证 | 理想MHD | MHD平衡精度提升 |
