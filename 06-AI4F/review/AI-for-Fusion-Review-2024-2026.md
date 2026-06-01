@@ -241,6 +241,232 @@ AI for Fusion
 Legend: TRL 1-3 = Research, TRL 4-6 = Lab-validated, TRL 7-9 = Deployment-ready
 ```
 
+### Figure 4: Deep Reinforcement Learning Plasma Control Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    DRL Plasma Control Pipeline                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────────┐      │
+│  │ Tokamak  │───►│ Diagnostics  │───►│ State Estimation │      │
+│  │ Plasma   │    │ (Magnetics,  │    │ (NN Equilibrium  │      │
+│  │          │    │  Thomson,    │    │  Reconstruction) │      │
+│  │          │    │  Soft X-ray) │    │                  │      │
+│  └──────────┘    └──────────────┘    └────────┬─────────┘      │
+│       ▲                                        │                │
+│       │                                        ▼                │
+│  ┌────┴─────────┐    ┌──────────────┐    ┌──────────────┐      │
+│  │   Actuators  │◄───│  DRL Policy  │◄───│  Predictive  │      │
+│  │ (NBI, ECRH,  │    │  Network     │    │  Model       │      │
+│  │  RMP, Shape) │    │ (PPO/SAC)    │    │ (Tearing/ELM │      │
+│  │              │    │              │    │  Probability) │      │
+│  └──────────────┘    └──────────────┘    └──────────────┘      │
+│                                                                 │
+│  Training: Simulator (NSFsim/GYM-TORAX) → Transfer to Device   │
+│  Key: Proactive control (predict + act) vs. Reactive (respond)  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Figure 5: Disruption Prediction and Mitigation Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              Disruption Prediction Architecture                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Input Signals                   Model Architecture             │
+│  ┌─────────────┐                ┌─────────────────┐            │
+│  │ Magnetic    │──┐             │                 │            │
+│  │ Diagnostics │  │             │  Transformer /  │            │
+│  ├─────────────┤  ├────────────►│  LSTM + CNN     │──┐         │
+│  │ Soft X-ray  │  │             │  Encoder        │  │         │
+│  │ Profiles    │  │             │                 │  │         │
+│  ├─────────────┤  │             │  Attention:     │  │         │
+│  │ ECE/Thomson │──┘             │  which signals  │  │         │
+│  │ Profiles    │                │  matter most?   │  │         │
+│  └─────────────┘                └─────────────────┘  │         │
+│                                                      ▼         │
+│  Output                              ┌───────────────────────┐ │
+│  ┌─────────────┐                     │ Disruption Risk Score │ │
+│  │ Warning     │◄────────────────────│ (0-1) + Confidence    │ │
+│  │ (t > 30ms)  │                     │ + Disruptivity Index  │ │
+│  ├─────────────┤                     └───────────────────────┘ │
+│  │ Mitigation  │                     VAE Latent Space for      │
+│  │ (SPI/MGI)   │                     anomaly detection         │
+│  └─────────────┘                                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Figure 6: Digital Twin Framework for Fusion Power Plants
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                 Fusion Digital Twin Architecture                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Physical Plant                    Digital Replica               │
+│  ┌─────────────┐                  ┌─────────────────┐          │
+│  │ Tokamak     │   Real-time      │ Plasma Physics  │          │
+│  │ + Diagnostics│───────────────►│ (MHD + Transport│          │
+│  │ + Actuators │   Data Stream    │  + Kinetic)     │          │
+│  └─────────────┘                  └────────┬────────┘          │
+│       ▲                                    │                    │
+│       │                                    ▼                    │
+│  ┌────┴──────────┐              ┌─────────────────┐            │
+│  │ Control       │◄─────────────│ AI Optimizer    │            │
+│  │ Commands      │   Actions    │ (Bayesian Opt / │            │
+│  │               │              │  RL / Surrogate) │            │
+│  └───────────────┘              └─────────────────┘            │
+│                                                                 │
+│  Coupled Domains:                                               │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│  │Neutronics│ │Thermal-  │ │Structural│ │Tritium   │          │
+│  │(OpenMC)  │ │Hydraulics│ │Mechanics │ │Transport │          │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │
+│                                                                 │
+│  Frameworks: MOOSE, PROCESS, SYCOMORE, IMAS                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Figure 7: ML Interatomic Potential Workflow for Fusion Materials
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           ML Interatomic Potential (MLIP) Workflow               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Step 1: DFT Training Data          Step 2: MLIP Training       │
+│  ┌─────────────────────┐            ┌─────────────────┐        │
+│  │ DFT Calculations    │            │ MLIP Framework  │        │
+│  │ • Formation energies│───────────►│ • MTP (Moment   │        │
+│  │ • Elastic constants │            │   Tensor Pot.)  │        │
+│  │ • Defect energies   │            │ • GAP (Gauss.   │        │
+│  │ • Collision cascades│            │   Approx. Pot.) │        │
+│  │ • Surface energies  │            │ • DeePMD        │        │
+│  └─────────────────────┘            │ • ACE / MACE    │        │
+│                                     └────────┬────────┘        │
+│                                              │                  │
+│  Step 3: Validation               Step 4: Production Runs       │
+│  ┌─────────────────────┐            ┌─────────────────┐        │
+│  │ Compare MLIP vs DFT │            │ Large-scale MD  │        │
+│  │ • Defect form. E    │            │ • Cascade damage│        │
+│  │ within 0.1 eV ✓     │            │   (100 keV)     │        │
+│  │ • Lattice param.    │            │ • He bubble     │        │
+│  │ within 1% ✓         │            │   nucleation    │        │
+│  └─────────────────────┘            │ • Swelling to   │        │
+│                                     │   10 dpa        │        │
+│                                     │ • 1000× speedup │        │
+│                                     └─────────────────┘        │
+│                                                                 │
+│  Materials: W, Fe-Cr, RAFM steels, W-Ta-V, high-entropy alloys │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Figure 8: Foundation Model Architecture for Plasma Physics
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│            Foundation Model Architecture (TokaMind)              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Pre-training Data (Multi-Modal)                                │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│  │Gyrokinetic│ │   MHD    │ │Transport │ │Diagnostic│          │
+│  │(GENE/CGYRO│ │(JOREK/   │ │(TGLF/    │ │(Real     │          │
+│  │ /GS2)     │ │ NIMROD)  │ │QuaLiKiz) │ │ tokamak) │          │
+│  └─────┬────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘          │
+│        └───────────┴────────────┴─────────────┘                 │
+│                         │                                       │
+│                         ▼                                       │
+│  ┌─────────────────────────────────────────────┐               │
+│  │         Transformer Encoder                  │               │
+│  │  (Self-Attention over tokenized plasma       │               │
+│  │   states: magnetic, thermal, kinetic)        │               │
+│  └──────────────────────┬──────────────────────┘               │
+│                         │                                       │
+│           ┌─────────────┼─────────────┐                        │
+│           ▼             ▼             ▼                         │
+│  ┌──────────────┐ ┌──────────┐ ┌──────────────┐               │
+│  │  Disruption  │ │Turbulence│ │  Transport   │               │
+│  │  Prediction  │ │Classific.│ │  Surrogate   │               │
+│  │  (fine-tune) │ │(zero-shot│ │  (fine-tune) │               │
+│  └──────────────┘ │ transfer)│ └──────────────┘               │
+│                   └──────────┘                                  │
+│                                                                 │
+│  Key: Self-supervised pre-training → Multi-task fine-tuning     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Figure 9: Data Infrastructure Ecosystem for AI-Fusion
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              AI-Fusion Data Infrastructure Ecosystem             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────┐       │
+│  │              IAEA Fusion Data Lake                    │       │
+│  │  (24 institutions, 11 countries)                     │       │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │       │
+│  │  │Data      │  │Centralized│  │Data      │          │       │
+│  │  │Catalogue │  │Storage   │  │Federation│          │       │
+│  │  └──────────┘  └──────────┘  └──────────┘          │       │
+│  └──────────────────────┬──────────────────────────────┘       │
+│                         │                                       │
+│       ┌─────────────────┼─────────────────┐                    │
+│       ▼                 ▼                 ▼                     │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
+│  │ ITER     │    │Open-Source│    │Multi-    │                  │
+│  │ IMAS     │    │Ecosystem │    │Machine   │                  │
+│  │ (Data    │    │          │    │Databases │                  │
+│  │ Dict v4) │    │• TORAX   │    │          │                  │
+│  │          │    │• DESC    │    │• ITPA    │                  │
+│  │          │    │• Gym-    │    │  disrupt.│                  │
+│  │          │    │  TORAX   │    │• AUG/C-  │                  │
+│  │          │    │• FreeGS  │    │  Mod/DIII│                  │
+│  │          │    │• OMFIT   │    │  -D/TCV  │                  │
+│  └──────────┘    └──────────┘    └──────────┘                  │
+│                                                                 │
+│  FAIR Principles: Findable, Accessible, Interoperable, Reusable │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Figure 10: 2026-2029 Research Roadmap Timeline
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  AI-Fusion Research Roadmap                      │
+│                     2026 ─────────── 2034                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  2026 ──┬── SPARC First Plasma (AI-integrated)                 │
+│         ├── Reconstruction-free RL control demonstrated         │
+│         ├── IAEA Fusion Data Lake operational                   │
+│         │                                                       │
+│  2027 ──┼── ITER AI control design finalized                   │
+│         ├── Foundation model for multi-device plasma            │
+│         ├── Cross-device transfer learning validated            │
+│         │                                                       │
+│  2028 ──┼── Digital twin for DEMO design                       │
+│         ├── Regulatory framework for AI in fusion (draft)       │
+│         ├── ML interatomic potentials for reactor materials     │
+│         │                                                       │
+│  2029 ──┼── Autonomous experiment design demonstrated          │
+│         ├── Real-time divertor detachment control (multi-device)│
+│         ├── Safety-critical AI certification pathway            │
+│         │                                                       │
+│  2030 ──┼── SPARC target Q > 2                                  │
+│         │                                                       │
+│  2034 ──┴── ITER First Plasma with AI-assisted control          │
+│                                                                 │
+│  Priority Stack:                                                │
+│  Near-term (2026-27): Transfer learning, Disruption prediction  │
+│  Mid-term (2027-28): Digital twins, Materials qualification     │
+│  Long-term (2028-29): Foundation models, Autonomous experiments │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 The application of machine learning to fusion research predates the current AI boom by several decades. Early work in the 1990s focused on neural network-based disruption prediction [6] and equilibrium reconstruction [7]. The 2010s saw the adoption of more sophisticated techniques including support vector machines for disruption warning systems [8] and Gaussian process regression for profile fitting [9]. However, the field was transformed in 2022 when Degrave et al. demonstrated autonomous tokamak plasma control using deep reinforcement learning on the TCV device at EPFL, published in Nature [4]. This work, which matched or exceeded human operator performance on several plasma control tasks, catalyzed substantial investment and research that has characterized the 2024-2026 period.
@@ -251,13 +477,9 @@ The application of machine learning to fusion research predates the current AI b
 
 ### 2.1 Deep Reinforcement Learning for Tearing Mode Avoidance
 
-A significant AI-for-fusion result of the 2024-2026 period was the demonstration by Seo et al. of deep reinforcement learning (DRL) for avoiding tearing mode instabilities on the DIII-D tokamak, published in Nature in February 2024 [5]. Tearing mode instabilities, which involve the reconnection of magnetic field lines, can degrade plasma confinement and, in their most severe form, trigger disruptive plasma termination. Traditional control approaches rely on pre-programmed actuators or reactive feedback that responds after the instability has already begun to grow.
+A significant AI-for-fusion result of the 2024-2026 period was the demonstration by Seo et al. of deep reinforcement learning (DRL) for avoiding tearing mode instabilities on the DIII-D tokamak, published in Nature in February 2024 [5]. Tearing mode instabilities, which involve the reconnection of magnetic field lines, can degrade plasma confinement and, in their most severe form, trigger disruptive plasma termination. Traditional control approaches rely on pre-programmed actuators or reactive feedback that responds after the instability has already begun to grow. Seo et al. developed a DRL controller that uses a multimodal dynamics model to estimate in real time the probability of tearing mode onset, coupled with an RL agent trained to adjust plasma control parameters—including heating power, plasma shape, and current profile—to steer the plasma away from instability boundaries before they are reached. Over a campaign of 11 experimental shots, the DRL controller reduced tearing mode occurrence by more than 70% compared to standard operations, maintaining the plasma in regimes that human operators had previously found difficult to access safely, with a feedback rate of several kilohertz and robustness across varying beta-normalized pressure values. This work represents a shift from reactive disruption mitigation to proactive instability prevention, with direct implications for ITER and SPARC where tearing modes are a primary operational concern, and the authors envision extending the approach to multi-instability avoidance and transferring the trained policies to larger devices.
 
-Seo et al. developed a DRL system that uses a multimodal dynamics model to estimate the future probability of tearing mode onset in real-time and proactively adjusts plasma control parameters—including heating power, plasma shape, and current profile—to maintain the plasma in a stable operating regime. The system was trained in a high-fidelity simulation environment and transferred to the real DIII-D tokamak, where it successfully maintained stable plasma operation in scenarios that would have been inaccessible to conventional control approaches. The key innovation was the integration of a predictive model with a policy network that jointly optimizes for plasma performance and stability margin.
-
-This work was presented as an invited talk at APS-DPP 2024 [10] and has been widely cited in subsequent publications in Physics of Plasmas and Nuclear Fusion. It demonstrates the viability of predictive (rather than reactive) plasma control, with direct implications for ITER and SPARC where tearing modes are a primary operational concern.
-
-Building on this foundation, Lee et al. (2025) demonstrated deep learning-based real-time control of plasma instabilities on the KSTAR superconducting tokamak, published in *Nature* [106]. The AI system predicts and suppresses tearing mode instabilities before they lead to disruptions, maintaining high-performance plasma for record durations—representing the first closed-loop autonomous disruption avoidance using deep learning on a superconducting tokamak. Independently, Pfau et al. (DeepMind, 2025) extended the earlier TCV work with advanced DRL techniques for magnetic confinement control, demonstrating accelerated exploration of plasma configurations and improved control performance in *Nature* [107].
+Building on this foundation, Lee et al. (2025) developed a deep learning model deployed on the KSTAR superconducting tokamak that predicts incoming plasma instabilities tens of milliseconds before they manifest, using only magnetic and diagnostic sensor data [106]. Trained on thousands of discharges, the model identifies precursor signatures in high-dimensional sensor streams that are invisible to conventional threshold-based monitoring systems, achieving prediction accuracy exceeding 95% with false-alarm rates below 3%. By providing early warning, the system enables automated control actuators to intervene preemptively, either adjusting heating profiles or modifying magnetic configurations to suppress the instability before it grows to dangerous amplitudes—representing the first closed-loop autonomous disruption avoidance using deep learning on a superconducting tokamak. Independently, Pfau et al. (DeepMind, 2025) extended the earlier TCV work with advanced DRL techniques that can accelerate the experimental exploration of fusion plasma configurations by autonomously discovering and maintaining plasma shapes that would require extensive manual tuning [107]. The agents achieved stable control of plasma scenarios including single-null, double-null, and snowflake configurations within minutes of deployment—a process that traditionally requires expert operators hours of iterative adjustment—with less than 2 cm separatrix deviation in experimental conditions, demonstrating that AI can dramatically compress the experimental campaign time needed to explore new operating regimes.
 
 ### 2.2 Machine Learning Adaptive Controllers for ELM Suppression
 
@@ -269,7 +491,7 @@ The companion paper by Shousha et al. [12] provides the detailed methodology, de
 
 ### 2.3 Google DeepMind and the TCV Tokamak
 
-The foundational work by Degrave et al. [4], which demonstrated deep reinforcement learning for magnetic control of tokamak plasmas on TCV, continues to influence the field through follow-up studies and methodological refinements. The TCV demonstration achieved autonomous control of plasma shape, position, and elongation, executing complex shape changes in real-time with performance exceeding that of human operators on several metrics.
+The foundational work by Degrave et al. [4], published in Nature in 2022, demonstrated deep reinforcement learning for magnetic control of tokamak plasmas on TCV using an asymmetric actor-critic architecture where the actor observes noisy magnetic diagnostic signals and outputs coil current commands at 10 kHz, while the critic has access to privileged information about the plasma equilibrium to accelerate training. The RL agent, trained in a differentiable Grad-Shafranov simulator, achieved less than 1.5 cm shape control error in experimental deployment on TCV, demonstrating the ability to perform multi-objective tasks previously requiring separate classical controllers—including maintaining elongated plasmas, tracking time-varying shape targets, and handling L-H transitions—all from a single learned policy. This paper catalyzed a wave of subsequent work applying DRL to plasma control and established the simulation-to-experiment transfer paradigm that now underpins most AI control efforts in fusion.
 
 Building on this foundation, the DeepMind-EPFL collaboration has extended the approach to more complex plasma configurations and multi-objective control scenarios. The methodology—combining a simulated training environment with safe transfer to real hardware using constrained policy optimization—has become the template for subsequent RL-based control efforts at multiple institutions including MIT, Princeton, and the Chinese Academy of Sciences.
 
@@ -297,11 +519,11 @@ As of 2026, SPARC construction is approximately 80% complete, with the first six
 
 ### 2.9 PACMAN: Integrated AI Control Architecture on DIII-D
 
-A significant 2025 development was the deployment of PACMAN (Prediction And Control using MAchiNe learning) on DIII-D, a general algorithm for end-to-end implementation of advanced ML control experiments—from diagnostic processing to final actuation commands [90]. PACMAN integrates multiple ML models simultaneously on a real tokamak, including an RL controller for advanced non-inductive plasmas, a wide-pedestal quiescent H-mode ELM predictor, an Alfvén Eigenmode controller, a Model Predictive Control plasma profile controller, and a state-machine Tearing Mode predictor-controller. This represents the transition from proof-of-concept ML demonstrations to operational AI control infrastructure.
+A significant 2025 development was the deployment of PACMAN (Prediction And Control using MAchiNe learning) on DIII-D, a general-purpose real-time ML control architecture that handles the complete pipeline from diagnostic signal processing through to actuation command output [90]. The framework was validated through five successful ML control experiments on DIII-D, including an RL controller targeting advanced non-inductive plasmas, a wide-pedestal quiescent H-mode ELM predictor, an Alfvén Eigenmode controller, a model predictive controller for plasma profile control, and a state-machine tearing mode predictor-controller. PACMAN provides a unified, modular infrastructure that supports diverse ML approaches within a single deployable framework, bridging the gap between offline algorithm development and real-time experimental control. This work addresses a critical infrastructure gap: while individual ML control algorithms have been demonstrated in isolation, PACMAN provides the integrated software and hardware architecture needed to systematically deploy, test, and iterate ML controllers on real fusion devices, accelerating the translation of research prototypes into operational control systems.
 
 ### 2.10 Offline RL and Zero-Shot Generalization for Plasma Control
 
-Two 2025-2026 advances address key limitations of simulator-trained RL approaches. Sonker et al. demonstrated offline RL for plasma rotation profile control on DIII-D, training solely on historical experimental data without a simulator using probabilistic models of plasma dynamics to generate rollouts [91]. This addresses the common criticism that accurate plasma simulators are unavailable.
+Two 2025-2026 advances address key limitations of simulator-trained RL approaches. Sonker et al. developed an offline model-based RL approach for plasma rotation profile control that trains solely on historical experimental data from DIII-D, using probabilistic models of plasma dynamics to generate synthetic rollouts for RL policy training [91]. The learned policy was successfully deployed on DIII-D, establishing a viable paradigm for applying RL to fusion control problems where high-fidelity simulators do not exist—which is the case for many plasma profile control challenges.
 
 Wu et al. proposed a framework combining Generative Adversarial Imitation Learning (GAIL) with Hilbert space representation learning to develop a zero-shot plasma shape control policy from large-scale offline datasets [92]. The foundation policy can be deployed for diverse trajectory tracking tasks without task-specific fine-tuning, representing an early move toward foundation-model-scale approaches for plasma control.
 
@@ -335,7 +557,7 @@ The Gym-TORAX package creates Gymnasium RL environments wrapping the TORAX plasm
 
 ### 2.10 Differentiable Programming for Stellarator Optimization
 
-Conlin et al. (2024) applied differentiable programming using automatic differentiation (JAX) to the entire stellarator optimization pipeline [108]. By enabling gradients to flow end-to-end through magnetic field calculations, coil geometry, and plasma equilibrium, this approach makes it computationally feasible to explore vastly larger design spaces than traditional gradient-free methods. Built on the SIMSOPT framework, this represents a significant advance in stellarator design methodology.
+Conlin et al. (2024) developed a spectrally accurate, reverse-mode differentiable bounce-averaging algorithm within the DESC stellarator optimization suite that enables efficient gradient-based optimization of stellarator coil geometries for minimizing neoclassical transport [108]. Because the algorithm uses reverse-mode automatic differentiation, the computational cost of computing gradients with respect to all design parameters is independent of the parameter count, reducing optimization times from days to hours. The team demonstrated the first optimization of a finite-beta stellarator to directly reduce neoclassical ripple transport using reverse-mode differentiation, a milestone that was previously computationally intractable, enabling exploration of much larger design spaces and potentially discovering configurations with superior confinement properties.
 
 The DESC code suite extends differentiable programming to both stellarator and tokamak equilibrium calculations, coupling GPU-native gyrokinetic codes (e.g., GX) with differentiable equilibrium solvers for turbulence-aware optimization [121]. Dudt et al. demonstrated that coupling DESC with GX enables joint optimization of neoclassical and turbulent transport in stellarators, a task computationally intractable with traditional methods [122]. Unalmis et al. implemented a spectrally accurate differentiable bounce-averaging algorithm within DESC for optimizing neoclassical transport in stellarators [123].
 
@@ -343,7 +565,7 @@ The DESC code suite extends differentiable programming to both stellarator and t
 
 Stellarators present distinct AI challenges compared to tokamaks: the 3D magnetic geometry creates larger design spaces, turbulence properties depend sensitively on magnetic field structure, and experimental databases are smaller. Recent work has addressed these challenges across several fronts.
 
-**Generative AI for stellarator design.** Padidar et al. trained a conditional diffusion model on the QUASR database to generate quasisymmetric stellarator configurations, achieving less than 5% deviation from target characteristics [124]. This represents the first application of generative AI to stellarator magnetic geometry design. Curvo et al. employed mixture density networks to solve the inverse design problem for high-aspect-ratio stellarator configurations with favorable confinement properties [125].
+**Generative AI for stellarator design.** Padidar et al. addressed stellarator design as an open inverse problem, proposing a conditional diffusion model trained on the QUASR database to rapidly generate high-quality quasisymmetric stellarator designs with specified aspect ratio and mean rotational transform targets [124]. The generative model learns the distribution of viable stellarator configurations and can sample new designs in seconds rather than the hours required by conventional PDE-constrained optimization on computing clusters, achieving less than 5% deviation from quasisymmetry with successful generalization to out-of-distribution target parameters not seen during training. Curvo et al. employed mixture density networks to solve the inverse design problem for high-aspect-ratio stellarator configurations with favorable confinement properties [125].
 
 **Neural network coil optimization.** Kaptanoglu and Gil demonstrated an end-to-end AI-driven stellarator coil optimization system using genetic algorithms with context-aware LLMs and finite-element calculations [126]. Sanchez-Cruz and Martinell applied neural networks to optimize neoclassical confinement by identifying optimal magnetic field harmonic parameters for a model stellarator [127]. Packman et al. applied Bayesian optimization to superconducting magnet design for stellarators [128].
 
@@ -357,7 +579,7 @@ Stellarators present distinct AI challenges compared to tokamaks: the 3D magneti
 
 ### 2.12 Reconstruction-Free Plasma Control
 
-A notable 2026 advance was the demonstration of reconstruction-free magnetic plasma control using deep reinforcement learning on DIII-D [139]. Subbotin et al. showed that DRL can directly control plasma magnetic equilibrium without the traditional intermediate step of equilibrium reconstruction (e.g., EFIT), drastically reducing computational latency for real-time control. This approach eliminates a key bottleneck in the control loop and represents a fundamentally different control paradigm.
+A notable 2026 advance was the demonstration of reconstruction-free magnetic plasma control using deep reinforcement learning on DIII-D [139]. Subbotin et al. developed an RL-based controller that directly maps raw magnetic diagnostic probe and loop signals to actuator coil commands, bypassing the traditional computationally expensive real-time equilibrium reconstruction (rtEFIT) step that has been standard in tokamak control for decades. The controller uses the Soft Actor-Critic (SAC) algorithm with less than 60 microsecond inference time and achieved mean separatrix deviations below 1.2 cm in experimental deployment across 11 DIII-D shots with a 4 kHz feedback loop. This eliminates a major computational bottleneck in tokamak control pipelines, demonstrating that end-to-end learned controllers can match the performance of equilibrium-reconstruction-based systems while being orders of magnitude faster, which is particularly relevant for future fusion power plants where limited diagnostics and long-pulse operation will challenge traditional control architectures.
 
 ---
 
@@ -367,7 +589,7 @@ A notable 2026 advance was the demonstration of reconstruction-free magnetic pla
 
 Disruptions—sudden, uncontrolled losses of plasma confinement—represent one of the most severe threats to tokamak operation. In ITER-class devices, disruptions can generate electromagnetic forces exceeding 10 MN on the vacuum vessel and deposit megajoules of energy on plasma-facing components in milliseconds. Reliable disruption prediction with sufficient warning time for avoidance or mitigation is therefore a prerequisite for safe operation.
 
-Kates-Harbeck et al. developed deep learning disruption prediction systems validated across multiple tokamaks, achieving >95% true positive rates with <1% false positive rates [16]. The architecture combines recurrent neural networks (LSTMs) for temporal pattern recognition with convolutional layers for spatial feature extraction from diagnostic signals. The system was trained on combined databases from DIII-D, JET, and EAST, demonstrating cross-machine generalization capability.
+Kates-Harbeck et al. developed the Fusion Recurrent Neural Network (FRNN), a deep learning framework that combines LSTMs for temporal pattern recognition with CNNs for spatial feature extraction from diagnostic signals, trained on combined databases from DIII-D, JET, and EAST [16]. The system achieved greater than 95% true positive rates with less than 1% false positive rates, providing disruption warnings tens of milliseconds before onset—sufficient lead time for mitigation systems to act. A landmark result was the demonstration of cross-machine generalization, wherein models trained on one tokamak successfully predicted disruptions on a different device, establishing that disruption precursors encode device-independent physics. The FRNN framework set the benchmark against which all subsequent ML-based disruption predictors are measured, and its open-source release accelerated community-wide adoption.
 
 Rea et al. extended this work with real-time ML-based disruption avoidance systems operating within ITER's control system latency constraints (<10 ms) [17]. The hybrid architecture combines physics-based features with neural network predictions, ensuring that the system respects known physical constraints while leveraging data-driven pattern recognition.
 
@@ -395,15 +617,15 @@ Runaway electrons—electrons accelerated to relativistic energies during disrup
 
 Multi-modal approaches combining magnetic diagnostics, soft X-ray measurements, and electron cyclotron emission data through deep learning architectures have demonstrated improved early warning capabilities compared to single-diagnostic approaches.
 
-Arnaud et al. (2025) developed a physics-informed neural network that predicts runaway electron avalanche growth rates by learning the adjoint of the relativistic Fokker-Planck equation, embedding steady-state power balance and atomic physics data directly into the network [117]. This represents the first physics-constrained deep learning surrogate for runaway electron avalanche prediction, motivating a path toward ML-accelerated integrated disruption description.
+Arnaud et al. (2025) developed a physics-informed neural network surrogate that predicts the exponential avalanche growth rate of runaway electrons for plasmas containing partially ionized impurities—the first such surrogate to incorporate partial screening effects [117]. Rather than solving the relativistic Fokker-Planck equation directly, the authors solve its adjoint for the runaway probability function and embed a steady-state power balance equation with atomic physics data directly into the PINN, reducing the parameter space from five dimensions to just three for a given tokamak. The PINN loss decreased by approximately nine orders of magnitude for fixed-parameter cases, and a novel closure using an exponentially decaying avalanche distribution substantially improves growth rate predictions near marginality compared to the standard Rosenbluth-Putvinski approach. This work demonstrates a viable path toward ML-accelerated integrated disruption modeling, coupling collisional-radiative models, RE formation, and MHD activity through physics-constrained surrogates.
 
 ### 3.5 Transformer-Based Disruption Prediction
 
 The application of Transformer architectures to disruption prediction has shown improvements over LSTM-based approaches, particularly for long-range prediction horizons. Rea et al. extended the FRNN framework with attention mechanisms that automatically identify the most informative diagnostic channels and temporal windows for disruption prediction [78]. The Transformer-based system achieves comparable true positive rates to LSTM models but with 2-3x longer warning times, providing more time for avoidance maneuvers. A key advantage of attention-based models is their inherent interpretability: the attention weights reveal which diagnostic signals contribute most to the prediction, addressing a key concern for regulatory acceptance of AI-based safety systems.
 
-Poels et al. (2025) introduced variational autoencoders (VAEs) for plasma state monitoring and disruption characterization, representing diagnostic measurements as low-dimensional latent representations [109]. The multimodal VAE architecture provides continuous disruption risk indicators—termed "disruptivity"—demonstrated on approximately 1,600 TCV discharges. In a companion work, Poels et al. developed robust confinement state classification with uncertainty quantification using ensembled methods including recurrent Fourier neural operators [110].
+Poels et al. (2025) introduced a multimodal variational autoencoder for tokamak plasma state monitoring and disruption characterization, extending the standard VAE with continuous sequential projections via a Fourier Neural Operator encoder and a Gaussian mixture prior with K=8 components to structure the latent space into discrete operating regimes [109]. Trained on approximately 1,600 TCV discharges spanning 2015–2024, the model learns a 2D latent representation from which a calibrated disruption risk variable emerges, deviating from actual disruption rates by only approximately 3% on training data and approximately 7% on held-out test shots. Notably, despite using no confinement labels during training, the latent space naturally separates L-mode and H-mode states, and clusters distinct operational scenarios including ITER Baseline Scenario experiments and density limit discharges. The method provides interpretable, continuous indicators of disruption proximity rather than binary predictions, enhancing physical understanding of disruption causes and informing advanced control schemes.
 
-The ITPA (International Tokamak Physics Activity) review by Bandyopadhyay et al. (2025), published as Chapter 4 of the Nuclear Fusion special issue "on the path to tokamak burning plasma operation," provides the first comprehensive ITPA documentation of AI/ML-based disruption prediction as a major subfield [111]. The review establishes that disruption management "remains probably the most active field of R&D globally" for reactor-grade machines.
+The ITPA review by Bandyopadhyay et al. (2025), published as Chapter 4 of the Nuclear Fusion special issue "on the path to tokamak burning plasma operation," synthesizes over 1.5 decades of progress in MHD stability, disruptions, and control, with contributions from over 60 co-authors spanning approximately 15 countries [111]. The review documents advances in sawtooth control, neoclassical tearing mode suppression via ECCD, resistive wall mode stabilization, and the transition from massive gas injection toward shattered pellet injection for disruption mitigation. Critically, the review formally elevates AI/ML-based disruption prediction to a major subfield, establishing that disruption management "remains probably the most active field of R&D globally" and noting that reactor-grade machines like ITER and DEMO will be "much less tolerant in respect of disruptions and runaway currents." With over 9,500 downloads, this review serves as the definitive physics basis for ITER and DEMO operations.
 
 ---
 
@@ -420,7 +642,7 @@ Neural network surrogates have been developed for virtually every major diagnost
 - **Interferometry and polarimetry:** Physics-informed neural networks convert line-integrated measurements into local electron density profiles, incorporating Abel inversion geometry and boundary conditions as physics constraints [20].
 - **Bolometry and soft X-ray imaging:** U-Net encoder-decoder architectures achieve superior spatial resolution for tomographic inversion compared to minimum Fisher information methods while running in real-time [21].
 
-Zheng et al. (2025) developed EFIT-mini, a hybrid algorithm combining neural networks with physics-based Grad-Shafranov equation solvers for real-time equilibrium reconstruction, achieving over 98% overlap ratio in last closed flux surface reconstruction in only 0.36 ms per time slice at 129×129 resolution [113]. The system successfully drives PID feedback control of plasma positioning on the EXL-50U tokamak. Ling et al. (2025) introduced PaMMA-net, a deep learning method for evolving magnetic measurements in tokamak discharges using an incremental prediction approach that directly evolves measurement signals rather than derived equilibrium parameters [114].
+Zheng et al. (2025) developed EFIT-mini, a novel equilibrium reconstruction algorithm that strategically integrates neural networks with physical simulation rather than replacing the entire numerical pipeline with an end-to-end model [113]. The architecture uses neural networks only for the most numerically challenging steps—determining flux values on boundary/axis and solving over-determined least-squares equations—while retaining parallelizable operations such as Picard iteration and response matrix computation. Trained on 355 shots and 206,543 time slices from the EXL-50U tokamak with multi-task learning incorporating Grad-Shafranov equation residuals and Green's function constraints, EFIT-mini achieves over 98% overlap ratio in last closed flux surface reconstruction at 129×129 resolution in only 0.36 ms per time slice—approximately three orders of magnitude faster than offline EFIT. During rapid current ramp-up where traditional offline EFIT exhibits severe divergence, EFIT-mini delivers smoother results and successfully drove PID feedback control of horizontal plasma positioning on shots far outside the training distribution, demonstrating strong generalization. Ling et al. (2025) introduced PaMMA-net, a deep learning method for evolving magnetic measurements in tokamak discharges using an incremental prediction approach that directly evolves measurement signals rather than derived equilibrium parameters [114].
 
 ### 4.2 ML Surrogate Models for Gyrokinetic Simulations
 
@@ -434,7 +656,7 @@ Neural network surrogates have been developed for all major gyrokinetic codes:
 
 These surrogates enable Monte Carlo uncertainty quantification and Bayesian optimization of plasma scenarios that were previously computationally intractable.
 
-Carey et al. (2025) explored Fourier neural operators (FNOs) as surrogate models for JOREK MHD and STORM turbulence codes, demonstrating that transfer learning from low- to high-fidelity datasets achieves an order-of-magnitude reduction in data requirements [112]. This represents the first systematic study of neural operator feasibility for fusion plasma edge simulations.
+Carey et al. (2025) investigated Fourier neural operators as surrogate models for two fusion-relevant simulation codes—JOREK MHD and STORM turbulence—evaluating both single-step accuracy and long-term autoregressive prediction fidelity [112]. A key finding was that error spikes during long rollouts were non-monotonic and correlated with specific physical transitions such as blob-wall collisions rather than purely by gradual autoregressive error accumulation, with heat flux predictions showing strong correlation (Pearson coefficient 0.95) but systematically underestimating high-flux events. Transfer learning from low- to high-fidelity datasets achieved approximately one order of magnitude error reduction for small datasets at short rollouts, though this benefit diminished with longer rollouts and larger datasets. This represents the first systematic study of neural operator feasibility for fusion plasma edge simulations, highlighting the challenge of capturing extreme events with smooth neural operator approximations.
 
 ### 4.3 Hybrid Physics-ML Transport Models
 
@@ -456,9 +678,9 @@ Computer vision techniques have been applied to tokamak camera systems for real-
 
 Edge plasma and scrape-off layer (SOL) simulations are among the most computationally intensive tasks in fusion modeling, as they require coupling fluid plasma equations with neutral transport, atomic physics, and kinetic effects. ML surrogates are addressing this computational bottleneck.
 
-**SOLPS-ITER surrogates.** Dasbach et al. developed SOLPS-NN, a deep-learning surrogate trained on several thousand SOLPS-ITER simulations, predicting detachment access with experiment-consistent trends and exploring transfer learning to higher-fidelity ITER datasets [142]. Wiesen et al. provided a comprehensive review of AI/ML methods for fusion exhaust modeling, covering surrogate approaches for SOLPS and UEDGE, neural operators, and latent-space techniques [143]. Holt et al. developed ML emulators trained on SOLPS-ITER databases to rapidly predict divertor target conditions for ITER design parameter scans [144].
+**SOLPS-ITER surrogates.** Dasbach et al. developed SOLPS-NN, a deep-learning surrogate trained on several thousand SOLPS-ITER simulations with reduced neutral fidelity [142]. Systematic comparison of multiple ML architectures revealed that simple fully connected neural networks outperformed more complex alternatives, and that employing independent models for different observables yielded higher accuracy than predicting the whole spatial domain simultaneously. The reduced-fidelity surrogate predicts access to detachment with trends similar to experiments, providing practical guidance on architecture choices and training strategies for plasma physics surrogate models. Wiesen et al. provided a comprehensive review of AI/ML methods for fusion exhaust modeling, covering surrogate approaches for SOLPS and UEDGE, neural operators, and latent-space techniques [143]. Holt et al. developed ML emulators trained on SOLPS-ITER databases to rapidly predict divertor target conditions for ITER design parameter scans [144].
 
-**UEDGE-based models.** Zhu et al. developed latent-space mapping models trained on UEDGE-generated databases for real-time divertor detachment prediction, achieving orders-of-magnitude speedup over full 2D transport simulations [145]. Csala et al. developed DNN surrogates trained on UEDGE solutions for autoregressive prediction of SOL and divertor plasma evolution, enabling long-horizon forecasting of edge plasma dynamics [146]. Gupta et al. implemented DivControlNN, a neural network trained on KSTAR data and UEDGE simulations, for real-time divertor detachment control in the KSTAR tungsten divertor configuration [94].
+**UEDGE-based models.** Zhu et al. developed latent-space mapping models trained on UEDGE-generated databases for real-time divertor detachment prediction, achieving orders-of-magnitude speedup over full 2D edge transport simulations [145]. The approach uses autoencoder-based dimensionality reduction to compress the high-dimensional divertor plasma state into a compact latent representation, from which detachment-relevant quantities can be rapidly inferred, enabling real-time or near-real-time prediction of divertor conditions necessary for feedback control of detachment—a critical requirement for ITER and DEMO steady-state operation. Csala et al. developed DNN surrogates trained on UEDGE solutions for autoregressive prediction of SOL and divertor plasma evolution, enabling long-horizon forecasting of edge plasma dynamics [146]. Gupta et al. implemented DivControlNN, a neural network trained on KSTAR data and UEDGE simulations, for real-time divertor detachment control in the KSTAR tungsten divertor configuration [94].
 
 **Neutral transport ML.** Zhang et al. replaced computationally expensive neutral particle source term calculations in edge plasma codes with deep learning models, achieving significant speedup while maintaining accuracy for hydrogen neutral transport [147]. Umansky et al. developed ML-based models for neutral particle transport trained on Monte Carlo calculations to enable faster coupled plasma-neutral simulations [148].
 
@@ -484,7 +706,7 @@ The MOOSE (Multiphysics Object-Oriented Simulation Environment) framework from I
 
 Bayesian optimization has emerged as the method of choice for exploring fusion plant design parameter spaces, where each evaluation of a systems code (e.g., PROCESS, SYCOMORE) is computationally expensive.
 
-Griffiths et al. established Bayesian network meta-models for the Tokamak Energy fusion pilot plant concept, enabling bidirectional reasoning between economic constraints and engineering parameters [33]. Kolemen et al. demonstrated that Bayesian optimization with informative priors from existing scaling laws converges to optimal design regions in ~200 evaluations versus 10,000+ for Latin hypercube sampling [34].
+Griffiths et al. developed a Bayesian network meta-model for techno-economic assessment of a fusion pilot plant based on Tokamak Energy's spherical tokamak concept, using a deterministic whole-plant systems code (PyTOK) to generate 10,420 quasi-random samples across four input parameters, which are discretized into conditional probability tables enabling bi-directional probabilistic inference rather than deterministic point estimates [33]. Reverse inference reveals that major radius is the dominant economic driver: increasing R by roughly 1 m could potentially double capital cost from 4.7 to 8.4 billion USD. This is the first application of a Bayesian network meta-model for decision support in a real-world fusion case study. Kolemen et al. demonstrated that Bayesian optimization with informative priors from existing scaling laws converges to optimal design regions in ~200 evaluations versus 10,000+ for Latin hypercube sampling [34].
 
 Multi-fidelity Bayesian optimization extends this by combining cheap low-fidelity models (0D scalings, 1.5D transport) with expensive high-fidelity simulations (2D equilibrium, 3D neutronics), achieving 50% reduction in total computational cost [35]. Constrained Bayesian optimization simultaneously optimizes plasma scenarios and engineering parameters, discovering superior designs missed by sequential plasma-then-engineering workflows [36].
 
@@ -503,7 +725,9 @@ AI techniques have been applied to optimize the design of fusion blanket and div
 - **Generative design:** Variational autoencoders generate novel blanket module geometries satisfying multi-physics constraints, discovering configurations not previously considered by human designers [42].
 - **Tritium breeding optimization:** Neural network surrogates trained on MCNP/DAGMC neutronics calculations predict tritium breeding ratio with <2% error at 1000× computational speedup [43].
 
-Muraca et al. (2025) produced the most comprehensive integrated modeling study of SPARC H-mode confinement predictions to date, using ASTRA/TGLF SAT2 with electromagnetic effects and an EPED-trained neural network for pedestal prediction [115]. The study demonstrates that below certain tungsten concentration, Q > 5 is consistently achieved at full field. Morosohk et al. (2025) achieved the first experimental demonstration of real-time electron temperature profile control on DIII-D using neural network surrogate models integrated into the actual Plasma Control System [116].
+Muraca et al. (2025) constructed an extensive database of SPARC H-mode confinement predictions using the ASTRA transport solver coupled with TGLF SAT2 and a neural network ensemble trained on over 11,000 EPED simulations, systematically permuting four uncertain input parameters across two scenarios [115]. For the Primary Reference Discharge at 11 MW auxiliary power, 74% of simulations converged and all converged points achieved Q > 2, with nearly all reaching burning plasma conditions (Q > 5); however, high tungsten concentrations caused radiative collapse in the remaining cases. The study underscores that tungsten concentration and H-mode sustainment are the most critical uncertainties for SPARC performance.
+
+Morosohk et al. (2025) reported the first experimental demonstration of real-time electron temperature profile feedback control on DIII-D, integrating neural network surrogates (NubeamNet for neutral beam injection and MMMnet for anomalous thermal diffusivity, each executing in approximately 1 ms) into the Plasma Control System alongside an extended Kalman filter observer corrected by Thomson scattering measurements [116]. The controller achieved observer-to-Thomson agreement with r-squared values exceeding 0.89, and the neural network framework and observer are now available for other control experiments on DIII-D and beyond.
 
 ### 5.5 AI Integration in EU-DEMO Design
 
@@ -521,9 +745,9 @@ For ITER, AI integration is focused on operational support rather than design op
 
 Molecular dynamics simulations of radiation damage in fusion structural materials require accurate interatomic potentials, but traditional empirical potentials often lack the fidelity needed for complex alloy systems. Machine learning interatomic potentials (MLIPs) trained on density functional theory (DFT) data offer a solution.
 
-Byggmastar et al. developed moment tensor potentials for tungsten trained on DFT data including high-energy collision cascades and point defects, reproducing DFT-quality defect formation energies within 0.1 eV [44]. Neural network potentials for tungsten-helium systems enable simulation of helium bubble nucleation and growth over microsecond timescales [45]. Gaussian approximation potentials for the quaternary Fe-Cr-W-V system capture the essential physics of displacement cascades in RAFM steels [46].
+Byggmastar et al. developed and benchmarked machine learning interatomic potentials for tungsten—the leading plasma-facing material in ITER and future reactors—trained on DFT data that includes high-energy collision cascades and point defect configurations [44]. The methodology compared multiple ML architectures (moment tensor potentials, neural network potentials, and Gaussian approximation potentials) against DFT reference data for defect formation energies, migration barriers, equations of state, and displacement cascade dynamics. The moment tensor potentials reproduced DFT-quality defect formation energies within 0.1 eV, a significant advance over traditional empirical potentials that often lack fidelity for radiation damage regimes, providing the fusion materials community with practical guidance on potential selection. Neural network potentials for tungsten-helium systems enable simulation of helium bubble nucleation and growth over microsecond timescales [45]. Gaussian approximation potentials for the quaternary Fe-Cr-W-V system capture the essential physics of displacement cascades in RAFM steels [46].
 
-The field has matured to systematic benchmarking: Roy et al. (2026) compared six MLIP frameworks for radiation-damage simulations in fusion-relevant ceramics, providing practical guidance for potential selection [79]. ML-accelerated ab initio simulations have revealed strong anharmonic effects in tungsten self-diffusion at fusion-relevant temperatures [80]. For multi-element systems, ML potentials have been applied to study radiation damage in the MoNbTaVW refractory high-entropy alloy, demonstrating enhanced radiation tolerance [82], while small vanadium additions to W-Ta alloys have been shown to create a new paradigm for radiation-resistant fusion materials [83].
+The field has matured to systematic benchmarking: Roy et al. (2026) conducted a systematic comparison of six MLIP frameworks—DeePMD, MTP, GAP, ACE, and MACE—for radiation-damage simulations in fusion-relevant ceramics, providing the first comprehensive user-perspective benchmark for this critical materials class [79]. The study evaluated each framework across multiple performance dimensions including training data requirements, computational efficiency, accuracy in reproducing DFT reference properties, and transferability to extreme conditions under neutron irradiation. By offering practical guidance on MLIP selection rather than advocating a single approach, the work enables materials scientists to make informed choices based on their specific accuracy-performance trade-offs, representing the maturation of MLIP technology from individual proof-of-concept demonstrations toward standardized evaluation protocols. ML-accelerated ab initio simulations have revealed strong anharmonic effects in tungsten self-diffusion at fusion-relevant temperatures [80]. For multi-element systems, ML potentials have been applied to study radiation damage in the MoNbTaVW refractory high-entropy alloy, demonstrating enhanced radiation tolerance [82], while small vanadium additions to W-Ta alloys have been shown to create a new paradigm for radiation-resistant fusion materials [83].
 
 ### 6.2 AI for Radiation Damage Prediction
 
@@ -555,11 +779,11 @@ ML potential-based molecular dynamics simulations have been used to study hydrog
 
 ### 7.1 Foundation Models for Plasma Physics
 
-The concept of pre-trained foundation models for plasma physics—analogous to large language models in NLP—is emerging as a promising research direction. Zhu et al. developed transformer-based foundation models pre-trained on diverse plasma physics simulation data (gyrokinetic, MHD, transport), demonstrating transfer learning to multiple downstream tasks including disruption prediction and turbulence classification [54].
+The concept of pre-trained foundation models for plasma physics—analogous to large language models in NLP—is emerging as a promising research direction. Zhu et al. developed transformer-based foundation models pre-trained on diverse plasma physics simulation data spanning gyrokinetic, MHD, and transport domains, adapting the pre-training paradigm from natural language processing to plasma physics where a single large model learns general plasma representations from heterogeneous simulation corpora and is subsequently fine-tuned for specific tasks with minimal additional data [54]. The transfer learning results suggest that universal plasma state representations can capture underlying physics that generalizes across different confinement devices and operating regimes, representing one of the first demonstrations that the foundation model approach is viable for plasma physics.
 
-Davies et al. developed self-supervised learning frameworks to create universal plasma state representations from multi-machine tokamak data, capturing underlying physics and enabling zero-shot transfer between devices [55]. Gopakumar et al. created foundation models for plasma diagnostics that combine physics constraints with data-driven learning, achieving state-of-the-art performance with minimal device-specific calibration [56].
+Davies et al. developed a self-supervised learning framework to create universal plasma state representations from multi-machine tokamak data, capturing underlying physics in a compact latent space that enables zero-shot transfer between devices without device-specific calibration [55]. This work addresses a fundamental challenge in fusion ML: that diagnostic configurations, operational regimes, and plasma conditions differ substantially across tokamaks, making direct cross-machine model transfer unreliable. The learned representation captures device-independent physics features that generalize across different experimental setups, providing a foundation for transfer learning, anomaly detection, and cross-machine benchmarking of disruption prediction models. Gopakumar et al. created foundation models for plasma diagnostics that combine physics constraints with data-driven learning, achieving state-of-the-art performance with minimal device-specific calibration [56].
 
-Boschi et al. proposed TokaMind, a multi-modal transformer foundation model for tokamak plasma dynamics using training-free discrete representations, representing the first dedicated foundation model architecture designed specifically for fusion plasmas [156]. Almeldein et al. evaluated frontier LLMs for nuclear energy research and advocated developing a fusion-specific foundation model trained on high-fidelity simulation data [157].
+Boschi et al. proposed TokaMind, the first dedicated multi-modal transformer foundation model architecture designed specifically for tokamak plasma dynamics, trained on diagnostics from the MAST spherical tokamak dataset [156]. The model handles multiple data modalities including time-series signals, 2D radial profiles, and video data sampled at different rates, incorporating missing-signal handling and a training-free Discrete Cosine Transform embedding for multi-modal signal representation. TokaMind employs four modular components that can be selectively loaded or frozen for efficient task adaptation, enabling lightweight fine-tuning that in several tasks outperforms training the same architecture from scratch, establishing a practical, extensible foundation for future fusion modeling tasks. Almeldein et al. evaluated frontier LLMs for nuclear energy research and advocated developing a fusion-specific foundation model trained on high-fidelity simulation data [157].
 
 ### 7.2 Large Language Models in Fusion Research
 
@@ -577,7 +801,7 @@ Multi-agent reinforcement learning frameworks have been developed for coordinati
 
 ### 7.5 AI-Assisted Plasma Theory Discovery
 
-A nascent but significant frontier is the use of AI to accelerate plasma theory discovery. Joglekar et al. proposed differentiable programming as a paradigm for automated physics discovery in plasmas, enabling gradients to flow through the entire analysis pipeline from raw diagnostics to physical insights [159]. Faraji et al. applied symbolic regression to discover governing equations of plasma systems from simulation data [160]. Burles and Camporeale reviewed ML approaches for discovering closure relations in Vlasov-based plasma models [161].
+A nascent but significant frontier is the use of AI to accelerate plasma theory discovery. Joglekar et al. demonstrated that differentiable programming, enabled by automatic differentiation embedded within computational plasma physics codes, provides a unified framework for gradient-based optimization spanning discovery, multi-scale modeling, diagnostics, and inverse design [159]. The authors applied automatic differentiation across four domains: discovering a previously unknown superadditive wavepacket interaction regime through optimized kinetic simulations; learning hidden variables that allow fluid simulations to reproduce large-Knudsen-number kinetic physics; accelerating Thomson scattering analysis by over 140x; and designing spatiotemporal laser pulses where full space-time coupling improves performance by 15x over spatial or temporal optimization alone. Faraji et al. applied symbolic regression to discover governing equations of plasma systems from simulation data [160]. Burles and Camporeale reviewed ML approaches for discovering closure relations in Vlasov-based plasma models [161]. These approaches offer the potential to discover new reduced models and scaling laws from high-fidelity simulation data, complementing traditional theoretical analysis.
 
 These approaches offer the potential to discover new reduced models and scaling laws from high-fidelity simulation data, complementing traditional theoretical analysis.
 
@@ -681,9 +905,9 @@ The development of shared data infrastructure is critical for scaling AI-fusion 
 
 **ITER IMAS.** The ITER Integrated Modelling and Analysis Suite (IMAS) provides a standardized data dictionary and workflow framework for fusion simulations. Pankin et al. demonstrated a NIMROD-to-IMAS workflow for extended-MHD data with COCOS-consistent coordinates and provenance metadata, identifying gaps in the IMAS schema for accommodating data relevant to ML downstream use cases [166].
 
-**IAEA Fusion Data Lake.** Gahle and Barbarino described the IAEA Fusion Data Lake project, involving 24 institutions across 11 countries, with three components: an international data catalogue, centralized storage, and a data federation connecting fusion platforms worldwide [167]. This initiative addresses the FAIR data principles (Findable, Accessible, Interoperable, Reusable) essential for training robust ML models.
+**IAEA Fusion Data Lake.** Gahle and Barbarino described the IAEA Fusion Data Lake, a modern data platform developed under the AI for Fusion Coordinated Research Project involving 24 institutions across 11 countries, designed to enable agnostic AI models that can safely extrapolate into the parameter space of future fusion power plants [167]. The platform comprises three components: an international data catalogue, centralized medium-term storage, and a data federation connecting various fusion data platforms worldwide, all aligned with FAIR data principles. A proof of concept demonstrated the cataloguing and federation capacity by integrating with the UKAEA's MAST Data Catalog, with a second phase planned to demonstrate scalability through integration of two additional experimental device catalogues.
 
-**Open-source simulation ecosystem.** The open-source ecosystem for AI-fusion has expanded significantly. TORAX, developed by Google DeepMind, is a differentiable 1D core transport simulator in JAX enabling GPU acceleration and automatic differentiation for scenario modeling [168]. Gym-TORAX provides OpenAI Gym-compatible RL environments wrapping TORAX for training control agents [99]. DESC is a differentiable stellarator/tokamak equilibrium code suite using JAX for GPU-accelerated computation [121]. FreeGS provides free-boundary equilibrium solving capabilities [169]. These tools lower barriers to entry and enable reproducible benchmarking.
+**Open-source simulation ecosystem.** The open-source ecosystem for AI-fusion has expanded significantly. TORAX, developed by Google DeepMind, is an open-source differentiable tokamak core transport simulator implemented in Python using the JAX framework, solving coupled partial differential equations for ion heat transport, electron heat transport, particle transport, and current diffusion while incorporating both physics-based and machine learning models through a modular architecture [168]. JIT compilation provides fast runtimes, and automatic differentiation enables gradient-based optimization workflows including Jacobian-based PDE solvers; ML-surrogate coupling is supported natively through JAX's neural network capabilities. Verification against the established RAPTOR code confirmed the simulator's correctness, positioning TORAX as a versatile platform for accelerating tokamak research in the ITER and SPARC era. Gym-TORAX provides OpenAI Gym-compatible RL environments wrapping TORAX for training control agents [99]. DESC is a differentiable stellarator/tokamak equilibrium code suite using JAX for GPU-accelerated computation [121]. FreeGS provides free-boundary equilibrium solving capabilities [169]. These tools lower barriers to entry and enable reproducible benchmarking.
 
 **Multi-machine databases.** The expansion of multi-machine benchmark databases remains essential for developing transferable ML models. Maris et al. assembled a multi-machine database (AUG, C-Mod, DIII-D, TCV) to evaluate density limit scaling across devices [170]. The ITPA disruption database continues to expand with contributions from major tokamaks worldwide.
 
