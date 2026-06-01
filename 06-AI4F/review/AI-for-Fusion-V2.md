@@ -525,15 +525,15 @@ AI/ML方法的性能高度依赖训练数据的质量和数量。当前聚变领
 **TRL评估分析**：DRL等离子体控制（TRL 4-5）已通过DIII-D上的实验验证，但距离在ITER级装置上测试（TRL 6）仍有显著差距，主要障碍包括：ITER等离子体参数远超DIII-D、ITER的控制架构与DIII-D不同、ITER的安全要求更为严格。ML破裂预测（TRL 5-6）相对成熟，已在DIII-D、JET、EAST等多台装置上验证，部分系统已进入实时部署阶段，但跨装置泛化和假阳性管理仍是关键挑战。平衡重建（TRL 5-6）的ML方法已在EXL-50U等装置上实现了实时部署，EFIT-mini等方法的精度已接近传统EFIT，是TRL最高的AI技术方向之一。代理模型（TRL 4）在计算验证和部分实验集成方面取得进展，TorbeamNN和SOLPS-NN等方法已在实际装置上验证，但大规模集成应用仍有待推进。基础模型（TRL 3）已出现TokaMind和PanoMHD等多模态预训练框架，但从预训练框架到真正具备跨装置零样本泛化能力的基础模型仍有较大距离。PINNs（TRL 2-3）仍处于早期探索阶段，距离装置验证（TRL 4-5）还有较大距离，需要在数据基础设施、模型架构和训练方法等方面取得突破。
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'radar': {'strokeColor': '#4A90D9'}}}}%%
-radar
-    title AI for Fusion 技术成熟度评估（TRL 1-9）
-    axis DRL控制, 破裂预测, ELM检测, 平衡重建, 代理模型, PINNs, 基础模型, 数字孪生
-    curve current [4.5, 5.5, 4.5, 5.5, 4, 2.5, 3, 3.5]
-    curve deploy_threshold [7, 7, 7, 7, 7, 7, 7, 7]
+xychart-beta
+    title "AI for Fusion 技术成熟度评估（TRL 1-9）"
+    x-axis ["DRL控制", "破裂预测", "ELM检测", "平衡重建", "代理模型", "PINNs", "基础模型", "数字孪生"]
+    y-axis "TRL等级" 0 --> 9
+    bar [4.5, 5.5, 4.5, 5.5, 4, 2.5, 3, 3.5]
+    line [7, 7, 7, 7, 7, 7, 7, 7]
 ```
 
-**图4** AI for Fusion各子领域技术成熟度（TRL）评估雷达图。DRL控制和破裂预测相对成熟（TRL 4-6），基础模型和PINNs仍处于早期阶段（TRL 2-3）。部署阈值线（TRL 7）表示系统原型在运行环境中验证——当前所有方向均未达到，表明AI for Fusion整体距离工程部署仍有显著差距。
+**图4** AI for Fusion各子领域技术成熟度（TRL）评估。柱状图展示各方向当前TRL，水平线标注部署阈值（TRL 7）。DRL控制和破裂预测相对成熟（TRL 4-6），基础模型和PINNs仍处于早期阶段（TRL 2-3）。所有方向均未达到TRL 7（系统原型在运行环境中验证），表明AI for Fusion整体距离工程部署仍有显著差距。
 
 ### 10.8 不确定性量化
 
