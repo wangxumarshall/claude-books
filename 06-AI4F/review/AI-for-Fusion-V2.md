@@ -136,30 +136,30 @@ Mouchamps等人开发了Gym-TORAX开源软件**[预印本]**[18]，将强化学�
 ```mermaid
 graph LR
     subgraph 传感层
-        A1[Mirnov线圈阵列<br>磁诊断]
-        A2[Thomson散射<br>温度/密度剖面]
-        A3[ECE辐射测量]
+        A1["Mirnov线圈阵列<br/>磁诊断"]
+        A2["Thomson散射<br/>温度/密度剖面"]
+        A3["ECE辐射测量"]
     end
 
     subgraph 状态估计
-        B[集成卡尔曼滤波器<br>状态融合]
+        B["集成卡尔曼滤波器<br/>状态融合"]
     end
 
     subgraph DRL智能体
-        C[策略网络 π(s→a)]
-        D[价值网络 V(s)]
+        C["策略网络 Policy"]
+        D["价值网络 Value"]
     end
 
     subgraph 执行层
-        E[等离子体控制系统 PCS]
-        F[执行器<br>NBI/ECCD/RMP/加料]
+        E["等离子体控制系统 PCS"]
+        F["执行器<br/>NBI/ECCD/RMP/加料"]
     end
 
-    G[(等离子体)]
+    G[("等离子体")]
 
     A1 & A2 & A3 --> B --> C --> E --> F --> G
     C -.-> D
-    G -.->|状态反馈| B
+    G -.->|"状态反馈"| B
 
     style A1 fill:#4A90D9,color:#fff
     style A2 fill:#4A90D9,color:#fff
