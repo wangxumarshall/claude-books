@@ -386,30 +386,30 @@ RDMA与高性能网络          ███████              ~10%
 
 ## 7. 论文完整索引表
 
-| # | 论文标题 | 第一单位 | 合作单位 | 类别 | 奖项 |
-|---|---------|---------|---------|------|------|
-| 1 | OSCAR: O(1)-Step Convergence and Readily-deployable Congestion Control | 南京大学 | — | 拥塞控制 | 🏆 Outstanding Paper |
-| 2 | SONiC DASH SmartSwitch | CUHK / MSRA | Microsoft | SmartNIC/云网络 | 🏆 Community Award |
-| 3 | HeteCCL | 东北大学 | 阿里云、中科院先进院 | 集合通信/ML训练 | — |
-| 4 | ForestColl | UW | Microsoft Research, Tsinghua | 集合通信/ML训练 | — |
-| 5 | EROICA | 阿里云 | — | ML训练诊断 | — |
-| 6 | ServeGen | 阿里云 | — | LLM推理负载 | — |
-| 7 | DroidSpeak | UChicago | Microsoft | LLM推理/KV Cache | — |
-| 8 | HarvestContainers | Georgia Tech | Microsoft | 容器资源管理 | — |
-| 9 | BURST | 湖南大学 | 字节跳动 | 软件RDMA | — |
-| 10 | Octopus | Columbia | Microsoft Azure, UW-Madison, UW | CXL内存分解 | — |
-| 11 | QCON | SNU | — | 5G流媒体 | — |
-| 12 | eXpressSFU | SNU | Colorado | SmartNIC/视频会议 | — |
-| 13 | AVA | 浙江大学 | Microsoft Research, Tsinghua | 视频分析/VLM | — |
-| 14 | HEDGE | Cornell | Microsoft, Meta, NYSERNet | 流量工程 | — |
-| 15 | S2Sim | 阿里云 | — | 网络验证/诊断 | — |
-| 16 | Eywa | UCLA | Microsoft Research | 协议测试/LLM | — |
-| 17 | MetaEase | MIT | Microsoft Research, Rice | 启发式分析 | — |
-| 18 | KRAKENGUARD | IIT Roorkee | Quantco, Microsoft, Imperial | eBPF安全 | — |
-| 19 | Come Hell or Still Water | 阿里云 | — | 云存储/尾延迟 | — |
-| 20 | AnyPro | 阿里云 | — | Anycast/BGP | — |
-| 21 | Pyrocumulus | UofT | MSRA, Microsoft, UT Austin | SmartNIC/热迁移 | — |
-| 22 | Wallet | TUM | — | 机密计算/Serverless | — |
+| # | 论文标题 | 第一作者 | 机构 | 方向 | 奖项 |
+|---|---------|---------|------|------|------|
+| 1 | OSCAR: O(1)-Step Convergence Congestion Control | 张兆琛 | 南京大学 | 拥塞控制 | 🏆 Outstanding Paper |
+| 2 | SONiC DASH SmartSwitch | — | CUHK / Microsoft Research | SmartNIC/云网络 | 🏆 Community Award |
+| 3 | HeteCCL: Synthesizing Collective Communication for Heterogeneous GPU Clusters | 黑晨阳 | 东北大学, 阿里云, 中科院先进院 | 集合通信/ML训练 | — |
+| 4 | ForestColl: Throughput-Optimal Collective Communications | Liangyu Zhao | U Washington, Microsoft Research, Tsinghua | 集合通信/ML训练 | — |
+| 5 | EROICA: Online Performance Troubleshooting for Model Training | 阿里云团队 | 阿里云 | ML训练诊断 | — |
+| 6 | ServeGen: Workload Characterization of LLM Serving | 阿里云团队 | 阿里云 | LLM推理负载 | — |
+| 7 | DroidSpeak: KV Cache Sharing Across Fine-tuned Models | Yuhan Liu | U Chicago, Microsoft | LLM推理/KV Cache | — |
+| 8 | HarvestContainers: Harvesting Spare CPU in Container Systems | Adam Hall | Georgia Tech, Microsoft | 容器资源管理 | — |
+| 9 | BURST: High-performance Soft-RDMA | 申卉君 | 湖南大学, 字节跳动 | 软件RDMA | — |
+| 10 | Octopus: CXL Disaggregated Memory | — | Columbia, Microsoft Azure, UW-Madison | CXL内存分解 | — |
+| 11 | QCON: Quality-Aware Video Streaming over 5G | — | Seoul National University | 5G流媒体 | — |
+| 12 | eXpressSFU: Video Conferencing SFU on SmartNIC | — | Seoul National University, Colorado | SmartNIC/视频会议 | — |
+| 13 | AVA: Video Analytics with VLM | — | 浙江大学, Microsoft Research, Tsinghua | 视频分析/VLM | — |
+| 14 | HEDGE: Traffic Engineering with Probabilistic Link Capacities | Arjun Devraj | Cornell, Microsoft, Meta | 流量工程 | — |
+| 15 | S2Sim: Network Simulation for Verification | 阿里云团队 | 阿里云 | 网络验证/诊断 | — |
+| 16 | Eywa: LLM-assisted Protocol Testing | — | UCLA, Microsoft Research | 协议测试/LLM | — |
+| 17 | MetaEase: Heuristic Analysis for Network Config | — | MIT, Microsoft Research, Rice | 启发式分析 | — |
+| 18 | KRAKENGUARD: eBPF Security Isolation | — | IIT Roorkee, Quantco, Imperial | eBPF安全 | — |
+| 19 | Come Hell or Still Water: Cloud Storage Tail Latency | 阿里云团队 | 阿里云 | 云存储/尾延迟 | — |
+| 20 | AnyPro: Anycast/BGP Routing | 阿里云团队 | 阿里云 | Anycast/BGP | — |
+| 21 | Pyrocumulus: SmartNIC VM Live Migration | — | U Toronto, Microsoft, UT Austin | SmartNIC/热迁移 | — |
+| 22 | Wallet: Confidential Computing for Serverless | — | Technical U Munich | 机密计算/Serverless | — |
 
 > **覆盖说明**：本报告覆盖了 Spring 轮（50篇）中可公开检索到的 22 篇论文（约 44%），包括3篇获奖论文。Fall 轮论文因信息有限仅少量覆盖。SNU 论文（QCON、eXpressSFU）来源为实验室主页 [netstech.org](https://netstech.org/publications/)，PRC 论文实际发表于 CoNEXT 2026，非 NSDI 2026。
 
