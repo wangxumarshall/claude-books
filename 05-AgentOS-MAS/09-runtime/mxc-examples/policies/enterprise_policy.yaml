@@ -1,0 +1,214 @@
+# ============================================================================
+# MXC 企业级综合策略 — 最严格的多角色安全配置
+# ============================================================================
+#
+# 适用场景: 企业环境下的多 Agent 平台，需要统一的安全治理
+# 隔离级别: 按角色动态选择（process / session / microvm）
+#
+# 参考来源:
+#   - GitHub: microsoft/mxc — Sandbox Policy Spec v1
+#   - Windows Blog: Build 2026 — Agent 365 + Entra ID + Intune 集成
+#   - Parallax (arXiv:2604.12986) — 架构级安全隔离原则
+#   - AgentBay (arXiv:2512.04367) — 多租户隔离和自适应策略
+#
+# Schema 版本: 0.6.0-alpha（当前稳定版）
+# ============================================================================
+
+version: "0.6.0-alpha"
+
+name: "enterprise-strict"
+description: |
+  企业级严格 Agent 执行策略。
+  定义多种 Agent 角色的隔离配置，实施全局安全约束。
+  集成 Microsoft Entra ID 身份管理和 Intune 策略管理。
+  遵循最小权限原则（Principle of Least Privilege）。
+
+# ---------------------------------------------------------------------------
+# 全局约束 — 适用于所有 Agent 角色
+# ---------------------------------------------------------------------------
+global:
+  maxTimeoutMs: 600000              # 全局最大超时（10 分钟）
+  requireAuditLog: true             # 强制审计日志
+  enforceIntunePolicy: true         # 强制 Intune 策略合规
+  entraIdentityRequired: true       # 要求 Entra ID 身份
+  defaultClipboard: "none"          # 默认禁止剪贴板
+  defaultInputInjection: false      # 默认禁止输入注入
+  allowedContainmentBackends:       # 允许的后端类型
+    - "processcontainer"
+    - "isolation_session"
+    - "microvm"
+
+# ---------------------------------------------------------------------------
+# Agent 角色策略 — 按角色定义差异化隔离
+# ---------------------------------------------------------------------------
+profiles:
+
+  # ── 编程 Agent ──────────────────────────────────────────────────────────
+  - name: "coding-agent"
+    description: "代码生成、审查和执行的 Agent"
+    containment: "process"           # 进程级隔离（快速响应）
+    filesystem:
+      readwritePaths:
+        - "/workspace/output"
+        - "/tmp/code-scratch"
+      readonlyPaths:
+        - "/workspace/src"
+        - "/workspace/tests"
+        - "/usr/local/lib"
+      deniedPaths:
+        - "/etc"
+        - "/root"
+        - "/workspace/secrets"
+        - "C:\\Windows\\System32"
+      tempDir: "isolated"
+    network:
+      allowOutbound: false
+      allowLocalNetwork: false
+    ui:
+      allowWindows: false
+      clipboard: "none"
+      allowInputInjection: false
+    timeoutMs: 120000               # 2 分钟
+
+  # ── 数据处理 Agent ──────────────────────────────────────────────────────
+  - name: "data-agent"
+    description: "数据分析、ETL 和报告生成的 Agent"
+    containment: "process"
+    filesystem:
+      readwritePaths:
+        - "/data/staging"
+        - "/data/output"
+      readonlyPaths:
+        - "/data/warehouse"
+        - "/data/reference"
+        - "/opt/analytics"
+      deniedPaths:
+        - "/data/pii"
+        - "/data/financial"
+        - "/data/credentials"
+      tempDir: "isolated"
+    network:
+      allowOutbound: true
+      allowLocalNetwork: true
+      allowedHosts:
+        - "internal-api.corp.local"
+        - "data-lake.corp.local"
+      blockedHosts:
+        - "*.external.com"
+    ui:
+      allowWindows: false
+      clipboard: "none"
+      allowInputInjection: false
+    timeoutMs: 300000               # 5 分钟
+
+  # ── 浏览器 Agent ──────────────────────────────────────────────────────
+  - name: "browser-agent"
+    description: "网页自动化和数据采集的 Agent"
+    containment: "isolation_session" # 会话级隔离（独立桌面）
+    filesystem:
+      readwritePaths:
+        - "/browser-data/downloads"
+        - "/browser-data/screenshots"
+        - "/tmp/browser-scratch"
+      readonlyPaths:
+        - "/opt/browser-tools"
+      deniedPaths:
+        - "/etc"
+        - "/root"
+        - "/home"
+      tempDir: "isolated"
+    network:
+      allowOutbound: true
+      allowLocalNetwork: false
+      allowedHosts:
+        - "*.corp.local"            # 仅允许内部域名
+      blockedHosts:
+        - "*.malware-domain.com"
+    ui:
+      allowWindows: true            # 浏览器需要窗口
+      clipboard: "read"             # 允许读取剪贴板
+      allowInputInjection: true     # 浏览器自动化需要输入
+    timeoutMs: 600000               # 10 分钟
+
+  # ── 高安全 Agent ──────────────────────────────────────────────────────
+  - name: "high-security-agent"
+    description: "处理高度敏感数据的 Agent，使用 MicroVM 隔离"
+    containment: "microvm"           # 硬件级虚拟化隔离
+    filesystem:
+      readwritePaths:
+        - "/secure/workspace"
+      readonlyPaths:
+        - "/secure/tools"
+      deniedPaths: []                # MicroVM 本身提供强隔离
+      tempDir: "isolated"
+    network:
+      allowOutbound: false
+      allowLocalNetwork: false
+    ui:
+      allowWindows: false
+      clipboard: "none"
+      allowInputInjection: false
+    timeoutMs: 180000               # 3 分钟
+
+# ---------------------------------------------------------------------------
+# 全局文件系统拒绝列表（所有角色继承）
+# ---------------------------------------------------------------------------
+filesystem:
+  deniedPaths:
+    - "/etc"                        # 系统配置
+    - "/root"                       # root 用户目录
+    - "C:\\Windows\\System32"       # Windows 系统目录
+    - "C:\\Program Files"           # 程序安装目录（非授权）
+    - "/var/run/docker.sock"        # Docker 守护进程
+    - "/proc"                       # 进程信息
+    - "/sys"                        # 系统信息
+
+# ---------------------------------------------------------------------------
+# 全局网络策略（作为角色的默认值）
+# ---------------------------------------------------------------------------
+network:
+  allowOutbound: true
+  proxy:
+    url: "http://corp-proxy:8080"   # 企业代理服务器
+
+# ---------------------------------------------------------------------------
+# 全局 UI 策略
+# ---------------------------------------------------------------------------
+ui:
+  allowWindows: false
+  clipboard: "none"
+  allowInputInjection: false
+
+# ---------------------------------------------------------------------------
+# 元数据
+# ---------------------------------------------------------------------------
+metadata:
+  owner: "enterprise-security"
+  classification: "restricted"
+  lastReviewed: "2026-06-01"
+  reviewCycleDays: 90
+  approvalRequired: true
+  approvalWorkflow:
+    approvers:
+      - "security-team@corp.local"
+      - "platform-ops@corp.local"
+    escalationDays: 7
+  complianceFrameworks:
+    - "SOC2"
+    - "GDPR"
+    - "ISO27001"
+    - "NIST-AI-RMF"
+  identityManagement:
+    provider: "microsoft-entra"
+    mfaRequired: true
+    sessionTokenExpiryHours: 8
+  deviceManagement:
+    provider: "microsoft-intune"
+    requireCompliance: true
+    conditionalAccess: true
+  auditConfiguration:
+    logDestination: "azure-log-analytics"
+    retentionDays: 365
+    alertOnViolation: true
+    alertRecipients:
+      - "soc-team@corp.local"

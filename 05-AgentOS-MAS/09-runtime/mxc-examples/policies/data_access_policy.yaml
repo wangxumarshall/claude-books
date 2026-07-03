@@ -1,0 +1,109 @@
+# ============================================================================
+# MXC 数据访问策略 — 面向数据处理 Agent 的受控访问配置
+# ============================================================================
+#
+# 适用场景: AI 数据分析 Agent 处理企业内部数据
+# 隔离级别: 进程级或会话级隔离
+#
+# 参考来源:
+#   - GitHub: microsoft/mxc — Sandbox Policy Spec v1
+#   - Windows Blog: Build 2026 — Session Isolation 章节
+#   - AgentBound (arXiv:2510.21236) — 声明式访问控制策略
+#
+# Schema 版本: 0.6.0-alpha（当前稳定版）
+# ============================================================================
+
+version: "0.6.0-alpha"
+
+name: "data-access-controlled"
+description: |
+  面向数据处理 Agent 的受控数据访问策略。
+  允许访问指定的数据源，禁止接触 PII 和财务数据。
+  网络访问仅限内部 API 端点，支持 SOC2 和 GDPR 合规要求。
+
+# ---------------------------------------------------------------------------
+# 文件系统策略
+# ---------------------------------------------------------------------------
+filesystem:
+  # 可写路径 — Agent 输出和暂存区
+  readwritePaths:
+    - "/data/staging"              # 数据暂存区
+    - "/data/output"               # 分析结果输出
+    - "/tmp/data-agent-scratch"    # 临时计算空间
+
+  # 只读路径 — 数据仓库和参考数据
+  readonlyPaths:
+    - "/data/warehouse"            # 企业数据仓库（只读）
+    - "/data/reference"            # 参考数据集
+    - "/data/schemas"              # 数据模式定义
+    - "/opt/analytics-tools"       # 分析工具安装目录
+
+  # 拒绝访问路径 — 敏感数据区域
+  deniedPaths:
+    - "/data/pii"                  # 个人身份信息（PII）
+    - "/data/financial"            # 财务数据
+    - "/data/hr-records"           # 人力资源记录
+    - "/data/credentials"          # 凭证存储
+    - "/etc"                       # 系统配置
+
+  # 使用隔离的临时目录
+  tempDir: "isolated"
+
+# ---------------------------------------------------------------------------
+# 网络策略
+# ---------------------------------------------------------------------------
+# ⚠️ allowedHosts/blockedHosts 在 Windows 上尚未支持
+network:
+  allowOutbound: true               # 允许出站（受限于 allowedHosts）
+  allowLocalNetwork: true           # 允许本地网络（内部 API）
+
+  # 仅允许访问以下主机
+  allowedHosts:
+    - "internal-api.corp.local"     # 内部 API 网关
+    - "data-lake.corp.local"       # 数据湖服务
+    - "telemetry.corp.local"       # 遥测数据上报
+    - "pypi.org"                    # Python 包索引（工具安装）
+
+  # 即使出站已允许，仍然阻止以下主机
+  blockedHosts:
+    - "*.social-media.com"         # 社交媒体
+    - "*.file-sharing.net"         # 文件共享
+    - "paste.ee"                   # 代码粘贴板
+
+  # 通过企业代理路由所有流量
+  # proxy:
+  #   url: "http://corp-proxy:8080"
+
+# ---------------------------------------------------------------------------
+# UI 策略
+# ---------------------------------------------------------------------------
+ui:
+  allowWindows: false               # 数据处理无需 GUI
+  clipboard: "none"                 # 禁止剪贴板（防止数据泄露）
+  allowInputInjection: false        # 禁止输入注入
+
+# ---------------------------------------------------------------------------
+# 超时设置
+# ---------------------------------------------------------------------------
+timeoutMs: 300000                   # 5 分钟（数据分析需要更长时间）
+
+# ---------------------------------------------------------------------------
+# 元数据
+# ---------------------------------------------------------------------------
+metadata:
+  owner: "data-governance"
+  classification: "confidential"
+  lastReviewed: "2026-06-01"
+  reviewCycleDays: 60
+  complianceFrameworks:
+    - "SOC2"                        # SOC 2 Type II 合规
+    - "GDPR"                        # 欧盟通用数据保护条例
+    - "ISO27001"                    # 信息安全管理
+  applicableAgents:
+    - "data-analyst"
+    - "etl-pipeline"
+    - "report-generator"
+  dataHandling:
+    encryptionAtRest: true          # 静态数据加密
+    auditLogRequired: true          # 强制审计日志
+    dataRetentionDays: 30           # 数据保留期限

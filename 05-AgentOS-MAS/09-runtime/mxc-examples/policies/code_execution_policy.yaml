@@ -1,0 +1,87 @@
+# ============================================================================
+# MXC 代码执行策略 — 面向编程 Agent 的标准隔离配置
+# ============================================================================
+#
+# 适用场景: AI 编程助手（如 GitHub Copilot CLI）生成的代码执行
+# 隔离级别: 进程级隔离（processcontainer）— 轻量级，快速启动
+#
+# 参考来源:
+#   - GitHub: microsoft/mxc — Sandbox Policy Spec v1
+#   - Windows Blog: Build 2026 — Process Isolation 章节
+#   - GitHub Copilot CLI 集成案例
+#
+# Schema 版本: 0.6.0-alpha（当前稳定版）
+# ============================================================================
+
+version: "0.6.0-alpha"
+
+name: "code-execution-standard"
+description: |
+  面向编程 Agent 的标准代码执行策略。
+  遵循 Default-Deny 原则：仅显式授权的路径和操作可用。
+  Agent 生成的代码在受限文件系统和无网络环境中执行。
+
+# ---------------------------------------------------------------------------
+# 文件系统策略
+# ---------------------------------------------------------------------------
+# 来源: Sandbox Policy Spec v1 §5 — filesystem
+# ⚠️ deniedPaths 在 Windows 上尚未支持（来源: GitHub README）
+filesystem:
+  # 可写路径 — 仅允许 Agent 写入输出目录和临时空间
+  readwritePaths:
+    - "/workspace/output"          # Agent 代码输出目录
+    - "/tmp/mxc-scratch"           # 沙箱专用临时空间
+
+  # 只读路径 — Agent 可读取但不能修改的源码和工具
+  readonlyPaths:
+    - "/workspace/src"             # 项目源码（只读）
+    - "/workspace/tests"           # 测试文件（只读）
+    - "/usr/local/lib/python3.12"  # Python 标准库
+    - "/usr/local/lib/node_modules" # Node.js 依赖
+
+  # 拒绝访问路径 — 完全禁止 Agent 访问的敏感目录
+  deniedPaths:
+    - "/etc/shadow"                # 系统密码文件
+    - "/root/.ssh"                 # SSH 密钥
+    - "/workspace/secrets"         # 项目敏感配置
+    - "/workspace/.env"            # 环境变量文件
+
+  # 临时目录模式 — 使用隔离的私有临时目录
+  tempDir: "isolated"
+
+# ---------------------------------------------------------------------------
+# 网络策略
+# ---------------------------------------------------------------------------
+# 来源: Sandbox Policy Spec v1 §5 — network
+# 代码执行场景通常禁止所有网络访问
+network:
+  allowOutbound: false              # 禁止出站连接
+  allowLocalNetwork: false          # 禁止本地网络访问
+
+# ---------------------------------------------------------------------------
+# UI 策略
+# ---------------------------------------------------------------------------
+# 来源: Sandbox Policy Spec v1 §5 — ui
+# 代码执行无需 UI 交互
+ui:
+  allowWindows: false               # 禁止创建窗口
+  clipboard: "none"                 # 禁止剪贴板访问
+  allowInputInjection: false        # 禁止输入注入
+
+# ---------------------------------------------------------------------------
+# 超时设置
+# ---------------------------------------------------------------------------
+timeoutMs: 60000                    # 60 秒执行超时
+
+# ---------------------------------------------------------------------------
+# 元数据（非 Schema 标准字段，用于策略管理）
+# ---------------------------------------------------------------------------
+metadata:
+  owner: "platform-security"
+  classification: "internal"
+  lastReviewed: "2026-06-01"
+  reviewCycleDays: 90
+  applicableAgents:
+    - "coding-assistant"
+    - "code-reviewer"
+    - "test-runner"
