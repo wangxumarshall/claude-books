@@ -2,7 +2,7 @@
 
 **作者：** （待补充）
 **日期：** 2026 年 7 月
-**版本：** v1.0
+**版本：** v2.0
 **引用格式：** IEEE
 
 ---
@@ -557,6 +557,8 @@ SGLang 是新兴的开源推理框架，以 RadixAttention 与结构化生成优
 
 需再次澄清：MindIE Turbo 与 vLLM-Ascend **不是**竞争关系，而是叠加关系[13][14]。Turbo 装载于 vLLM-Ascend 之上，通过 `VLLM_OPTIMIZATION_LEVEL` 环境变量与补丁机制为已有 vLLM 服务提供加速。这意味着选型并非"MindIE 或 vLLM-Ascend"二选一，而是存在三条路径：(a) MindIE 原生引擎（多卡吞吐优先）；(b) vLLM-Ascend 裸跑（单卡延迟优先、vLLM 重度用户）；(c) vLLM-Ascend + MindIE Turbo（兼顾生态与加速）。理解这一分层，是避免选型误判的关键。
 
+> **图 5**（见附录 E）：国产昇腾推理栈多维度能力雷达对比。基于论文第 9.1-9.3 节对比分析，从多卡吞吐、单卡 TTFT、特性覆盖度、生态成熟度、易用性、PD 分离支持六个维度对 MindIE 原生引擎与 vLLM-Ascend 进行 1-5 分定性评估（5 为最优）。
+
 ### 9.4 综合选型建议
 
 基于上述对比，可给出面向不同场景的选型建议：
@@ -688,11 +690,12 @@ MindIE (Mind Inference Engine) is Huawei's full-scenario inference acceleration 
 
 ## 附录 E：图表索引与生成代码
 
-本报告含 4 张图表，均配有可运行的 Python (matplotlib) 生成代码，存放于同目录 `generate_figures.py`。运行方式：
+本报告含 5 张图表，均配有可运行的 Python (matplotlib) 生成代码，存放于同目录 `figures/generate_figures.py`。运行方式：
 
 ```bash
+cd mindIE
 pip install matplotlib numpy
-python generate_figures.py   # 输出至 figures/ 目录, 300 dpi PNG
+python figures/generate_figures.py   # 输出至 figures/ 目录, 300 dpi PNG
 ```
 
 | 图号 | 文件名 | 内容 | 数据出处 |
@@ -701,8 +704,9 @@ python generate_figures.py   # 输出至 figures/ 目录, 300 dpi PNG
 | 图 2 | `fig2_kv_transfer_time.png` | P→D KV Cache 传输时延 vs Prompt 长度 | 论文 §5.5 建模 + 参考文献 [6] |
 | 图 3 | `fig3_mindie_vs_vllm.png` | MindIE vs vLLM-Ascend TTFT/输出速度 | 参考文献 [32] |
 | 图 4 | `fig4_feature_compat.png` | 特性互斥矩阵热力图 | 参考文献 [20] + 论文 §3.3/§5.5 |
+| 图 5 | `fig5_domestic_stack_radar.png` | 国产昇腾推理栈多维度能力雷达对比 | 论文 §9 对比分析 |
 
-**图表规范说明**：所有图表采用 APA 7.0 风格（无顶/右轴线、标题加粗置于上方），使用 Okabe-Ito 色盲友好调色板，300 dpi 输出以满足期刊投稿要求。图中每个数据点均可在论文正文或参考文献中找到出处，未虚构任何数据。图 1 仅绘制相对示意（基线=100，PD 分离=130），不主张绝对倍数；图 2 为基于公开带宽参数的解析建模而非实测，已标注 60-80% 实际带宽折扣；图 3 数据点直接对应 issue#4395 的实测表，tok/s 与 TPOT 互为倒数；图 4 互斥关系据官方特性总览表格[20]与论文约束整理，"部分兼容"（橙色）项标注为条件性互斥（如 MTP 与 Context Parallel 在 128K 长序列场景不可叠加，短序列可）。
+**图表规范说明**：所有图表采用 APA 7.0 风格（无顶/右轴线、标题加粗置于上方），使用 Okabe-Ito 色盲友好调色板，300 dpi 输出以满足期刊投稿要求。图中每个数据点均可在论文正文或参考文献中找到出处，未虚构任何数据。图 1 仅绘制相对示意（基线=100，PD 分离=130），不主张绝对倍数；图 2 为基于公开带宽参数的解析建模而非实测，已标注 60-80% 实际带宽折扣；图 3 数据点直接对应 issue#4395 的实测表，tok/s 与 TPOT 互为倒数；图 4 互斥关系据官方特性总览表格[20]与论文约束整理，"部分兼容"（橙色）项标注为条件性互斥（如 MTP 与 Context Parallel 在 128K 长序列场景不可叠加，短序列可）；图 5 为基于论文第 9 章对比分析的定性评估雷达图，评分维度为多卡吞吐、单卡 TTFT、特性覆盖、生态成熟、易用性、PD 分离支持六项，1-5 分制（5 为最优）。
 
 **运行环境说明**：代码经 matplotlib>=3.5、numpy>=1.21 测试；字体默认 DejaVu Sans，若环境缺失可回退至 `mpl.rcParams["font.family"] = "sans-serif"` 配合系统 sans-serif。Python 3.9+ 兼容。
 

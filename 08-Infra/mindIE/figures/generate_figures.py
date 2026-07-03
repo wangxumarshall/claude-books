@@ -3,15 +3,16 @@ MindIE 研究报告配套图表生成代码
 
 依赖: Python 3.9+, matplotlib>=3.5, numpy>=1.21
 运行: python generate_figures.py
-输出: figures/ 目录下 4 张 PNG (300 dpi, APA 7.0 风格)
+输出: figures/ 目录下 5 张 PNG (300 dpi, APA 7.0 风格)
 
 图表清单:
-  fig1_pd_vs_mixed.png      - PD 分离 vs PD 混部 吞吐对比 (柱状)
-  fig2_kv_transfer_time.png - KV Cache 传输时延 vs prompt 长度 (折线)
-  fig3_mindie_vs_vllm.png   - MindIE vs vLLM-Ascend TTFT/TPOT 对比 (分组柱状)
-  fig4_feature_compat.png   - 特性互斥矩阵热力图
+  fig1_pd_vs_mixed.png       - PD 分离 vs PD 混部 吞吐对比 (柱状)
+  fig2_kv_transfer_time.png  - KV Cache 传输时延 vs prompt 长度 (折线)
+  fig3_mindie_vs_vllm.png    - MindIE vs vLLM-Ascend TTFT/TPOT 对比 (分组柱状)
+  fig4_feature_compat.png    - 特性互斥矩阵热力图
+  fig5_domestic_stack_radar.png - 国产推理栈多维度能力雷达对比
 
-数据来源: 论文参考文献 [2][4][6][22][32]
+数据来源: 论文参考文献 [2][4][6][22][32] 及论文第9章对比分析
 所有数值均可在论文中找到出处, 未虚构任何数据点。
 """
 
@@ -228,11 +229,52 @@ def fig4_feature_compat():
     plt.close(fig)
 
 
+# ============================================================
+# 图 5: 国产推理栈多维度能力雷达对比
+# 数据来源: 论文第9章对比分析 + 参考文献 [4][32][33]
+# 维度: 多卡吞吐、单卡延迟、特性覆盖度、生态成熟度、易用性、PD分离支持
+# 评分: 1-5 (5为最优), 基于论文对比分析的定性评估
+# ============================================================
+def fig5_domestic_stack_radar():
+    categories = ["多卡吞吐", "单卡TTFT", "特性覆盖", "生态成熟", "易用性", "PD分离"]
+    N = len(categories)
+
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]
+
+    mindie_scores = [5, 3, 5, 3, 3, 5]
+    vllm_scores = [3, 5, 4, 4, 4, 2]
+    mindie_scores += mindie_scores[:1]
+    vllm_scores += vllm_scores[:1]
+
+    fig, ax = plt.subplots(figsize=(6.5, 6.0), subplot_kw=dict(polar=True))
+
+    ax.plot(angles, mindie_scores, "o-", linewidth=2, label="MindIE 原生", color=C_BLUE, ms=5)
+    ax.fill(angles, mindie_scores, alpha=0.15, color=C_BLUE)
+    ax.plot(angles, vllm_scores, "s-", linewidth=2, label="vLLM-Ascend", color=C_ORANGE, ms=5)
+    ax.fill(angles, vllm_scores, alpha=0.15, color=C_ORANGE)
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories, fontsize=10)
+    ax.set_ylim(0, 5)
+    ax.set_yticks([1, 2, 3, 4, 5])
+    ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=8, color=C_GRAY)
+    ax.set_title("Fig. 5  国产昇腾推理栈多维度能力雷达对比\n(1=弱, 5=强; 评分基于论文§9对比分析)",
+                 fontsize=11, fontweight="bold", y=1.08)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.25, 1.1), frameon=False)
+    ax.grid(True, ls=":", lw=0.5, alpha=0.6)
+
+    fig.tight_layout()
+    fig.savefig(f"{OUT_DIR}/fig5_domestic_stack_radar.png")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     fig1_pd_vs_mixed()
     fig2_kv_transfer_time()
     fig3_mindie_vs_vllm()
     fig4_feature_compat()
-    print(f"已生成 4 张图表至 {OUT_DIR}/ 目录:")
+    fig5_domestic_stack_radar()
+    print(f"已生成 5 张图表至 {OUT_DIR}/ 目录:")
     for f in sorted(os.listdir(OUT_DIR)):
         print(f"  {OUT_DIR}/{f}")
