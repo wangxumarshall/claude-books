@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>openYuanrong: 分布式智能底座 · Huawei Corporate Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ============ Huawei corporate theme (default: classic red) ============
+       Switch theme: copy one :root block from references/themes-huawei.md and
+       replace the variables in this section only. */
+    --paper:#f7f8fa;
+    --paper-rgb:247,248,250;
+    --card:#ffffff;
+    --ink:#22252b;
+    --ink-rgb:34,37,43;
+    --muted:#6f7680;
+    --line:#dfe3e8;
+    --line-strong:#c7ccd4;
+    --brand-red:#c7000b;
+    --brand-red-rgb:199,0,11;
+    --brand-red-dark:#990008;
+    --brand-red-soft:#f5e5e7;
+    --brand-black:#111111;
+    --brand-grey:#f0f2f5;
+    --shadow:0 18px 46px rgba(15,23,42,.12);
+    --shadow-soft:0 10px 26px rgba(15,23,42,.10);
+
+    --sans:"Inter","Noto Sans SC","Microsoft YaHei UI",Arial,sans-serif;
+    --sans-zh:"Noto Sans SC","Microsoft YaHei UI",Arial,sans-serif;
+    --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:geometricPrecision;
+  }
+  body.low-power *,body.low-power *::before,body.low-power *::after{
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+
+  #deck{
+    display:flex;
+    width:100vw;
+    height:100vh;
+    transition:transform .72s cubic-bezier(.22,1,.36,1);
+  }
+  body.low-power #deck{transition:none!important}
+
+  .slide{
+    position:relative;
+    flex:0 0 100vw;
+    width:100vw;
+    height:100vh;
+    padding:7.2vh 7vw 7vh;
+    overflow:hidden;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.94),rgba(247,248,250,.96)),
+      radial-gradient(circle at 78% 12%,rgba(var(--brand-red-rgb),.08),transparent 22vw),
+      radial-gradient(circle at 12% 88%,rgba(17,17,17,.045),transparent 28vw);
+  }
+  .slide::before,
+  .slide::after{
+    content:"";
+    position:absolute;
+    pointer-events:none;
+    border-radius:999px;
+    z-index:0;
+  }
+  .slide::before{
+    width:13vw;
+    height:13vw;
+    right:6vw;
+    top:10vh;
+    background:linear-gradient(145deg,#fff,rgba(223,227,232,.95));
+    box-shadow:inset -12px -12px 22px rgba(255,255,255,.9),inset 10px 10px 26px rgba(111,118,128,.14),0 14px 28px rgba(15,23,42,.08);
+    opacity:.32;
+  }
+  .slide::after{
+    width:2.6vw;
+    height:2.6vw;
+    left:6.3vw;
+    bottom:8vh;
+    background:var(--brand-red);
+    box-shadow:13vw -72vh 0 -1.4vw rgba(var(--brand-red-rgb),.9),73vw -6vh 0 -1vw rgba(var(--brand-red-rgb),.85),82vw -78vh 0 -1.1vw rgba(var(--brand-red-rgb),.9);
+    opacity:.18;
+  }
+  .slide > *{position:relative;z-index:1}
+
+  .slide.dark{
+    color:#fff;
+    background:
+      linear-gradient(135deg,var(--brand-red-dark),var(--brand-red) 54%,#e34034),
+      radial-gradient(circle at 82% 18%,rgba(255,255,255,.22),transparent 22vw);
+  }
+  .slide.dark::before{
+    background:rgba(255,255,255,.14);
+    box-shadow:inset -10px -10px 18px rgba(255,255,255,.18),inset 10px 10px 26px rgba(0,0,0,.14);
+    opacity:.55;
+  }
+  .slide.dark::after{background:#fff;box-shadow:14vw -66vh 0 -1.5vw rgba(255,255,255,.72),72vw -7vh 0 -1vw rgba(255,255,255,.58);opacity:.24}
+
+  .brand-lockup{
+    position:absolute;
+    right:6.4vw;
+    top:4.6vh;
+    display:flex;
+    align-items:center;
+    gap:.58vw;
+    color:var(--brand-black);
+    font-weight:800;
+    letter-spacing:.01em;
+    font-size:1.08vw;
+    z-index:3;
+  }
+  .dark .brand-lockup{color:#fff}
+  .brand-mark{
+    width:1.62vw;
+    height:1.62vw;
+    flex:none;
+    color:var(--brand-red);
+    background:currentColor;
+    -webkit-mask:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTMuNjcgNi4xNFMxLjgyIDcuOTEgMS43MiA5Ljc4di4zNWMuMDggMS41MSAxLjIyIDIuNCAxLjIyIDIuNCAxLjgzIDEuNzkgNi4yNiA0LjA0IDcuMyA0LjU1IDAgMCAuMDYuMDMuMS0uMDFsLjAyLS4wNHYtLjA0QzcuNTIgMTAuOCAzLjY3IDYuMTQgMy42NyA2LjE0ek05LjY1IDE4LjZjLS4wMi0uMDgtLjEtLjA4LS4xLS4wOGwtNy4zOC4yNmMuOCAxLjQzIDIuMTUgMi41MyAzLjU2IDIuMi45Ni0uMjUgMy4xNi0xLjc4IDMuODgtMi4zLjA2LS4wNS4wNC0uMDkuMDQtLjA5em0uMDgtLjc4QzYuNDkgMTUuNjMuMjEgMTIuMjguMjEgMTIuMjhjLS4xNS40Ni0uMi45LS4yMSAxLjN2LjA3YzAgMS4wNy40IDEuODIuNCAxLjgyLjggMS42OSAyLjM0IDIuMiAyLjM0IDIuMi43LjMgMS40LjMxIDEuNC4zMS4xMi4wMiA0LjQgMCA1LjU0IDAgLjA1IDAgLjA4LS4wNS4wOC0uMDV2LS4wNmMwLS4wMy0uMDMtLjA1LS4wMy0uMDV6TTkuMDYgMy4xOWEzLjQyIDMuNDIgMCAwMC0yLjU3IDMuMTV2LjQxYy4wMy42LjE2IDEuMDUuMTYgMS4wNS42NiAyLjkgMy44NiA3LjY1IDQuNTUgOC42NS4wNS4wNS4xLjAzLjEuMDNhLjEuMSAwIDAwLjA2LS4xYzEuMDYtMTAuNi0xLjExLTEzLjQyLTEuMTEtMTMuNDItLjMyLjAyLTEuMTkuMjMtMS4xOS4yM3ptOC4yOTkgMi4yN3MtLjQ5LTEuOC0yLjQ0LTIuMjhjMCAwLS41Ny0uMTQtMS4xNy0uMjIgMCAwLTIuMTggMi44MS0xLjEyIDEzLjQzLjAxLjA3LjA2LjA4LjA2LjA4LjA3LjAzLjEtLjAzLjEtLjAzLjcyLTEuMDMgMy45LTUuNzYgNC41NS04LjY0IDAgMCAuMzYtMS40LjAyLTIuMzR6bS0yLjkyIDEzLjA3cy0uMDcgMC0uMDkuMDVjMCAwLS4wMS4wNy4wMy4xLjcuNTEgMi44NSAyIDMuODggMi4zIDAgMCAuMTYuMDUuNDMuMDZoLjE0Yy42OS0uMDIgMS45LS4zNyAzLTIuMjZsLTcuNC0uMjV6bTcuODMtOC40MWMuMTQtMi4wNi0xLjk0LTMuOTctMS45NC0zLjk4IDAgMC0zLjg1IDQuNjYtNi42NyAxMC44IDAgMC0uMDMuMDguMDIuMTNsLjA0LjAxaC4wNmMxLjA2LS41MyA1LjQ2LTIuNzcgNy4yOC00LjU0IDAgMCAxLjE1LS45MyAxLjIxLTIuNDJ6bTEuNTIgMi4xNHMtNi4yOCAzLjM3LTkuNTIgNS41NWMwIDAtLjA1LjA0LS4wMy4xMSAwIDAgLjAzLjA2LjA3LjA2IDEuMTYgMCA1LjU2IDAgNS42Ny0uMDIgMCAwIC41Ny0uMDIgMS4yNy0uMjkgMCAwIDEuNTYtLjUgMi4zNy0yLjI3IDAgMCAuNzMtMS40NS4xNy0zLjE0eiIvPjwvc3ZnPg==") center/contain no-repeat;
+    mask:url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTMuNjcgNi4xNFMxLjgyIDcuOTEgMS43MiA5Ljc4di4zNWMuMDggMS41MSAxLjIyIDIuNCAxLjIyIDIuNCAxLjgzIDEuNzkgNi4yNiA0LjA0IDcuMyA0LjU1IDAgMCAuMDYuMDMuMS0uMDFsLjAyLS4wNHYtLjA0QzcuNTIgMTAuOCAzLjY3IDYuMTQgMy42NyA2LjE0ek05LjY1IDE4LjZjLS4wMi0uMDgtLjEtLjA4LS4xLS4wOGwtNy4zOC4yNmMuOCAxLjQzIDIuMTUgMi41MyAzLjU2IDIuMi45Ni0uMjUgMy4xNi0xLjc4IDMuODgtMi4zLjA2LS4wNS4wNC0uMDkuMDQtLjA5em0uMDgtLjc4QzYuNDkgMTUuNjMuMjEgMTIuMjguMjEgMTIuMjhjLS4xNS40Ni0uMi45LS4yMSAxLjN2LjA3YzAgMS4wNy40IDEuODIuNCAxLjgyLjggMS42OSAyLjM0IDIuMiAyLjM0IDIuMi43LjMgMS40LjMxIDEuNC4zMS4xMi4wMiA0LjQgMCA1LjU0IDAgLjA1IDAgLjA4LS4wNS4wOC0uMDV2LS4wNmMwLS4wMy0uMDMtLjA1LS4wMy0uMDV6TTkuMDYgMy4xOWEzLjQyIDMuNDIgMCAwMC0yLjU3IDMuMTV2LjQxYy4wMy42LjE2IDEuMDUuMTYgMS4wNS42NiAyLjkgMy44NiA3LjY1IDQuNTUgOC42NS4wNS4wNS4xLjAzLjEuMDNhLjEuMSAwIDAwLjA2LS4xYzEuMDYtMTAuNi0xLjExLTEzLjQyLTEuMTEtMTMuNDItLjMyLjAyLTEuMTkuMjMtMS4xOS4yM3ptOC4yOTkgMi4yN3MtLjQ5LTEuOC0yLjQ0LTIuMjhjMCAwLS41Ny0uMTQtMS4xNy0uMjIgMCAwLTIuMTggMi44MS0xLjEyIDEzLjQzLjAxLjA3LjA2LjA4LjA2LjA4LjA3LjAzLjEtLjAzLjEtLjAzLjcyLTEuMDMgMy45LTUuNzYgNC41NS04LjY0IDAgMCAuMzYtMS40LjAyLTIuMzR6bS0yLjkyIDEzLjA3cy0uMDcgMC0uMDkuMDVjMCAwLS4wMS4wNy4wMy4xLjcuNTEgMi44NSAyIDMuODggMi4zIDAgMCAuMTYuMDUuNDMuMDZoLjE0Yy42OS0uMDIgMS45LS4zNyAzLTIuMjZsLTcuNC0uMjV6bTcuODMtOC40MWMuMTQtMi4wNi0xLjk0LTMuOTctMS45NC0zLjk4IDAgMC0zLjg1IDQuNjYtNi42NyAxMC44IDAgMC0uMDMuMDguMDIuMTNsLjA0LjAxaC4wNmMxLjA2LS41MyA1LjQ2LTIuNzcgNy4yOC00LjU0IDAgMCAxLjE1LS45MyAxLjIxLTIuNDJ6bTEuNTIgMi4xNHMtNi4yOCAzLjM3LTkuNTIgNS41NWMwIDAtLjA1LjA0LS4wMy4xMSAwIDAgLjAzLjA2LjA3LjA2IDEuMTYgMCA1LjU2IDAgNS42Ny0uMDIgMCAwIC41Ny0uMDIgMS4yNy0uMjkgMCAwIDEuNTYtLjUgMi4zNy0yLjI3IDAgMCAuNzMtMS40NS4xNy0zLjE0eiIvPjwvc3ZnPg==") center/contain no-repeat;
+  }
+  .dark .brand-mark{color:#fff}
+
+  .chrome{
+    position:absolute;
+    left:6.4vw;
+    right:6.4vw;
+    top:4.6vh;
+    min-height:3.2vh;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:1.1vh;
+    color:var(--muted);
+    font-size:.78vw;
+    letter-spacing:.02em;
+    z-index:2;
+  }
+  .dark .chrome{border-color:rgba(255,255,255,.28);color:rgba(255,255,255,.78)}
+  .chrome .l{
+    display:flex;
+    align-items:center;
+    gap:.72vw;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .dark .chrome .l{color:#fff}
+  .chrome .square{
+    width:.9vw;
+    height:.9vw;
+    background:var(--brand-red);
+    box-shadow:-.38vw -.38vw 0 0 rgba(var(--brand-red-rgb),.16);
+    flex:none;
+  }
+  .dark .chrome .square{background:#fff;box-shadow:-.38vw -.38vw 0 0 rgba(255,255,255,.22)}
+
+  .kicker{
+    font-family:var(--mono);
+    font-size:.78vw;
+    line-height:1;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--brand-red);
+    font-weight:600;
+  }
+  .dark .kicker{color:rgba(255,255,255,.82)}
+  .h-hero{
+    font-family:var(--sans-zh);
+    font-size:min(5.8vw,10.3vh);
+    line-height:1.02;
+    letter-spacing:0;
+    font-weight:900;
+  }
+  .h-xl{
+    font-family:var(--sans-zh);
+    font-size:min(4vw,7.4vh);
+    line-height:1.08;
+    font-weight:800;
+    letter-spacing:0;
+  }
+  .h-md{
+    font-family:var(--sans-zh);
+    font-size:min(2.1vw,4.1vh);
+    line-height:1.2;
+    font-weight:800;
+  }
+  .lead{
+    font-size:1.25vw;
+    line-height:1.72;
+    color:var(--muted);
+    font-weight:400;
+  }
+  .dark .lead{color:rgba(255,255,255,.84)}
+  .body-copy{
+    font-size:1vw;
+    line-height:1.82;
+    color:#444b55;
+  }
+  .dark .body-copy{color:rgba(255,255,255,.78)}
+  .meta{
+    font-family:var(--mono);
+    font-size:.76vw;
+    color:var(--muted);
+    letter-spacing:.04em;
+  }
+
+  .red-rule{height:.52vh;background:var(--brand-red);width:100%}
+  .hairline{height:1px;background:var(--line);width:100%}
+  .dark .hairline{background:rgba(255,255,255,.22)}
+
+  .red-panel{
+    background:linear-gradient(90deg,var(--brand-red),#ef4a3d);
+    color:#fff;
+    padding:4.2vh 3.4vw;
+    min-height:32vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    box-shadow:var(--shadow-soft);
+  }
+  .red-panel .en{
+    font-family:var(--mono);
+    border:1px solid rgba(255,255,255,.42);
+    color:rgba(255,255,255,.9);
+    padding:.5vh .72vw;
+    width:max-content;
+    font-size:.86vw;
+    letter-spacing:.08em;
+  }
+
+  .cover-shell{
+    height:100%;
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    align-items:center;
+    gap:5vw;
+  }
+  .cover-badge{
+    width:10.4vw;
+    height:10.4vw;
+    border-radius:999px;
+    background:linear-gradient(145deg,#fff,#e9edf2);
+    box-shadow:inset -16px -16px 28px rgba(255,255,255,.95),inset 12px 12px 24px rgba(111,118,128,.14),0 22px 46px rgba(15,23,42,.14);
+    display:grid;
+    place-items:center;
+    margin-bottom:3.4vh;
+  }
+  .cover-badge .brand-mark{
+    width:5.8vw;
+    height:5.8vw;
+    color:var(--brand-red);
+  }
+  .cover-title-wrap{display:flex;flex-direction:column;gap:2.6vh}
+  .cover-subtitle{max-width:46ch}
+  .cover-wave{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:19vh;
+    background:
+      linear-gradient(8deg,var(--brand-red) 0 45%,transparent 46%),
+      linear-gradient(6deg,rgba(17,17,17,.14) 0 51%,transparent 52%);
+    opacity:.96;
+  }
+  .cover-meta{
+    position:absolute;
+    left:7vw;
+    bottom:5vh;
+    color:#fff;
+    display:grid;
+    gap:.86vh;
+    font-size:.88vw;
+    z-index:2;
+  }
+  .cover-visual{
+    min-height:48vh;
+    position:relative;
+  }
+  .orb{
+    position:absolute;
+    border-radius:50%;
+    background:linear-gradient(145deg,#fff,#e6eaef);
+    box-shadow:inset -10px -10px 20px rgba(255,255,255,.95),inset 8px 8px 20px rgba(111,118,128,.18),0 16px 28px rgba(15,23,42,.10);
+  }
+  .orb.red{background:linear-gradient(145deg,#f83230,var(--brand-red));box-shadow:0 12px 24px rgba(var(--brand-red-rgb),.26)}
+
+  .agenda-layout{
+    height:100%;
+    display:grid;
+    grid-template-columns:.72fr 1.28fr;
+    gap:5vw;
+    align-items:center;
+  }
+  .agenda-list{display:flex;flex-direction:column;gap:1.25vh}
+  .agenda-item{
+    display:grid;
+    grid-template-columns:3.6vw 1fr;
+    align-items:center;
+    min-height:6.2vh;
+    background:#e6e9ed;
+    color:#505965;
+  }
+  .agenda-item .idx{
+    height:100%;
+    display:grid;
+    place-items:center;
+    background:var(--brand-red);
+    color:#fff;
+    font-family:var(--mono);
+    font-weight:700;
+  }
+  .agenda-item .txt{padding:0 1.25vw;font-size:1.02vw;font-weight:700}
+
+  .section-layout{
+    height:100%;
+    display:grid;
+    grid-template-columns:.82fr 1.18fr;
+    gap:4.5vw;
+    align-items:center;
+  }
+  .section-no{
+    width:8vw;
+    height:8vw;
+    border-radius:999px;
+    background:#fff;
+    box-shadow:var(--shadow);
+    display:grid;
+    place-items:center;
+    color:var(--brand-red);
+    font-family:var(--mono);
+    font-size:2.2vw;
+    font-weight:800;
+    margin-bottom:2.6vh;
+  }
+
+  .grid-2,.grid-3,.grid-4{align-items:stretch}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4vw}
+  .grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:1vw}
+  .span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}
+
+  .content-stack{display:flex;flex-direction:column;gap:2.2vh}
+  .same-size,
+  .equal-children{
+    align-items:stretch;
+  }
+  .same-size > *{
+    height:100%;
+    min-height:0;
+  }
+  .equal-children > *{
+    height:100%;
+    min-height:0;
+  }
+  .equal-children{
+    display:grid;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-soft);
+    padding:3vh 2vw;
+  }
+  .grid-2 > .card,.grid-3 > .card,.grid-4 > .card{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+  }
+  .grid-2 > .image-frame,.grid-3 > .image-frame,.grid-4 > .image-frame{height:100%}
+  .card.flat{box-shadow:none;background:#fff}
+  .mini-card{
+    min-height:0;
+    border:1px solid var(--line);
+    background:#fff;
+    padding:1.25vh 1vw;
+    display:grid;
+    grid-template-rows:auto 1fr;
+    gap:.45vh;
+  }
+  .mini-card strong{
+    color:var(--ink);
+    font-size:clamp(.84rem,.96vw,1.08rem);
+    line-height:1.22;
+    font-weight:800;
+  }
+  .mini-card .card-body{
+    font-size:clamp(.76rem,.84vw,.98rem);
+    line-height:1.34;
+  }
+  .card strong{
+    display:inline-block;
+    color:var(--ink);
+    font-weight:800;
+  }
+  .card-title{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:clamp(1.08rem,1.34vw,1.56rem);
+    line-height:1.18;
+    font-weight:800;
+    color:var(--ink);
+    margin-bottom:1.1vh;
+  }
+  .card-body{font-size:clamp(.92rem,1.02vw,1.18rem);line-height:1.58;color:var(--muted)}
+  .num-pill{
+    display:inline-grid;
+    place-items:center;
+    min-width:2.4vw;
+    height:2.4vw;
+    border-radius:999px;
+    background:var(--brand-red);
+    color:#fff;
+    font-family:var(--mono);
+    font-weight:800;
+    margin-bottom:1.4vh;
+  }
+  .icon-disc{
+    width:4.4vw;
+    height:4.4vw;
+    border-radius:999px;
+    background:var(--brand-red);
+    color:#fff;
+    display:grid;
+    place-items:center;
+    margin-bottom:1.5vh;
+    box-shadow:0 14px 28px rgba(var(--brand-red-rgb),.22);
+  }
+  .icon-disc .lucide{width:2vw;height:2vw;stroke-width:1.8}
+
+  .timeline-v{display:grid;grid-template-columns:1fr 3vw 1fr;gap:2vw;align-items:start}
+  .tl-axis{position:relative;min-height:58vh}
+  .tl-axis::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line-strong)}
+  .tl-dot{
+    width:2.6vw;
+    height:2.6vw;
+    border-radius:999px;
+    background:var(--brand-red);
+    color:#fff;
+    display:grid;
+    place-items:center;
+    font-family:var(--mono);
+    font-weight:800;
+    margin:0 auto 6.5vh;
+    position:relative;
+    z-index:1;
+  }
+  .tl-card{min-height:10vh;border-top:3px solid var(--brand-red);padding-top:1.3vh;margin-bottom:5.4vh}
+  .tl-card .year{font-family:var(--mono);color:var(--brand-red);font-weight:800;margin-bottom:.6vh}
+
+  .bar-chart{display:flex;flex-direction:column;gap:1.35vh}
+  .bar-row{display:grid;grid-template-columns:7vw 1fr 4vw;gap:1vw;align-items:center;font-size:.9vw;color:var(--muted)}
+  .bar-track{height:2.2vh;background:#e7eaee;position:relative;overflow:hidden}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--brand-red-dark),var(--brand-red));width:var(--v,50%)}
+  .bar-row strong{font-family:var(--mono);color:var(--ink)}
+  .stat-big{font-family:var(--mono);font-size:min(5.2vw,9vh);line-height:1;color:var(--brand-red);font-weight:800}
+
+  .process{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+    align-items:stretch;
+  }
+  .process-step{
+    position:relative;
+    background:#fff;
+    border:1px solid var(--line);
+    padding:3vh 1.6vw;
+    min-height:30vh;
+  }
+  .process-step:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    right:-1.2vw;
+    top:50%;
+    transform:translateY(-50%);
+    width:0;
+    height:0;
+    border-top:1.5vw solid transparent;
+    border-bottom:1.5vw solid transparent;
+    border-left:1.2vw solid var(--brand-red);
+    z-index:2;
+  }
+
+  .arrow-timeline{
+    --axis-y:50%;
+    --line-left:4%;
+    --line-right:6.4%;
+    --line-h:5.2vh;
+    --head-right:1.5%;
+    --head-w:5vw;
+    --head-h:8vh;
+    position:relative;
+    margin-top:7vh;
+    height:36vh;
+  }
+  .arrow-timeline-line{
+    position:absolute;
+    left:var(--line-left);
+    right:var(--line-right);
+    top:var(--axis-y);
+    height:var(--line-h);
+    background:var(--brand-red);
+    transform:translateY(-50%);
+  }
+  .arrow-timeline-head{
+    position:absolute;
+    right:var(--head-right);
+    top:var(--axis-y);
+    width:var(--head-w);
+    height:var(--head-h);
+    background:var(--brand-red);
+    clip-path:polygon(0 0,100% 50%,0 100%);
+    transform:translateY(-50%);
+  }
+  .arrow-timeline-node{
+    position:absolute;
+    top:var(--axis-y);
+    width:1.8vw;
+    height:1.8vw;
+    border-radius:999px;
+    background:var(--brand-red);
+    box-shadow:0 0 0 .8vw rgba(var(--brand-red-rgb),.10);
+    transform:translate(-50%,-50%);
+    z-index:2;
+  }
+  .arrow-timeline-card{
+    position:absolute;
+    width:18vw;
+    z-index:3;
+  }
+  .arrow-timeline-card.top{top:0}
+  .arrow-timeline-card.bottom{bottom:0}
+
+  .image-frame{
+    background:#fff;
+    border:1px solid var(--line);
+    padding:.7vw;
+    box-shadow:var(--shadow-soft);
+  }
+  .image-frame img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .r-16x9{aspect-ratio:16/9}
+  .r-16x10{aspect-ratio:16/10}
+  .r-4x3{aspect-ratio:4/3}
+  .fit-contain img{object-fit:contain;background:#fff}
+  .caption{
+    margin-top:1vh;
+    font-size:.76vw;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .quote-band{
+    background:linear-gradient(90deg,var(--brand-red),var(--brand-red-dark));
+    color:#fff;
+    padding:3.4vh 3vw;
+    font-family:var(--sans-zh);
+    font-size:2.4vw;
+    line-height:1.24;
+    font-weight:900;
+  }
+  .bullet-list{
+    display:grid;
+    gap:1.15vh;
+  }
+  .bullet-item{
+    display:grid;
+    grid-template-columns:1.1vw 1fr;
+    gap:1vw;
+    align-items:start;
+  }
+  .bullet-dot{
+    width:.72vw;
+    height:.72vw;
+    border-radius:50%;
+    background:var(--brand-red);
+    margin-top:.5vh;
+  }
+
+  [data-anim]{
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity .56s ease,transform .56s cubic-bezier(.22,1,.36,1);
+  }
+  .slide.active [data-anim]{opacity:1;transform:none}
+  .slide.active [data-anim]:nth-child(2){transition-delay:.06s}
+  .slide.active [data-anim]:nth-child(3){transition-delay:.12s}
+  .slide.active [data-anim]:nth-child(4){transition-delay:.18s}
+  body.low-power [data-anim],#overview [data-anim]{opacity:1!important;transform:none!important}
+
+  #hint{
+    position:fixed;
+    right:1.5vw;
+    bottom:1.8vh;
+    z-index:20;
+    color:rgba(34,37,43,.56);
+    font-size:.72vw;
+    font-family:var(--mono);
+    letter-spacing:.02em;
+    user-select:none;
+  }
+  body.low-power #hint{color:var(--brand-red)}
+  .page-no{
+    position:absolute;
+    left:2.2vw;
+    bottom:2.2vh;
+    z-index:4;
+    font-family:var(--mono);
+    font-size:.86vw;
+    line-height:1;
+    letter-spacing:.08em;
+    color:rgba(34,37,43,.42);
+    pointer-events:none;
+  }
+  .dark .page-no{color:rgba(255,255,255,.72)}
+  .hw-cover .page-no{color:rgba(255,255,255,.74)}
+  #nav{
+    position:fixed;
+    left:50%;
+    bottom:2.1vh;
+    transform:translateX(-50%);
+    display:flex;
+    gap:.55vw;
+    z-index:20;
+  }
+  #nav button{
+    width:.55vw;
+    height:.55vw;
+    border:0;
+    border-radius:50%;
+    background:rgba(34,37,43,.2);
+    cursor:pointer;
+    padding:0;
+  }
+  #nav button.active{background:var(--brand-red);transform:scale(1.35)}
+  #overview{
+    position:fixed;
+    inset:0;
+    background:rgba(10,10,10,.88);
+    z-index:30;
+    display:none;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+    padding:24px;
+    overflow:auto;
+  }
+  body.overview #overview{display:grid}
+  .thumb{
+    position:relative;
+    aspect-ratio:16/9;
+    background:#fff;
+    overflow:hidden;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.18);
+  }
+  .thumb .slide{
+    transform:scale(.25);
+    transform-origin:top left;
+    pointer-events:none;
+  }
+
+  @media (max-width:900px){
+    .slide{padding:8vh 6vw 8vh}
+    .cover-shell,.agenda-layout,.section-layout,.grid-2{grid-template-columns:1fr;gap:3vh}
+    .grid-3,.grid-4,.process{grid-template-columns:1fr 1fr}
+    .brand-lockup{font-size:2.8vw}
+    .brand-mark{width:3.4vw;height:3.4vw}
+    .h-hero{font-size:12vw}
+    .h-xl{font-size:8.8vw}
+    .lead{font-size:3.5vw}
+    .card-title{font-size:3.6vw;white-space:normal}
+    .body-copy,.card-body{font-size:2.8vw}
+    .chrome{font-size:2.2vw}
+    .page-no{font-size:2.2vw;left:3.5vw;bottom:2.8vh}
+    #hint{font-size:2vw}
+  }
+</style>
+</head>
+<body>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     页面骨架参考 references/layouts-huawei.md
+     主题色配置参考 references/themes-huawei.md
+     ============================================================ -->
+
+
+<!-- P01 H01 Cover -->
+<section class="slide hw-cover" data-layout="H01" data-animate="cover">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="cover-shell">
+    <div class="cover-title-wrap">
+      <div class="cover-badge" data-anim>
+        <span class="brand-mark" aria-hidden="true"></span>
+      </div>
+      <div class="kicker" data-anim>SERVERLESS ENGINE / 2026</div>
+      <h1 class="h-hero" data-anim>openYuanrong<br/>分布式智能底座</h1>
+      <p class="lead cover-subtitle" data-anim>分布式智能时代的 Serverless 引擎：消除复杂性，使能极简编程</p>
+    </div>
+    <div class="cover-visual" aria-hidden="true">
+      <span class="orb red" style="width:6vw;height:6vw;right:10vw;top:3vh"></span>
+      <span class="orb" style="width:12vw;height:12vw;right:0;top:16vh"></span>
+      <span class="orb red" style="width:2.6vw;height:2.6vw;right:18vw;top:34vh"></span>
+      <span class="orb" style="width:5vw;height:5vw;right:26vw;top:8vh"></span>
+    </div>
+  </div>
+  <div class="cover-wave" aria-hidden="true"></div>
+  <div class="cover-meta">
+    <div>汇报人: [演讲者]</div>
+    <div>部门: [架构与基础软件部]</div>
+  </div>
+</section>
+
+<!-- P02 H02 Agenda -->
+<section class="slide" data-layout="H02" data-animate="agenda">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="agenda-layout">
+    <div class="red-panel" data-anim>
+      <div class="kicker" style="color:rgba(255,255,255,.72)">CONTENT</div>
+      <h2 class="h-xl" style="margin-top:2vh">目录</h2>
+      <div class="en" style="margin-top:2vh">CONTENT</div>
+    </div>
+    <div class="agenda-list">
+      <div class="agenda-item" data-anim><div class="idx">01</div><div class="txt">Serverless 时代的挑战与演进</div></div>
+      <div class="agenda-item" data-anim><div class="idx">02</div><div class="txt">元戎 (openYuanrong) 架构与核心原理</div></div>
+      <div class="agenda-item" data-anim><div class="idx">03</div><div class="txt">向上：支撑用户 Serverless 体验</div></div>
+      <div class="agenda-item" data-anim><div class="idx">04</div><div class="txt">向下：操作系统与设备诉求</div></div>
+      <div class="agenda-item" data-anim><div class="idx">05</div><div class="txt">openJiuwen 与 openYuanrong 的协同</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- P03 H03 Section 1 -->
+<section class="slide" data-layout="H03" data-animate="section">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="section-layout">
+    <div data-anim>
+      <div class="section-no">01</div>
+      <div class="kicker">SECTION ONE</div>
+      <h2 class="h-xl" style="margin-top:1.8vh">时代的挑战与演进</h2>
+      <p class="lead" style="margin-top:2vh">分布式架构复杂化，AI 算力异构化带来的新诉求。</p>
+    </div>
+    <div class="red-panel" data-anim>
+      <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
+      <h3 class="h-md" style="margin-top:2vh">业务需要更纯粹的业务逻辑表达，而非繁重的底层治理。</h3>
+    </div>
+  </div>
+</section>
+
+<!-- P04 H11 Foreword -->
+<section class="slide" data-layout="H11" data-animate="foreword">
+  <div class="chrome"><div class="l"><span class="square"></span><span>前言 / INTRODUCTION</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:9vh;display:grid;gap:4vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">INTRODUCTION</div>
+      <h2 class="h-xl">Serverless、FaaS 与 BaaS 简述</h2>
+    </div>
+    <div class="card flat" data-anim style="position:relative;max-width:72vw;margin:auto;padding:5vh 5vw">
+      <span style="position:absolute;left:1.4vw;top:1.4vh;width:2.2vw;height:2px;background:var(--brand-red)"></span>
+      <span style="position:absolute;left:1.4vw;top:1.4vh;width:2px;height:2.2vw;background:var(--brand-red)"></span>
+      <span style="position:absolute;right:1.4vw;bottom:1.4vh;width:2.2vw;height:2px;background:var(--brand-red)"></span>
+      <span style="position:absolute;right:1.4vw;bottom:1.4vh;width:2px;height:2.2vw;background:var(--brand-red)"></span>
+      <p class="body-copy"><strong>Serverless (无服务器计算)</strong> 是一种云原生架构范式，让开发者无需管理服务器等基础设施。它由 <strong>FaaS (函数即服务)</strong> 提供按需执行的弹性计算，以及 <strong>BaaS (后端即服务)</strong> 提供对象存储、KV 存储等托管服务共同构成。</p>
+    </div>
+  </div>
+</section>
+
+<!-- P05 H04 Title Body -->
+<section class="slide" data-layout="H04" data-animate="body">
+  <div class="chrome"><div class="l"><span class="square"></span><span>挑战与痛点</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="height:100%;display:grid;grid-template-rows:auto 1fr;gap:4.8vh;padding-top:7vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">CHALLENGE</div>
+      <h2 class="h-xl">传统架构与智能场景的需求差距</h2>
+      <div class="red-rule" style="width:8vw"></div>
+    </div>
+    <div class="grid-2" style="align-items:start">
+      <div class="card flat" data-anim>
+        <p class="body-copy">传统微服务和分布式编程模式中，开发者深陷于 RPC 通信、状态同步、容错重试等底层细节。随着大模型和 Agent 的爆发，AI 应用往往涉及复杂的算子调度、庞大的状态流转（如 KV Cache），现有基础设施难以支撑这种敏捷开发与极速弹性需求。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="card-title">核心鸿沟</div>
+        <p class="card-body">开发复杂度呈指数级上升，而云上弹性资源利用率却因为冷启动和通信开销而处于低位。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P06 H03 Section 2 -->
+<section class="slide" data-layout="H03" data-animate="section">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="section-layout">
+    <div data-anim>
+      <div class="section-no">02</div>
+      <div class="kicker">SECTION TWO</div>
+      <h2 class="h-xl" style="margin-top:1.8vh">元戎架构与核心原理</h2>
+      <p class="lead" style="margin-top:2vh">单机化编程体验，极致解耦底座。</p>
+    </div>
+    <div class="red-panel" data-anim>
+      <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
+      <h3 class="h-md" style="margin-top:2vh">通过计算、状态、存储的三层解耦，重塑分布式应用底座。</h3>
+    </div>
+  </div>
+</section>
+
+<!-- P07 H17 Central Hub -->
+<section class="slide" data-layout="H17" data-animate="hub">
+  <div class="chrome"><div class="l"><span class="square"></span><span>架构总览</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">ARCHITECTURE</div><h2 class="h-xl">三层解耦架构总览</h2></div>
+    <div style="position:relative;height:52vh;margin-top:2vh" data-anim>
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:11vw;height:11vw;border-radius:999px;background:var(--brand-red);color:#fff;display:grid;place-items:center;font-weight:900;text-align:center">底层<br/>解耦</div>
+      <div style="position:absolute;left:16%;top:12%" class="card"><div class="card-title">运行时 (Runtime)</div><p class="card-body">单机化多语言 API (C/C++, Python)</p></div>
+      <div style="position:absolute;right:16%;top:12%" class="card"><div class="card-title">函数系统 (FuncSystem)</div><p class="card-body">分布式调度、弹性伸缩、冷启动优化</p></div>
+      <div style="position:absolute;left:18%;bottom:6%" class="card"><div class="card-title">数据系统 (DataSystem)</div><p class="card-body">分布式对象、KV与流缓存体系</p></div>
+      <div style="position:absolute;right:18%;bottom:6%" class="card"><div class="card-title">基础设施</div><p class="card-body">基于 Linux / openEuler 的底层支撑</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- P08 H05 Three Cards -->
+<section class="slide" data-layout="H05" data-animate="cards">
+  <div class="chrome"><div class="l"><span class="square"></span><span>运行时抽象</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">RUNTIME ABSTRACTION</div>
+      <h2 class="h-xl">分布式应用的三大核心抽象</h2>
+    </div>
+    <div class="grid-3" style="margin-top:6vh">
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="cloud-lightning"></i></div>
+        <div class="card-title">Invoke (无状态)</div>
+        <p class="card-body">屏蔽 RPC 细节的无状态函数调用。开发者只需定义业务逻辑，像调用本地函数一样调用远程服务，极大降低心智负担。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="server"></i></div>
+        <div class="card-title">Instance (有状态)</div>
+        <p class="card-body">面向状态的执行实体抽象。将状态与计算绑定，底层自动管理 Actor 的生命周期和容错恢复，避免数据来回搬迁。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="network"></i></div>
+        <div class="card-title">Distributed Futures</div>
+        <p class="card-body">统一的异步结果返回机制。基于 DataSystem 提供的数据对象引用 (ObjectRef)，实现跨节点的异步数据流转与按需拉取。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P09 H26 Metaphor Compare -->
+<section class="slide" data-layout="H26" data-animate="metaphor">
+  <div class="chrome"><div class="l"><span class="square"></span><span>无状态 vs 有状态</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">COMPARE</div><h2 class="h-xl">@yr.invoke 与 @yr.instance 的定位差异</h2></div>
+    <div class="grid-2" style="margin-top:5vh;align-items:end">
+      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--brand-red)">
+        <h3 class="h-md" style="margin-bottom:2vh">@yr.invoke (FaaS 任务)</h3>
+        <p class="body-copy">执行后即刻销毁或休眠，完全无状态。<br/>适合密集型计算、临时任务、高并发无依赖逻辑。<br/><strong>极速扩展，零维护负担。</strong></p>
+      </div>
+      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--ink)">
+        <h3 class="h-md" style="margin-bottom:2vh">@yr.instance (Actor 模型)</h3>
+        <p class="body-copy">生命周期持久化，维护内部状态。<br/>适合数据库连接池、聊天机器人上下文、大模型 KV Cache。<br/><strong>状态就近处理，避免序列化开销。</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P10 H08 Process Arrow -->
+<section class="slide" data-layout="H08" data-animate="process">
+  <div class="chrome"><div class="l"><span class="square"></span><span>调用流程</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">WORKFLOW</div>
+      <h2 class="h-xl">函数调用的完整解耦流程</h2>
+    </div>
+    <div class="process" style="margin-top:7vh">
+      <div class="process-step" data-anim>
+        <div class="num-pill">01</div>
+        <div class="card-title">触发调用</div>
+        <p class="card-body">用户侧触发 invoke。参数立即落入分布式数据系统 (DataSystem)。</p>
+      </div>
+      <div class="process-step" data-anim>
+        <div class="num-pill">02</div>
+        <div class="card-title">控制流调度</div>
+        <p class="card-body">仅传递数据引用 (ObjectRef)。调度器根据资源状态分配计算节点。</p>
+      </div>
+      <div class="process-step" data-anim>
+        <div class="num-pill">03</div>
+        <div class="card-title">执行层拉取</div>
+        <p class="card-body">工作节点依据引用，从共享内存或远端零拷贝拉取真实数据。</p>
+      </div>
+      <div class="process-step" data-anim>
+        <div class="num-pill">04</div>
+        <div class="card-title">结果返回</div>
+        <p class="card-body">结果再次存入 DataSystem，原调用方通过 Future 解析最终结果。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P11 H23 Gear Process -->
+<section class="slide" data-layout="H23" data-animate="gear-process">
+  <div class="chrome"><div class="l"><span class="square"></span><span>函数系统</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">FUNCTION SYSTEM</div><h2 class="h-xl">多级分层调度机制</h2></div>
+    <div class="grid-4" style="margin-top:6vh;align-items:center">
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="globe"></i></div><div class="card-title">Master 集群级</div><p class="card-body">负责租户管理、粗粒度资源分配与全局负载均衡。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="server"></i></div><div class="card-title">Domain / Node</div><p class="card-body">单节点或域内的守护进程，管理本机资源池与路由。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="cpu"></i></div><div class="card-title">Agent 隔离级</div><p class="card-body">沙箱化隔离，执行具体的应用环境初始化与安全边界管理。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="zap"></i></div><div class="card-title">Worker 协程级</div><p class="card-body">基于 Boost.Fiber 实现的微秒级用户态线程，极高并发执行函数。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- P12 H15 KPI Dashboard -->
+<section class="slide" data-layout="H15" data-animate="kpi-dashboard">
+  <div class="chrome"><div class="l"><span class="square"></span><span>性能优化</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div class="grid-12" style="padding-top:9vh;align-items:end">
+    <div class="span-7 card" data-anim>
+      <div class="kicker">COLD START OPTIMIZATION</div>
+      <div style="height:42vh;display:flex;align-items:end;gap:1.2vw;margin-top:4vh;border-bottom:1px solid var(--line)">
+        <div style="height:88%;width:4vw;background:#d8dde4"></div><div style="height:88%;width:4vw;background:#d8dde4"></div><div style="height:88%;width:4vw;background:#d8dde4"></div><div style="height:12%;width:4vw;background:var(--brand-red)"></div><div style="height:12%;width:4vw;background:var(--brand-red)"></div>
+      </div>
+    </div>
+    <div class="span-5 content-stack" data-anim>
+      <div class="stat-big">&gt;80%</div>
+      <div class="card-title">冷启动延迟下降</div>
+      <p class="lead">通过 <strong>Checkpoint/Snapstart</strong> 技术，元戎将初始化后的进程状态保存为快照。后续实例直接从快照恢复内存，跳过漫长的框架加载与代码初始化，真正实现 FaaS 的毫秒级弹性。</p>
+      <div class="red-rule" style="width:10vw"></div>
+    </div>
+  </div>
+</section>
+
+<!-- P13 H11 Foreword -->
+<section class="slide" data-layout="H11" data-animate="foreword">
+  <div class="chrome"><div class="l"><span class="square"></span><span>数据系统</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:9vh;display:grid;gap:4vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">DATA SYSTEM</div>
+      <h2 class="h-xl">数据底座架构定位</h2>
+    </div>
+    <div class="card flat" data-anim style="position:relative;max-width:72vw;margin:auto;padding:5vh 5vw">
+      <span style="position:absolute;left:1.4vw;top:1.4vh;width:2.2vw;height:2px;background:var(--brand-red)"></span>
+      <span style="position:absolute;left:1.4vw;top:1.4vh;width:2px;height:2.2vw;background:var(--brand-red)"></span>
+      <span style="position:absolute;right:1.4vw;bottom:1.4vh;width:2.2vw;height:2px;background:var(--brand-red)"></span>
+      <span style="position:absolute;right:1.4vw;bottom:1.4vh;width:2px;height:2.2vw;background:var(--brand-red)"></span>
+      <p class="body-copy">如果说 Function System 是元戎的神经网络（传递控制信号），那么 Data System 就是元戎的血液循环（传递实际状态与参数）。Data System 全权负责数据的路由、缓存、一致性及对象存储，使得函数系统彻底变为无状态枢纽。</p>
+    </div>
+  </div>
+</section>
+
+<!-- P14 H20 Icon Matrix -->
+<section class="slide" data-layout="H20" data-animate="icon-matrix">
+  <div class="chrome"><div class="l"><span class="square"></span><span>数据接口</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">DATA ABSTRACTION</div><h2 class="h-xl">三层数据抽象设计</h2></div>
+    <div class="grid-3" style="margin-top:5vh">
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="cpu"></i></div><div class="card-title">HeteroObj (底层)</div><p class="card-body">异构对象管理。对内存、磁盘甚至 NPU/GPU 显存进行统一抽象。支撑跨设备的异构资源纳管与调度。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="database"></i></div><div class="card-title">KV 与 Object (中层)</div><p class="card-body">核心分布式缓存与存储。同节点利用 POSIX 共享内存实现零拷贝；跨节点依赖 RDMA/TCP 进行低延迟传输。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="layout-template"></i></div><div class="card-title">BaaS 视图 (顶层)</div><p class="card-body">对外屏蔽复杂性，为用户层代码直接暴露 Redis 风格的接口与文件系统，极大提升开发者体验。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- P15 H09 Image Grid -->
+<section class="slide" data-layout="H09" data-animate="images">
+  <div class="chrome"><div class="l"><span class="square"></span><span>异构硬件直通</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">HARDWARE PASSTHROUGH</div>
+      <h2 class="h-xl">HeteroObj 与 NPU HBM 直通</h2>
+    </div>
+    <div class="grid-3" style="margin-top:5vh">
+      <div data-anim>
+        <div class="image-frame r-16x9"><img src="images/placeholder.png" style="background:#e3e8ee" alt="模型推理过程"></div>
+        <div class="caption">1. 将大模型张量直接映射为 HeteroObj。</div>
+      </div>
+      <div data-anim>
+        <div class="image-frame r-16x9"><img src="images/placeholder.png" style="background:#e3e8ee" alt="显存零拷贝"></div>
+        <div class="caption">2. 绕过宿主内存，由 DataSystem 协调 NPU 进行 HBM 层面的零拷贝传递。</div>
+      </div>
+      <div data-anim>
+        <div class="image-frame r-16x9"><img src="images/placeholder.png" style="background:#e3e8ee" alt="高速执行"></div>
+        <div class="caption">3. 面向大模型时代的极致性能优化，大幅消除 I/O 瓶颈。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P16 H03 Section 3 -->
+<section class="slide" data-layout="H03" data-animate="section">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="section-layout">
+    <div data-anim>
+      <div class="section-no">03</div>
+      <div class="kicker">SECTION THREE</div>
+      <h2 class="h-xl" style="margin-top:1.8vh">支撑用户 Serverless 体验</h2>
+      <p class="lead" style="margin-top:2vh">面向业务的极致简化。</p>
+    </div>
+    <div class="red-panel" data-anim>
+      <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
+      <h3 class="h-md" style="margin-top:2vh">向上对用户：将“编写分布式集群程序”转化为“编写单机代码”。</h3>
+    </div>
+  </div>
+</section>
+
+<!-- P17 H26 Metaphor Compare -->
+<section class="slide" data-layout="H26" data-animate="metaphor">
+  <div class="chrome"><div class="l"><span class="square"></span><span>单机化编程</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">PARADIGM SHIFT</div><h2 class="h-xl">消除分布式复杂性</h2></div>
+    <div class="grid-2" style="margin-top:5vh;align-items:end">
+      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--ink)">
+        <h3 class="h-md" style="margin-bottom:2vh">传统微服务开发</h3>
+        <p class="body-copy">定义 Protobuf / Thrift 接口<br/>实现客户端桩代码、配置重试策略<br/>显式调用 Redis 进行状态流转<br/><strong>心智负担重，代码充斥框架粘合剂。</strong></p>
+      </div>
+      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--brand-red)">
+        <h3 class="h-md" style="margin-bottom:2vh">元戎单机化编程</h3>
+        <p class="body-copy">直接写普通 Python/C++ 函数<br/>使用 @yr.invoke 注解暴露服务<br/>直接按引用返回，底层自动处理路由、重试与缓存<br/><strong>极致轻量，专注业务逻辑。</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P18 H05 Three Cards -->
+<section class="slide" data-layout="H05" data-animate="cards">
+  <div class="chrome"><div class="l"><span class="square"></span><span>FaaS & BaaS 体验</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">VALUE PROPOSITION</div>
+      <h2 class="h-xl">极速计算与无缝存储的双重赋能</h2>
+    </div>
+    <div class="grid-3" style="margin-top:6vh">
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="zap"></i></div>
+        <div class="card-title">Serverless 弹性无感</div>
+        <p class="card-body">免运维：用户无需关心节点资源；按需计费：0请求0消耗；秒级扩容：流量突增时底层自动实例化调度，确保服务高可用。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="database"></i></div>
+        <div class="card-title">内置 BaaS 数据系统</div>
+        <p class="card-body">无需自建 Redis / MinIO。元戎平台直接提供统一的 KV 读写和 Object 挂载，函数执行完毕自动释放关联内存。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="puzzle"></i></div>
+        <div class="card-title">异构算力一键下发</div>
+        <p class="card-body">通过特定的 decorator 参数指明 NPU/GPU 需求，底座智能调度到具备加速硬件的节点，大模型时代必备基建。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P19 H04 Title Body -->
+<section class="slide" data-layout="H04" data-animate="body">
+  <div class="chrome"><div class="l"><span class="square"></span><span>应用必然性</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="height:100%;display:grid;grid-template-rows:auto 1fr;gap:4.8vh;padding-top:7vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">CONCLUSION</div>
+      <h2 class="h-xl">采用元戎的必然性</h2>
+      <div class="red-rule" style="width:8vw"></div>
+    </div>
+    <div class="grid-2" style="align-items:start">
+      <div class="card flat" data-anim>
+        <p class="body-copy">随着云原生走向深水区，容器级抽象（Kubernetes）仍将大量的通信与编排复杂度遗留在了应用代码中。元戎通过更高维度的 Serverless 抽象层，接管了这些非功能性需求，真正将应用的本质剥离出来。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="card-title">必然降本增效</div>
+        <p class="card-body">元戎架构不仅仅是开发模式的简化，更通过高密部署、极速冷启和共享内存，大幅推高了硬件资源的实际利用率。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P20 H03 Section 4 -->
+<section class="slide" data-layout="H03" data-animate="section">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="section-layout">
+    <div data-anim>
+      <div class="section-no">04</div>
+      <div class="kicker">SECTION FOUR</div>
+      <h2 class="h-xl" style="margin-top:1.8vh">设备与操作系统诉求</h2>
+      <p class="lead" style="margin-top:2vh">软硬件基础设施底座。</p>
+    </div>
+    <div class="red-panel" data-anim>
+      <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
+      <h3 class="h-md" style="margin-top:2vh">向下对设备：深度依赖内核级特性与先进网络/异构设备。</h3>
+    </div>
+  </div>
+</section>
+
+<!-- P21 H17 Central Hub -->
+<section class="slide" data-layout="H17" data-animate="hub">
+  <div class="chrome"><div class="l"><span class="square"></span><span>生态协同</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">ECOSYSTEM</div><h2 class="h-xl">软硬基础设施深度耦合</h2></div>
+    <div style="position:relative;height:52vh;margin-top:2vh" data-anim>
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:11vw;height:11vw;border-radius:999px;background:var(--brand-red);color:#fff;display:grid;place-items:center;font-weight:900;text-align:center">元戎<br/>OS 底座</div>
+      <div style="position:absolute;left:16%;top:12%" class="card"><div class="card-title">容器与沙箱</div><p class="card-body">Linux Cgroups / Namespaces</p></div>
+      <div style="position:absolute;right:16%;top:12%" class="card"><div class="card-title">IPC 机制</div><p class="card-body">POSIX Shared Memory (/dev/shm)</p></div>
+      <div style="position:absolute;left:18%;bottom:6%" class="card"><div class="card-title">高速网络</div><p class="card-body">RDMA (InfiniBand/RoCE)</p></div>
+      <div style="position:absolute;right:18%;bottom:6%" class="card"><div class="card-title">计算硬件</div><p class="card-body">NPU / GPU, 异构算力纳管</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- P22 H20 Icon Matrix -->
+<section class="slide" data-layout="H20" data-animate="icon-matrix">
+  <div class="chrome"><div class="l"><span class="square"></span><span>系统内核依赖</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">KERNEL DEPS</div><h2 class="h-xl">对 openEuler 与 Linux 内核的依赖</h2></div>
+    <div class="grid-4" style="margin-top:5vh">
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="layers"></i></div><div class="card-title">共享内存隔离</div><p class="card-body">强依赖内核稳定高效的 POSIX 共享内存机制，实现同宿主机进程间零拷贝通信。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="shield"></i></div><div class="card-title">高密沙箱隔离</div><p class="card-body">依赖 namespace 和 cgroup v2 提供资源隔离机制。openEuler 的轻量化容器技术为元戎提供了优质的运行土壤。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="save"></i></div><div class="card-title">CRIU 快照引擎</div><p class="card-body">深度集成 Checkpoint/Restore in Userspace 技术。操作系统必须支持进程快照挂起与极速唤醒机制。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="activity"></i></div><div class="card-title">用户态调度</div><p class="card-body">Boost.Fiber 的海量协程切换，对宿主系统 CPU 调度的公平性与实时性提出了高要求。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- P23 H05 Three Cards -->
+<section class="slide" data-layout="H05" data-animate="cards">
+  <div class="chrome"><div class="l"><span class="square"></span><span>硬件支持</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">HARDWARE REQ</div>
+      <h2 class="h-xl">硬件设施建设要求</h2>
+    </div>
+    <div class="grid-3" style="margin-top:6vh">
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="cpu"></i></div>
+        <div class="card-title">AI 加速卡 (NPU/GPU)</div>
+        <p class="card-body">在处理深度学习、Agent 群体智能等重负载应用时，系统向下需要硬件提供算力直通接口，DataSystem 需具备对其 HBM 的直接读写能力。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="network"></i></div>
+        <div class="card-title">RDMA 高速网络</div>
+        <p class="card-body">跨节点 Object 的延迟必须被极致压缩。传统 TCP/IP 协议栈开销过大，需要 RoCEv2 等 RDMA 技术支持内核旁路的显存直传 (GPUDirect RDMA)。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="icon-disc"><i data-lucide="hard-drive"></i></div>
+        <div class="card-title">高速 NVMe SSD</div>
+        <p class="card-body">进程级 Checkpoint 快照技术会在冷启动唤醒时从磁盘载入海量内存镜像，底层必须配备极致性能的 NVMe I/O 池来支撑瞬时并发 IOPS。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P24 H03 Section 5 -->
+<section class="slide" data-layout="H03" data-animate="section">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div class="section-layout">
+    <div data-anim>
+      <div class="section-no">05</div>
+      <div class="kicker">SECTION FIVE</div>
+      <h2 class="h-xl" style="margin-top:1.8vh">openJiuwen 协同演进</h2>
+      <p class="lead" style="margin-top:2vh">AI Agent 平台与底层计算底座的完美结合。</p>
+    </div>
+    <div class="red-panel" data-anim>
+      <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
+      <h3 class="h-md" style="margin-top:2vh">九问 (openJiuwen) 构建在元戎之上，验证了元戎大模型时代的核心价值。</h3>
+    </div>
+  </div>
+</section>
+
+<!-- P25 H26 Metaphor Compare -->
+<section class="slide" data-layout="H26" data-animate="metaphor">
+  <div class="chrome"><div class="l"><span class="square"></span><span>引擎定位差异</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">POSITIONING</div><h2 class="h-xl">应用层 vs 基础计算层</h2></div>
+    <div class="grid-2" style="margin-top:5vh;align-items:end">
+      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--ink)">
+        <h3 class="h-md" style="margin-bottom:2vh">openJiuwen (AI Agent 平台)</h3>
+        <p class="body-copy">构建、编排、管理大模型智能体(Agents)<br/>专注于 RAG、Memory、Swarm 群体智能逻辑<br/><strong>面向 AI 应用开发者，聚焦智能体的交互与编排。</strong></p>
+      </div>
+      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--brand-red)">
+        <h3 class="h-md" style="margin-bottom:2vh">openYuanrong (计算底座)</h3>
+        <p class="body-copy">分布式资源调度与 Serverless 抽象<br/>专注于高并发协程、进程快照、共享内存数据零拷贝<br/><strong>面向系统架构，为上层应用提供透明的无限算力池。</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P26 H23 Gear Process -->
+<section class="slide" data-layout="H23" data-animate="gear-process">
+  <div class="chrome"><div class="l"><span class="square"></span><span>架构映射</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim><div class="kicker">ARCHITECTURE MAPPING</div><h2 class="h-xl">群体智能与底层调度的完美映射</h2></div>
+    <div class="grid-4" style="margin-top:6vh;align-items:center">
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="users"></i></div><div class="card-title">群体协同 (Swarm)</div><p class="card-body">九问中的多 Agent 协同，直接映射为元戎的跨节点 instance 间通信。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="cpu"></i></div><div class="card-title">独立 Agent</div><p class="card-body">九问的单个 Agent，转化为元戎的独立沙箱 (Sandbox)，享有隔离的计算资源。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="brain"></i></div><div class="card-title">Tool / API 调用</div><p class="card-body">Agent 使用外部工具的动作，映射为元戎无状态高并发的 @yr.invoke 执行单元。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="database"></i></div><div class="card-title">Context Memory</div><p class="card-body">大模型复杂的对话记忆、检索文档缓存，平滑存入元戎 DataSystem 的分布式数据结构中。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- P27 H08 Process Arrow -->
+<section class="slide" data-layout="H08" data-animate="process">
+  <div class="chrome"><div class="l"><span class="square"></span><span>大模型专属优化</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="padding-top:8vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">AI WORKLOAD</div>
+      <h2 class="h-xl">KV Cache 与算力亲和加速</h2>
+    </div>
+    <div class="process" style="margin-top:7vh">
+      <div class="process-step" data-anim>
+        <div class="num-pill">01</div>
+        <div class="card-title">Agent 请求</div>
+        <p class="card-body">九问发出推理请求，携带海量 Prompt / Memory 上下文。</p>
+      </div>
+      <div class="process-step" data-anim>
+        <div class="num-pill">02</div>
+        <div class="card-title">数据状态锚定</div>
+        <p class="card-body">元戎 DataSystem 锁定 KV Cache 分布节点位置。</p>
+      </div>
+      <div class="process-step" data-anim>
+        <div class="num-pill">03</div>
+        <div class="card-title">算力调度就近原则</div>
+        <p class="card-body">元戎 FunctionSystem 不搬数据，而是将计算函数调度到持有缓存的 NPU 节点上执行。</p>
+      </div>
+      <div class="process-step" data-anim>
+        <div class="num-pill">04</div>
+        <div class="card-title">极速响应</div>
+        <p class="card-body">避开网络瓶颈，消除 TTFT (首字生成时间) 尖峰，使九问系统在多并发下依然顺滑。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P28 H04 Title Body -->
+<section class="slide" data-layout="H04" data-animate="body">
+  <div class="chrome"><div class="l"><span class="square"></span><span>最终价值</span></div><div></div></div>
+  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
+  <div style="height:100%;display:grid;grid-template-rows:auto 1fr;gap:4.8vh;padding-top:7vh">
+    <div class="content-stack" data-anim>
+      <div class="kicker">SUMMARY</div>
+      <h2 class="h-xl">双核驱动：使能分布式 AI 时代</h2>
+      <div class="red-rule" style="width:8vw"></div>
+    </div>
+    <div class="grid-2" style="align-items:start">
+      <div class="card flat" data-anim>
+        <p class="body-copy"><strong>openYuanrong</strong> 与 <strong>openJiuwen</strong> 的珠联璧合，代表了未来云原生演进的终极形态——底层基建完全隐藏（Serverless），业务逻辑由 AI Agent 主导（Agentic Workflow）。元戎为九问提供了极致弹性与极低延迟，九问则为元戎提供了最契合的大模型应用场景，共同构筑智能社会数字基石。</p>
+      </div>
+      <div class="card" data-anim>
+        <div class="card-title">核心总结</div>
+        <p class="card-body">让业务开发者回归业务本身，让系统架构回归资源调度，这正是 openYuanrong 诞生的最终意义。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P29 H10 Closing -->
+<section class="slide dark" data-layout="H10" data-animate="closing">
+  <div class="brand-lockup">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span>HUAWEI</span>
+  </div>
+  <div style="height:100%;display:grid;align-content:center;gap:3vh;max-width:62vw">
+    <div class="cover-badge" data-anim>
+      <span class="brand-mark" aria-hidden="true"></span>
+    </div>
+    <div class="kicker" data-anim>THANK YOU</div>
+    <h2 class="h-hero" data-anim>演示完毕<br/>感谢聆听</h2>
+    <p class="lead" data-anim>openYuanrong 架构分享 / Serverless 底座演进方案</p>
+  </div>
+</section>
+
+
+</div>
+
+<div id="nav"></div>
+<div id="overview"></div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+(() => {
+  const deck = document.getElementById('deck');
+  const nav = document.getElementById('nav');
+  const overview = document.getElementById('overview');
+  const slides = [...document.querySelectorAll('.slide')];
+  const lowPowerKey = 'guizang-huawei-low-power';
+  let current = 0;
+  let wheelLock = false;
+
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.__lowPowerMode = localStorage.getItem(lowPowerKey) === '1' || prefersReduced;
+  document.body.classList.toggle('low-power', window.__lowPowerMode);
+
+  function buildPageNumbers(){
+    const total = String(slides.length).padStart(2, '0');
+    slides.forEach((slide, i) => {
+      slide.querySelector('.page-no')?.remove();
+      const pageNo = document.createElement('div');
+      pageNo.className = 'page-no';
+      pageNo.textContent = `${String(i + 1).padStart(2, '0')} / ${total}`;
+      slide.appendChild(pageNo);
+    });
+  }
+
+  function buildNav(){
+    nav.innerHTML = '';
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      dot.addEventListener('click', () => go(i));
+      nav.appendChild(dot);
+    });
+  }
+
+  function buildOverview(){
+    overview.innerHTML = '';
+    slides.forEach((slide, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      const clone = slide.cloneNode(true);
+      clone.classList.add('active');
+      thumb.appendChild(clone);
+      thumb.addEventListener('click', () => {
+        document.body.classList.remove('overview');
+        go(i);
+      });
+      overview.appendChild(thumb);
+    });
+  }
+
+  function updateTheme(){
+    document.body.classList.toggle('dark-bg', slides[current]?.classList.contains('dark'));
+  }
+
+  function go(i){
+    if (!slides.length) return;
+    current = Math.max(0, Math.min(i, slides.length - 1));
+    deck.style.transform = `translateX(${-current * 100}vw)`;
+    slides.forEach((slide, idx) => slide.classList.toggle('active', idx === current));
+    [...nav.children].forEach((dot, idx) => dot.classList.toggle('active', idx === current));
+    updateTheme();
+  }
+
+  function toggleLowPower(){
+    window.__lowPowerMode = !window.__lowPowerMode;
+    localStorage.setItem(lowPowerKey, window.__lowPowerMode ? '1' : '0');
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+  }
+
+  addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      document.body.classList.toggle('overview');
+      return;
+    }
+    if (event.key === 'b' || event.key === 'B') {
+      event.preventDefault();
+      toggleLowPower();
+      return;
+    }
+    if (document.body.classList.contains('overview')) return;
+    if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') {
+      event.preventDefault();
+      go(current + 1);
+    }
+    if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+      event.preventDefault();
+      go(current - 1);
+    }
+  });
+
+  addEventListener('wheel', (event) => {
+    if (document.body.classList.contains('overview') || wheelLock || Math.abs(event.deltaY) < 24) return;
+    wheelLock = true;
+    go(current + (event.deltaY > 0 ? 1 : -1));
+    setTimeout(() => { wheelLock = false; }, 620);
+  }, { passive: true });
+
+  let touchStartX = null;
+  addEventListener('touchstart', (event) => { touchStartX = event.touches[0]?.clientX ?? null; }, { passive: true });
+  addEventListener('touchend', (event) => {
+    if (touchStartX == null) return;
+    const dx = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+    if (Math.abs(dx) > 46) go(current + (dx < 0 ? 1 : -1));
+    touchStartX = null;
+  }, { passive: true });
+
+  buildPageNumbers();
+  buildNav();
+  buildOverview();
+  go(0);
+  if (window.lucide) window.lucide.createIcons();
+})();
+</script>
+</body>
+</html>
