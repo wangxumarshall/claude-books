@@ -1,405 +1,786 @@
-# openYuanrong（元戎）Serverless 分布式计算引擎：架构、原理与上下层诉求
----
+# openYuanrong（元戎）：面向分布式智能时代的Serverless计算引擎
 
-## 摘要（中文）
-
-openYuanrong（元戎）是 openEuler 社区孵化的 Serverless 分布式计算引擎，以"函数"为核心概念抽象，将传统 Serverless 函数概念泛化为可表达任意分布式应用运行实例的通用编程单元，起到类似单机操作系统中进程的作用。本文以 openYuanrong 为案例，系统剖析其三层子系统架构：多语言函数运行时提供 Python/Java/C++ 分布式编程接口与类单机编程体验；函数系统提供大规模分布式动态调度、极速弹性扩缩与跨节点迁移；数据系统提供基于 HBM/DRAM/SSD 的异构分布式多级缓存，支撑函数间高性能数据共享与传递。文章进一步论述 openYuanrong 向上对 Serverless/FaaS/BaaS 范式的支撑价值：通过将函数间数据传递从外部存储介质转移到近计算共享内存与异构对象直通通道，消解传统 Serverless 的数据传输瓶颈与冷启动开销；向下分析其对设备（昇腾 NPU、HBM、HCCS/RoCE）和操作系统（openEuler、共享内存、RDMA、Kubernetes）的诉求。最后讨论系统当前局限与演进方向。
-
-**关键词：** Serverless, FaaS, 分布式计算, 多级缓存, 异构对象, openEuler, 元戎
+## 深度架构解析、原理剖析与关键实现研究
 
 ---
 
-## 1 引言
+**摘要**：openYuanrong（元戎）是华为开源的Serverless分布式计算引擎，隶属于openEuler生态，致力于以一套统一Serverless架构支持AI推理/训练、大数据、微服务等各类分布式应用。本文从源码层面深度剖析元戎的整体架构、核心原理、关键功能实现，向上论述其对用户Serverless体验的支撑价值与必要性，向下揭示其对设备硬件和操作系统的诉求，并对比当前主流Serverless平台分析元戎的独特定位与创新路径。
 
-### 1.1 问题背景与研究动机
-
-Serverless 计算范式自 AWS Lambda 问世以来，以"按需付费、零运维、自动弹性"的承诺改变了云原生应用的构建方式。然而，传统 FaaS 平台在实践中暴露了三个结构性瓶颈：
-
-1. **冷启动延迟**。函数实例从零到可用需要经历容器拉起、运行时初始化、代码加载等阶段，延迟可达数百毫秒至数秒，对延迟敏感型应用构成障碍 [1]。
-2. **数据传输瓶颈**。函数间数据传递依赖外部对象存储（如 S3）或消息队列，引入"存储税"：每次数据经过外部介质均产生 I/O 延迟与吞吐折损。这一瓶颈在分布式函数链、流式处理、大模型参数分发等场景中尤为突出 [2]。
-3. **编程体验割裂**。FaaS 平台要求开发者显式处理分布式逻辑（事件触发、状态外部化、异步编排），与单机编程模型差距显著，增加了心智负担与出错概率 [3]。
-
-openYuanrong 的设计动机正是回应这三重瓶颈。它不是又一个 FaaS 平台，而是一个将 Serverless 理念延伸到分布式计算底层的引擎：以"函数"为统一抽象，让开发者用单机编程的方式构建分布式应用，同时在引擎层解决数据传递和弹性调度问题。
-
-### 1.2 案例选择与研究问题
-
-openYuanrong 作为案例具有两个独特价值：其一，它是 openEuler 社区孵化项目（Apache 2.0 许可证），源码完全开放，可供深入剖析实现细节；其二，它的架构设计同时对齐了 Serverless 上层需求和异构硬件下层诉求，为理解"从应用范式到设备特性"的纵向穿透关系提供了完整标本。
-
-本文聚焦两个研究问题：
-
-- **RQ1**：openYuanrong 的整体架构、核心原理与关键功能实现是什么？
-- **RQ2**：openYuanrong 向上如何支撑 Serverless 范式的价值诉求，向下对设备和操作系统提出了哪些诉求？
-
-### 1.3 论文结构
-
-第 2 节建立 Serverless/FaaS/BaaS 的理论框架。第 3 节描述 openYuanrong 的整体架构与关键概念。第 4 节逐层剖析三个子系统的原理与实现。第 5 节论述向上对 Serverless 的支撑。第 6 节分析向下对设备与操作系统的诉求。第 7 节讨论局限与未来方向。第 8 节总结全文。
+**关键词**：Serverless、FaaS、BaaS、分布式计算、函数运行时、多级缓存、弹性调度、异构对象、NPU
 
 ---
 
-## 2 文献脉络：Serverless、FaaS 与 BaaS
+## 目录
 
-### 2.1 Serverless 计算的定义与演进
-
-UC Berkeley RISELab 的综述论文将 Serverless 计算定义为："云编程简化——开发者只需关注业务逻辑，而不必关心集群管理、调度、扩缩容等运维问题" [3]。这一定义揭示了 Serverless 的本质不是"无服务器"，而是将服务器管理责任从用户转移到平台。
-
-Serverless 的发展经历了两个阶段。第一阶段以 AWS Lambda 为代表，聚焦事件驱动的短期函数执行（FaaS），函数无状态、短暂存活、按调用计费。第二阶段涌现了 Dask [4]、SAND [5]、SEED [6] 等工作，试图将 Serverless 扩展到有状态、长时运行的分布式计算场景，但普遍面临数据传递效率和编程模型复杂度的挑战。
-
-### 2.2 FaaS 的瓶颈与突破方向
-
-FaaS 平台的核心瓶颈可归纳为三类：
-
-- **冷启动**。AWS Lambda 的冷启动延迟在 2019 年的测量中可达 1-8 秒（取决于运行时与包大小）[7]。后续的 Firecracker MicroVM 快照恢复 [8]、保持存活（keep-alive）策略、预热并发（provisioned concurrency）等缓解措施各有代价：快照恢复需要内核协作，保持存活浪费资源，预热并发需要用户预估流量。
-- **数据传输**。函数间数据必须经由外部存储中转，Berkeley 论文称之为"存储税" [3]。SAND [5] 提出在同一节点内通过共享内存传输数据，但仅限于单节点场景；SEED [6] 引入本地缓存层，但缓存容量受限于单节点 DRAM。openYuanrong 的数据系统则将缓存延伸到集群级多级层次（HBM/DRAM/SSD），且支持异构对象（NPU HBM）的跨卡直通传输。
-- **编程模型**。传统 FaaS 要求开发者以事件处理函数的方式编写代码，状态外部化到 DynamoDB 等 BaaS 服务，函数间通过 Step Functions 或消息队列编排。这种模型与单机编程的直觉相去甚远。openYuanrong 试图通过"有状态函数"和"数据对象/数据流"抽象，让开发者用类/函数的方式编程，运行时自动处理分布式语义。
-
-### 2.3 BaaS 的角色与局限
-
-BaaS（Backend as a Service）为 Serverless 应用提供数据库、存储、认证等后端能力，是 FaaS 的必要补充。然而，BaaS 服务本质上是独立的外部系统，每次调用仍涉及网络 I/O。openYuanrong 的数据系统将部分 BaaS 功能（分布式缓存、KV 存储、发布订阅）内置于引擎，以共享内存和近计算缓存的方式提供，避免了外部 I/O 的延迟代价。这并非取代所有 BaaS，而是在高频数据共享场景中提供更近的替代。
+1. [引言：Serverless计算的时代需求](#1-引言serverless计算的时代需求)
+2. [元戎整体架构：三层解耦的Serverless引擎](#2-元戎整体架构三层解耦的serverless引擎)
+3. [多语言函数运行时：分布式编程的单机体验](#3-多语言函数运行时分布式编程的单机体验)
+4. [函数系统：大规模分布式动态调度](#4-函数系统大规模分布式动态调度)
+5. [数据系统：异构分布式多级缓存](#5-数据系统异构分布式多级缓存)
+6. [三层协同的Serverless运行原理](#6-三层协同的serverless运行原理)
+7. [向上：对用户Serverless的支撑与价值](#7-向上对用户serverless的支撑与价值)
+8. [向下：对设备和操作系统的诉求](#8-向下对设备和操作系统的诉求)
+9. [与主流Serverless平台的对比分析](#9-与主流serverless平台的对比分析)
+10. [总结与展望](#10-总结与展望)
 
 ---
 
-## 3 openYuanrong 整体架构与关键概念
+## 1. 引言：Serverless计算的时代需求
 
-### 3.1 系统定位
+### 1.1 Serverless的本质与演进
 
-openYuanrong 定位为"Serverless 分布式计算引擎"，其核心目标是：以一套统一的 Serverless 架构支持 AI、大数据、微服务等各类分布式应用。它由三个子系统组成，可灵活单独或组合使用：
+Serverless并非"无服务器"，而是将服务器的运维、调度、扩缩容等基础设施复杂性从用户视野中消除，使开发者仅需关注业务逻辑本身。Serverless的核心理念源于两个互补维度：
 
-| 子系统 | 代码仓 | 核心职责 |
-|--------|--------|----------|
-| 多语言函数运行时 | `yuanrong` | 函数分布式编程，支持 Python/Java/C++，类单机编程体验 |
-| 函数系统 | `yuanrong-functionsystem` | 大规模分布式动态调度，极速弹性扩缩与跨节点迁移 |
-| 数据系统 | `yuanrong-datasystem` | 异构分布式多级缓存（HBM/DRAM/SSD），Object/Stream 语义 |
+- **FaaS（Function as a Service）**：将业务逻辑抽象为函数，按事件触发执行，按调用计费，零调用零成本。AWS Lambda、Azure Functions、Google Cloud Functions是典型代表。
+- **BaaS（Backend as a Service）**：将后端通用能力（数据存储、认证、消息队列等）以服务形式提供，开发者无需自建后端基础设施。
 
-系统版本为 0.8.0.dev，以 Apache 2.0 许可证发布在 openEuler 社区（AtomGit/GitCode `openeuler` 组织），支持 x86_64 与 aarch64 两种架构。
+Serverless的演进经历了三个阶段：早期的Web应用托管（如Heroku），中期的函数计算爆发（2014年AWS Lambda开创），以及当前的分布式AI与大数据场景对Serverless提出的新挑战——这些场景需要GPU/NPU异构资源、模型参数高速传递、长时推理状态保持等能力，传统云函数平台难以胜任。
 
-### 3.2 核心概念抽象：函数
+### 1.2 元戎的定位与使命
 
-openYuanrong 最关键的概念创新是"函数"（openYuanrong Function）的泛化定义。根据官方词汇表：
+openYuanrong正是在这一背景下诞生。它不是又一个通用云函数平台，而是**面向分布式智能场景的Serverless引擎**，其使命是：
 
-> "openYuanrong 函数是分布式调度运行的基本单位。相比传统 Serverless 函数概念，openYuanrong 函数更加通用，支持运行中动态创建、长时运行、相互间异步调用、有状态等，可以表达任意分布式应用的运行实例，起到类似单机 OS 中进程的作用。" [9]
+1. **统一架构**：用同一套Serverless框架同时承载AI推理/训练、大数据流处理、微服务等不同负载类型；
+2. **单机编程体验**：让分布式编程如同写单机程序一样自然，消除分布式复杂性；
+3. **极致性能**：通过多级缓存、异构对象直通、共享内存免拷贝等机制，让Serverless不再是"慢"的代名词；
+4. **资源高效**：通过弹性调度、跨节点迁移、Bin-Packing等策略，最大化集群资源利用率。
 
-这一泛化在三个维度突破了传统 FaaS 函数的限制：
+---
 
-1. **有状态 vs 无状态**。传统 FaaS 函数强制无状态；openYuanrong 同时支持无状态函数（`@yr.invoke`）和有状态函数（`@yr.instance`）。有状态函数保持进程内私有变量（如静态变量、成员变量），方法调用按顺序执行，支持运行中状态读写。
-2. **动态创建与长时运行**。传统 FaaS 函数生命周期由事件触发决定；openYuanrong 函数可在运行中通过 `invoke()` 动态创建，支持长时运行直到显式 `terminate()`。
-3. **天然相互调用**。传统 FaaS 函数间调用需要外部编排；openYuanrong 函数可直接相互调用，调用返回数据对象引用，支持 Future 语义和引用传递。
+## 2. 元戎整体架构：三层解耦的Serverless引擎
 
-从编程模型看，有状态函数映射为"类"（class），无状态函数映射为"函数"（function），开发者用单机编程方式编写类或函数，SDK 自动将其转换为分布式运行单元。Python 示例：
+### 2.1 架构总览
+
+元戎采用三层解耦架构，由三个独立子系统组成，可按需灵活组合或单独使用：
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                     用户应用层                              │
+│   @yr.invoke / @yr.instance / yr.put / yr.get / ...      │
+├──────────────────────────────────────────────────────────┤
+│                  多语言函数运行时 (yuanrong)                 │
+│   Python SDK │ Java SDK │ C++ SDK │ Go SDK │ Rust SDK    │
+│   Libruntime │ FiberPool │ DependencyResolver │ ...       │
+├──────────┬─────────────────────────────┬─────────────────┤
+│ 函数系统  │                             │  数据系统        │
+│ (FS)      │                             │  (DS)           │
+│           │                             │                 │
+│ Master    │     Proxy ── Agent          │  Worker         │
+│ Scheduler │     LocalScheduler          │  MultiLevel     │
+│ Scaler    │     InstanceControl         │  Cache          │
+│ SnapMgr   │     BundleManager           │  HeteroObj      │
+│           │     MigrateController       │  KV/Object/     │
+│           │                             │  Stream         │
+├──────────┴─────────────────────────────┴─────────────────┤
+│                    基础设施层                               │
+│   Linux OS │ etcd │ Kubernetes │ Docker │ RDMA │ HCCS     │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 2.2 三大子系统及其角色
+
+| 子系统 | 代码仓 | 核心角色 | 关键能力 |
+|--------|--------|---------|---------|
+| **多语言函数运行时** | `yuanrong` | 分布式编程抽象层，对用户提供SDK接口 | `@yr.invoke`（无状态函数）、`@yr.instance`（有状态实例）、`yr.put/get`（数据传递）、FiberPool异步执行 |
+| **函数系统** | `yuanrong-functionsystem` | 函数生命周期管理与分布式调度 | Master全局调度、Proxy本地调度、Agent进程管理、弹性扩缩、跨节点迁移、Checkpoint快照 |
+| **数据系统** | `yuanrong-datasystem` | 分布式数据共享与缓存 | DRAM/SSD多级缓存、HBM异构对象、共享内存免拷贝、KV/Object/Stream语义、NPU间卡间直通 |
+
+### 2.3 构建依赖关系
+
+从CLAUDE.md中可以清晰看到构建依赖图：
+
+```
+datasystem ──────┬──► functionsystem
+                 ├──► yuanrong
+                 └──► dashboard
+
+frontend ────────► yuanrong
+dashboard ───────► yuanrong
+functionsystem ─► yuanrong
+```
+
+**yuanrong是最终集成点**——它将所有组件打包为最终交付包。这意味着函数运行时是面向用户的第一入口，但它的底层能力依赖于函数系统和数据系统。
+
+---
+
+## 3. 多语言函数运行时：分布式编程的单机体验
+
+### 3.1 核心设计理念
+
+元戎函数运行时的核心设计理念是：**分布式编程应当如同单机编程一样自然**。它通过两个关键抽象实现这一目标：
+
+1. **函数（Function）**——对传统Serverless函数概念的通用化扩展。在元戎中，函数不仅是HTTP事件触发的一次性计算单元，更像单机OS中的"进程"，可以表达任意分布式应用的运行实例，天然支持相互调用。
+
+2. **数据对象（Data Object）**——基于ObjectRef的分布式数据传递机制。函数间不通过参数序列化传递数据，而是通过`yr.put`将数据放入数据系统，返回ObjectRef，接收方通过`yr.get`按ObjectRef获取数据。这种模式类似Ray的Actor模型，但元戎加入了多级缓存和异构对象支持。
+
+### 3.2 Python SDK关键接口
+
+从`apis.py`源码中，元戎向用户暴露的核心接口包括：
+
+#### 3.2.1 初始化与退出
+
+```python
+import yr
+conf = yr.Config()
+yr.init(conf)        # 初始化运行时，返回ClientInfo
+yr.finalize()        # 退出并释放资源
+```
+
+`yr.init()`内部执行关键操作：
+- 通过`_auto_get_cluster_access_info`自动获取集群访问信息（server地址、数据系统地址、是否在集群内）
+- 初始化`ConfigManager`和`RuntimeHolder`
+- 对于非Driver模式（函数实例内部），自动加载Handler
+
+#### 3.2.2 无状态函数：@yr.invoke
+
+```python
+@yr.invoke
+def add(a, b):
+    return a + b
+
+result_ref = add.invoke(1, 2)    # 远程执行，返回ObjectRef
+result = yr.get(result_ref)       # 获取结果
+```
+
+`@yr.invoke`将普通Python函数转换为**StatelessFunction**（无状态远程函数）。`.invoke()`方法触发远程执行，返回ObjectRef而非直接结果——这是分布式编程的关键：**调用与获取解耦**，允许多个函数并行执行，最后统一获取结果。
+
+#### 3.2.3 有状态实例：@yr.instance
 
 ```python
 @yr.instance
 class Counter:
     def __init__(self):
-        self.value = 0
-    def increment(self, n):
-        self.value += n
-        return self.value
+        self.sum = 0
+    def add(self, a):
+        self.sum += a
+        return self.sum
+    def get(self):
+        return self.sum
 
-counter = Counter.invoke()  # 远端创建实例
-ref = counter.increment.invoke(1)  # 异步调用
-print(yr.get(ref))  # 获取结果
-counter.terminate()  # 终止实例
+ins = Counter.invoke()       # 创建远程实例
+yr.get(ins.add.invoke(1))    # 远程调用实例方法
+ins.terminate()              # 终止实例
 ```
 
-### 3.3 数据抽象：数据对象与数据流
+`@yr.instance`将Python类转换为**StatefulInstanceCreator**（有状态远程实例创建器）。实例创建后在集群中持久存在，多次方法调用共享同一实例状态——这是微服务、AI推理长连接、强化学习训练等场景的关键支撑。
 
-除函数抽象外，openYuanrong 还定义了两种数据原语，作为函数间数据传递的载体：
+#### 3.2.4 数据传递：yr.put / yr.get / yr.wait
 
-**数据对象（Object）**：跨节点分布式共享的内存数据。支持基于共享内存的高性能 `put/get` 访问。可作为函数调用参数和返回值自动分布式传递，并支持异步 Future 语义。openYuanrong 在运行中自动解析引用，通过分布式引用计数管理数据对象生命周期。
+```python
+obj_ref = yr.put(data)                   # 将数据放入数据系统
+result = yr.get(obj_ref, timeout=300)    # 从数据系统获取数据
+ready, unready = yr.wait([ref1, ref2, ref3], wait_num=2, timeout=10)
+```
 
-**数据流（Stream）**：跨节点分布式传递共享的有序无界内存数据集。支持基于共享内存的 `pub/sub` 访问，支持一对一、一对多、多对一等发布订阅模式。通过数据流可解耦多个函数间异步流式数据传递。
+`yr.put/get`是元戎分布式数据传递的基石。数据通过序列化（或零拷贝）存入数据系统，ObjectRef作为轻量级引用在函数间传递。`yr.wait`支持等待多个ObjectRef就绪，是实现并行汇聚的关键。
 
-这两种数据原语将函数间通信从"经由外部存储中转"变为"经由引擎内置共享内存直传"，是 openYuanrong 消解 Serverless 数据传输瓶颈的核心机制。
+#### 3.2.5 KV接口：类Redis的分布式键值存储
 
-### 3.4 集群角色模型
+```python
+yr.kv_write("key", b"value")
+yr.kv_read("key", timeout=300)
+yr.kv_del("key")
+```
 
-openYuanrong 集群分为两种节点角色：
+KV接口提供类Redis的分布式键值存储，支持TTL、LRU淘汰、write_through/write_back持久化策略——这是微服务状态管理的BaaS能力。
 
-- **主节点（Master）**：包含控制面和数据面。控制面组件包括 `function_master`（全局调度、实例管理、Traefik 路由注册）；数据面组件包括 `function_proxy`（本地调度）、`function_agent`（实例生命周期管理）、`runtime_manager`（运行时环境管理）和 `data_worker`（分布式缓存）。
-- **从节点（Agent）**：只包含数据面。一台主机可部署多个从节点。
+#### 3.2.6 流接口：发布/订阅数据流
 
-控制面组件通过 etcd 实现集群发现、健康检测、故障恢复和在线扩缩容。
+```python
+producer = yr.create_stream_producer("stream", ProducerConfig(...))
+consumer = yr.create_stream_consumer("stream", SubscriptionConfig(...))
+```
 
----
+流接口支持数据发布订阅，解耦生产者与消费者——这是大数据流处理和AI推理数据管道的核心机制。
 
-## 4 子系统原理与关键实现
+#### 3.2.7 资源组：异构资源协同调度
 
-### 4.1 多语言函数运行时
+```python
+rg = yr.create_resource_group(
+    [{"NPU/Ascend910B4/count": 1}, {"CPU": 2000, "Memory": 2000}],
+    name="my-rg",
+    strategy="PACK"
+)
+```
 
-#### 4.1.1 编程接口与 SDK
+资源组（ResourceGroup）是元戎独有的异构资源调度抽象。用户可以将CPU、内存、NPU/GPU等异构资源打包为一个资源组，确保相关函数实例被调度到同一节点或指定拓扑位置——这对AI推理中Prefill实例与Decode实例的协同调度至关重要。
 
-运行时 SDK 是用户与 openYuanrong 交互的入口。Python SDK 提供 `yr.init()`、`@yr.invoke`、`@yr.instance`、`yr.get()`、`yr.put()`、`yr.finalize()` 等接口。C++ SDK 提供 `RuntimeHandler` 抽象基类（用户实现 `HandleRequest`、`Initializer`、`PreStop` 方法）、`ObjectRef`（Future 式异步结果引用）和 `Context`（包含 trace ID、request ID、函数名、内存/CPU 配额等调用上下文）。Java SDK 通过 `faas-function-sdk` jar 包提供类似接口。
+### 3.3 核心运行时内部实现
 
-SDK 的关键设计是 `yr.init()` 的自动集群发现机制（源码 `src/libruntime/auto_init.cpp`）。当用户在非集群节点上调用 `yr.init()`，SDK 按以下优先级寻找集群：(1) 用户配置参数；(2) 环境变量 `YR_SERVER_ADDRESS` 和 `YR_DS_ADDRESS`；(3) 读取 `/tmp/yr_sessions/yr_current_master_info` 文件；(4) 执行 `yr start --master` 启动临时集群。临时集群在进程退出时自动销毁。这一机制使得开发者无需预先部署集群即可使用 openYuanrong。
+#### 3.3.1 Libruntime：C++核心引擎
 
-#### 4.1.2 函数调用链路
+`libruntime.h`揭示了函数运行时的核心C++引擎，它管理着整个分布式执行的生命周期：
 
-函数调用涉及 SDK → `function_proxy` → runtime 实例的 RPC 链路。核心协议是 `RuntimeRPC` gRPC 双向流式 RPC（定义在 `src/libruntime/fsclient/protobuf/runtime_rpc.proto`），支持 `MessageStream` 和 `BatchMessageStream` 两种模式。消息类型覆盖 `CreateReq/InvokeReq/KillReq/CallResultReq/StateSaveReq/StateLoadReq/CheckpointReq/SignalReq/EventReq` 等，覆盖函数实例的完整生命周期。
+- **CreateInstance**：创建函数实例（异步，返回临时ID，通过GetRealInstanceId获取真实ID）
+- **InvokeByFunctionName**：通过函数名调用（自动调度实例，支持Bin-Packing/Priority策略）
+- **InvokeByInstanceId**：通过实例ID直接调用
+- **Put/Get**：数据对象存取
+- **Wait**：等待多个对象就绪
+- **Kill**：终止实例或任务
+- **Snapshot/Snapstart**：快照与恢复
+- **KVWrite/KVRead/KVDel**：KV操作
+- **CreateStreamProducer/Consumer**：流操作
+- **CreateResourceGroup**：资源组操作
+- **DevMSet/DevMGet/DevPublish/DevSubscribe**：异构设备对象操作
+- **GroupCreate/GroupWait/GroupTerminate**：函数组操作
 
-在集群内（`in_cluster=true`），SDK 通过 `FSClient`（gRPC 客户端，源码 `src/libruntime/fsclient/fs_client.h`）连接同节点 `function_proxy`，proxy 路由到目标实例的 runtime 进程。在集群外（`in_cluster=false`），SDK 通过 `GwClient`（HTTP/WebSocket 客户端，源码 `src/libruntime/gwclient/gw_client.h`）连接 frontend 网关（端口 8888），走 `/serverless/v1/posix/instance/create|invoke|kill` RESTful 路径。
+Libruntime内部依赖组件链路：
+```
+Libruntime → ClientsManager → FSClient (函数系统客户端)
+                          → DsClients (数据系统客户端: ObjectStore/KV/HeteroObj/Stream)
+                          → InvokeAdaptor (调用适配器)
+                          → DependencyResolver (依赖解析)
+                          → WaitingObjectManager (等待对象管理)
+                          → ObjectIdPool (对象ID池)
+                          → FiberPool (协程池)
+                          → GeneratorNotifier/Receiver (生成器通知)
+                          → MetricsAdaptor (指标上报)
+                          → ResourceGroupManager (资源组管理)
+                          → DowngradeController (降级控制)
+```
 
-#### 4.1.3 并发模型
+#### 3.3.2 FiberPool：协程并发模型
 
-runtime 实例内部的并发使用 **boost::fibers**（M:N 用户级线程），而非传统 OS 线程（源码 `src/libruntime/fiber.h`）。`FiberPool` 在单个 OS 线程中调度多个 fiber：每个 fiber 任务通过 `unbuffered_channel` 入队，以 `fixedsize_stack` 分配栈空间，以 `FiberSemaphore` 控制并发上限。这一设计在单实例内实现了高并发处理能力，同时避免了 OS 线程创建和上下文切换的开销。
+元戎采用Boost.Fiber实现用户态协程（fiber）并发模型，而非传统线程模型：
 
-#### 4.1.4 沙箱隔离
+```cpp
+class FiberPool {
+    FiberPool(size_t stackSize, int maxConcurrency);
+    void Handle(std::function<void()> &&handler);
+    void Shutdown();
+};
+```
 
-openYuanrong 提供了沙箱（Sandbox）机制用于隔离的远端执行环境。沙箱不是独立的运行时实现，而是跨三个仓库协作的端到端能力：
+FiberPool的关键特性：
+- **轻量级**：协程切换在用户态完成，无需内核介入，开销远低于线程
+- **高并发**：单个线程可承载数千协程，适合Serverless场景的大规模并发函数调用
+- **受控并发**：通过FiberSemaphore限制最大并发数，防止资源过载
+- **事件驱动**：协程在IO等待时自动让出，IO完成时恢复——天然适配Serverless的事件触发模式
 
-- `yuanrong` 侧：SDK 提供 `yr.sandbox.create()` 高层封装，基于 `@yr.instance` 创建远端实例，支持 `exec()` 命令执行、端口转发和 reverse tunnel。
-- `functionsystem` 侧：负责实例创建、runtime 环境变量注入（`YR_SERVER_ADDRESS`、`YR_DS_ADDRESS`、`INSTANCE_ID`）、端口映射和 Traefik 路由注册。
-- `frontend` 侧：提供浏览器 WebTerminal 入口。
+#### 3.3.3 DependencyResolver：分布式依赖解析
 
-此外，openYuanrong 还提供 Rust sandbox runtime（`rrt`），作为轻量级隔离运行时。在 `deploy/sandbox/docker/services.yaml` 中，`rrt` 运行时槽位通过 `openyuanrong_rrt.runtime_path()` 获取可执行文件路径。
+元戎的分布式执行依赖解析器解决了函数调用链中的数据依赖问题：当一个函数的输入是另一个函数的输出（ObjectRef）时，DependencyResolver自动跟踪这些依赖，确保数据就绪后才触发函数执行——这是实现"Distributed Futures"编程模型的核心。
 
-#### 4.1.5 函数服务模式
+#### 3.3.4 Config：环境驱动的运行时配置
 
-openYuanrong 函数可运行于两种模式：任务模式（一次性作业）和 Serverless 服务模式（长期运行、自动弹性）。`ApiType` 枚举（proto 定义）包含 `Function=0`（任务模式）、`Faas=1`（FaaS 服务模式）、`Posix=2`（POSIX 调用模式）和 `Serve=3`（服务模式）。SpringBoot 微服务可通过适配器 SDK 以接近零改动的方式迁移为 openYuanrong 函数服务运行，享受 Serverless 弹性与免运维优势（见 `docs/source_zh_cn/use_cases/microservice-serverless.md`）。
+从`config.h`可以看到，元戎运行时配置完全通过环境变量驱动：
 
-### 4.2 函数系统
+```cpp
+CONFIG_DECLARE(std::string, GRPC_SERVER_ADDRESS, "0.0.0.0:0");
+CONFIG_DECLARE(std::string, DATASYSTEM_ADDR, "0.0.0.0:0");
+CONFIG_DECLARE(std::string, INSTANCE_ID, "");
+CONFIG_DECLARE(std::string, FUNCTION_NAME, "");
+CONFIG_DECLARE(bool, ENABLE_METRICS, false);
+CONFIG_DECLARE(bool, ENABLE_TRACE, false);
+CONFIG_DECLARE(bool, RUNTIME_DIRECT_CONNECTION_ENABLE, false);
+CONFIG_DECLARE(std::string, RUN_MODE, "integrated");  // integrated or standalone
+CONFIG_DECLARE(bool, ENABLE_FUNCTION_SCHEDULER, false);
+CONFIG_DECLARE(bool, YR_ENABLE_WEBSOCKET, false);
+```
 
-#### 4.2.1 架构概述
-
-函数系统是 openYuanrong 的控制平面，由以下组件构成：
-
-- **function_master**：全局调度器，管理集群资源表、实例生命周期、Traefik 路由注册。提供 RESTful 接口：`/global-scheduler/resources`（资源查询）、`/instance-manager/named-ins`（命名实例查询）、`/global-scheduler/scheduling_queue`（调度队列）、`/global-scheduler/node/localschedulingstatus`（节点调度开关）。
-- **function_proxy**：本地调度器，以 DaemonSet 方式部署在每个节点（`hostNetwork: true`），负责本地实例创建、路由转发、健康检测。支持与 function_agent 合并进程模式（`function_proxy_merge_process_enable`）以减少进程间通信开销。
-- **function_agent**：实例管理器，与 runtime_manager 协同工作，负责函数实例进程的创建与销毁。
-- **runtime_manager**：运行时环境管理器，负责拉取函数代码、构建运行时环境、注入环境变量（`INSTANCE_ID`、`YR_SERVER_ADDRESS`、`YR_DS_ADDRESS` 等）、启动 runtime 实例进程。
-- **runtime_launcher**：容器启动器，支持 Docker 和 K8s 两种后端，通过 Unix domain socket 接收 runtime_manager 的容器创建请求。
-- **frontend**：API 网关（Go 实现），提供 HTTP/WebSocket 接入，端口 8888。承担函数调用、认证（JWT/OAuth2 via Casdoor/Keycloak）、沙箱创建入口等职责。
-- **meta_service**：元数据服务，管理函数注册、资源池配置。
-- **function_scheduler**：调度策略服务，支持多副本部署实现高可用。
-- **iam_server**：身份认证服务，支持 Casdoor 和 Keycloak 两种外部 IdP。
-
-#### 4.2.2 调度与弹性
-
-函数系统实现了两级调度架构：
-
-- **全局调度**（function_master）：维护集群资源表，决定实例的节点分配。提供调度队列查询接口，可观测等待调度的实例及其资源需求和等待时长。
-- **本地调度**（function_proxy）：在节点内执行实例创建和路由。支持通过 `/global-scheduler/node/localschedulingstatus` 接口将节点切换为 `evicting` 状态（停止接收新实例）或恢复为 `normal`。
-
-弹性扩缩通过多种机制实现：(1) 函数实例的极速创建与销毁；(2) 通过 HTTP 接口触发实例扩缩（如推理实例扩容的 `/scaleout` 接口）；(3) 节点级调度开关控制流量疏散；(4) 运行时快照恢复（checkpoint `StateSaveReq/StateLoadReq`）加速实例启动。
-
-#### 4.2.3 Traefik 路由集成
-
-函数系统使用 Traefik 作为反向代理，为函数实例暴露 HTTP 服务端口。路由信息通过 HTTP Provider 方案提供：Traefik 定期轮询 `GET /global-scheduler/traefik/config` 端点拉取完整路由表。每个实例通过 `portForward` 扩展字段声明端口映射（`protocol:hostPort:containerPort` 格式），function_master 清洗实例 ID 后生成 `{safeID}-{sandboxPort}` 路由名称，注册到 Traefik。这一方案比 etcd provider 方案减少了 etcd 写放大和 TTL 续约开销。
-
-### 4.3 数据系统
-
-#### 4.3.1 架构概述
-
-数据系统是 openYuanrong 的数据平面，由三个部分构成：
-
-- **多语言 SDK**：提供 Python/C++ 接口，封装 heterogeneous object（异构对象）、KV、object 三类接口。
-- **worker**：核心组件，分配管理 DRAM/SSD 资源和元数据，提供分布式多级缓存能力。
-- **集群管理**：依赖 etcd，实现节点发现/健康检测、故障恢复及在线扩缩容。
-
-部署视图中，每个节点部署一个 worker 进程并注册到 etcd，SDK 集成到用户进程中与同节点 worker 通过共享内存通信。worker 间通过 TCP/RDMA 传输数据（当前版本仅支持 TCP，RDMA/UB 即将支持）。异构对象 HBM 间通过 HCCS/RoCE 卡间直通传输。
-
-#### 4.3.2 三类数据接口
-
-数据系统提供三类接口，分别服务于不同场景：
-
-**KV 接口**：基于共享内存的免拷贝 KV 操作，支持 `KVWrite/KVRead/KVDel/KVMSetTx/KVExist`。适用于微服务状态数据的内存级读写，Checkpoint 快速保存和加载。支持 `write_through`（写穿）、`write_back`（写回）和 `none`（无持久化）三种持久化策略，满足不同场景的数据可靠性需求。
-
-**object 接口**：基于共享内存的近计算本地对象缓存，支持 `Put/Get/IncreGlobalReference/DecreGlobalReference`。实现函数间高效数据流转，支撑 Distributed Futures 编程模型。数据对象作为函数调用参数和返回值自动传递，运行时自动解析 Future 引用并管理分布式引用计数。
-
-**heterogeneous object 接口**：基于 NPU 卡 HBM 内存抽象的异构对象接口。这是数据系统最具创新性的部分，提供以下能力：
-
-- **H2D/D2H**：数据在 DRAM 与 HBM 之间的高速迁移。`MSetD2H` 将设备数据写回主机，`MGetH2D` 将主机数据加载到设备。
-- **D2D（DevPublish/DevSubscribe）**：NPU 卡间数据直通传输。发布者通过 `DevPublish` 将 HBM 内存注册为异构对象，订阅者通过 `DevSubscribe` 获取数据，数据通过 HCCS/RoCE 卡间链路直接传输。传输完成后数据系统自动删除异构对象。
-- **DevMSet/DevMGet**：D2D 模式的非自动删除版本，适用于需要多次访问的场景。
-- **P2P 负载均衡**：跨节点 NPU 间传输支持 P2P 策略，充分利用卡间链路带宽。
-
-#### 4.3.3 一致性模型与可靠性
-
-数据系统支持两种数据一致性模型：
-
-- **Causal 一致性**：保证因果顺序的可见性，适合需要因果推理的场景（如分布式训练中的参数更新顺序）。
-- **PRAM（Pipeline Random Access Memory）一致性**：单进程写入顺序对所有进程可见，但不同进程的写入顺序不保证全局一致。适合对一致性要求较低、对性能要求较高的场景。
-
-数据可靠性方面，热点数据跨节点读取时自动在本地保存副本（`enable_data_replication` 参数，默认开启），本地副本使用 LRU 策略自动淘汰。这一机制支撑热点数据高效访问，但不保障数据可靠性或可用性（文档明确标注其仅为性能优化机制）。
-
-分布式元数据管理基于 etcd，支持系统水平线性扩展。动态资源伸缩时自动迁移数据，实现系统高可用。
-
-#### 4.3.4 应用场景与实测效果
-
-数据系统文档列出的应用场景覆盖 AI 推理、训练和微服务三大领域：
-
-- **LLM 长序列推理 KVCache**：基于异构对象构建分布式 KVCache，实现 Prefill 阶段 KVCache 缓存和 Prefill/Decode 实例间 KVCache 快速传递。
-- **模型推理实例 M→N 快速弹性**：利用异构对象卡间直通和 P2P 数据分发能力实现模型参数快速复制。实测在 Qwen2.5-7B 推理实例扩容场景中，首次冷加载模型约 15.8 秒，扩容实例通过 `dev_mget` 从已有实例 HBM 中同步模型参数仅约 1.5 秒，加速约 **10 倍** [10]。
-- **强化学习模型参数重排**：卡间直通传输训练侧模型参数到推理侧。
-- **训练场景 Checkpoint 快速保存及加载**：KV 接口快速写 Checkpoint 到二级缓存保证可靠性；恢复时各节点将 Checkpoint 分片加载到异构对象，利用 D2D 直通快速传递到各节点 HBM。
-- **微服务状态数据快速读写**：KV 接口实现内存级读写微服务状态数据，支持持久化到二级缓存。
+关键配置项解读：
+- `RUN_MODE`：支持`integrated`（SDK+运行时一体化）和`standalone`（独立运行时进程）两种模式
+- `RUNTIME_DIRECT_CONNECTION_ENABLE`：开启后允许函数实例间直接通信（不经Proxy中转），降低延迟但需要更大消息尺寸限制（10MB vs 100KB）
+- `ENABLE_FUNCTION_SCHEDULER`：是否在运行时内启动内存调度器——这是local_mode的关键，允许无函数系统的轻量级运行
+- `YR_ENABLE_WEBSOCKET`：支持WebSocket传输协议，适用于长连接场景
 
 ---
 
-## 5 向上：对 Serverless 范式的支撑
+## 4. 函数系统：大规模分布式动态调度
 
-### 5.1 消解数据传输瓶颈
+### 4.1 函数系统架构
 
-传统 Serverless 的核心性能瓶颈在于函数间数据必须经过外部存储中转。openYuanrong 通过数据系统的三种机制直接消解这一瓶颈：
+函数系统是元戎的调度与编排核心，由四个关键角色组成：
 
-**近计算共享内存**。数据对象和 KV 接口基于共享内存实现免拷贝读写，函数实例与同节点 worker 之间通过共享内存传输数据，消除了网络 I/O 和序列化开销。这与 SAND [5] 的共享内存思路类似，但 openYuanrong 将其扩展到集群级：跨节点数据通过 worker 间 TCP/RDMA 传输后，在本地保存副本供后续访问，减少了重复跨节点传输。
+```
+┌──────────────┐
+│  Frontend    │ ← HTTP/WebSocket网关，函数创建/调用入口
+├──────────────┤
+│  Master      │ ← 全局调度中心：资源视图、调度决策、弹性扩缩
+│  Scheduler   │   Bin-Packing/Priority/Preemption策略
+│  Scaler      │   自动伸缩、实例池管理
+│  SnapManager │   Checkpoint管理
+├──────────────┤
+│  Proxy       │ ← 本地调度与路由：实例管理、迁移控制
+│  LocalSch    │   Bundle管理、GC回收
+│  InstanceCtrl│   实例生命周期
+│  MigrateCtrl │   跨节点迁移
+│  BundleMgr   │   资源打包调度
+├──────────────┤
+│  Agent       │ ← 节点级进程管理：函数实例创建/销毁/监控
+│  RuntimeMgr  │   Runtime进程启动/停止
+│  CodeDeploy  │   代码部署
+│  HealthCheck │   健康检测
+├──────────────┤
+│  Domain      │ ← 领域调度器：按业务域（AI/大数据/微服务）
+│  Scheduler   │   定制化调度策略
+└──────────────┘
+```
 
-**异构对象直通传输**。对于 AI 场景中大模型参数、KVCache 等数据，openYuanrong 通过 D2D 直通将数据从源 NPU HBM 直接传输到目标 NPU HBM，不经过主机 DRAM 中转。这一机制将模型弹性扩容的数据传输延迟从"从磁盘加载全部参数"的分钟级降至"HBM 直通复制"的秒级，实测 10 倍加速。
+### 4.2 调度策略深度解析
 
-**数据流解耦**。数据流 pub/sub 模式解耦了数据生产者与消费者，实现异步流式传递。与传统 Serverless 中依赖 SQS/Kafka 等外部消息队列不同，数据流基于共享内存实现，延迟和吞吐显著优于网络消息队列。
+从源码目录结构可以看到，函数系统实现了多层调度策略：
 
-### 5.2 减轻冷启动开销
+#### 4.2.1 全局调度（Master层）
 
-openYuanrong 从两个层面减轻冷启动：
+- **SchedulerFramework**：类似Kubernetes Scheduler Framework的可扩展调度框架
+  - Prefilter阶段：过滤不满足条件的节点
+  - Filter阶段：排除资源不足的节点
+  - Score阶段：为候选节点打分（Bin-Packing优先、资源均衡优先等）
+  - Performer阶段：执行调度决策
 
-**运行时层面**。函数实例的 runtime 进程通过 `runtime_launcher` 拉起，支持 Docker 容器方式。runtime 实例进程启动后通过 gRPC `RuntimeRPC.MessageStream` 注册到 `function_proxy`，后续调用直接路由到已注册实例，无需再次创建。有状态函数的 `Initializer` 方法在实例启动时执行一次，后续调用直接执行 `HandleRequest`，避免了传统 FaaS 每次调用均需初始化的开销。
+- **调度插件体系**（`schedule_plugin/`）：
+  - `prefilter/`：前置过滤插件
+  - `filter/`：节点过滤插件
+  - `scorer/`：节点评分插件
 
-**数据层面**。对于 AI 推理等数据密集型场景，冷启动最耗时的环节是模型参数加载。openYuanrong 的异构对象机制实现了"一次冷加载，多次热复制"：首个实例冷加载模型参数后发布到数据系统，后续实例通过 `dev_mget` 从已有实例 HBM 直接获取参数，将模型加载时间从约 15.8 秒降至约 1.5 秒。
+- **抢占调度**（`preemption_controller/`）：高优先级请求可以抢占低优先级实例的资源
 
-### 5.3 简化分布式编程体验
+#### 4.2.2 本地调度（Proxy层）
 
-openYuanrong 的编程接口设计使分布式应用开发接近单机编程体验：
+- **LocalScheduler**：管理本节点上的实例调度与生命周期
+- **BundleManager**：将多个函数实例打包调度到同一节点，减少跨节点通信
+- **MigrateController**：管理实例跨节点迁移（用于负载均衡或故障恢复）
+- **InstanceControl**：实例的创建、扩缩、销毁控制
+- **ResourceGroupController**：管理资源组的创建与绑定
 
-- **类即有状态函数**：Python 的 class 通过 `@yr.instance` 装饰后自动转为分布式有状态函数，成员变量保持状态，方法调用按顺序执行。
-- **函数即无状态函数**：Python 的 function 通过 `@yr.invoke` 装饰后自动转为分布式无状态函数，支持并行异步调用。
-- **数据对象引用传递**：函数调用返回数据对象引用（Future），引用可直接作为其他函数调用参数传递，引擎自动解析引用并管理生命周期，避免了显式序列化和数据传输代码。
-- **零改动微服务迁移**：SpringBoot 微服务通过适配器 SDK 以接近零改动的方式迁移为 openYuanrong 函数服务，享受 Serverless 弹性与免运维。
+#### 4.2.3 领域调度（DomainScheduler层）
 
-这一编程体验与传统 FaaS 的"事件触发、状态外部化、编排链式调用"模型形成鲜明对比。开发者不再需要显式处理分布式语义，引擎层自动完成。
+DomainScheduler是元戎独有的创新——它允许不同业务域（AI推理、大数据、微服务）拥有各自的调度策略：
+- AI推理域：NPU亲和性调度、Prefill/Decode实例协同放置
+- 大数据域：数据本地性优先调度
+- 微服务域：延迟优先调度
 
-### 5.4 统一 Serverless 底座
+### 4.3 函数实例生命周期
 
-openYuanrong 的"函数"泛化抽象使其可同时支撑三类分布式应用：
+元戎中函数实例的完整生命周期包括：
 
-- **AI 应用**：大模型推理的弹性扩缩、强化学习的参数重排、训练的 Checkpoint 管理。
-- **大数据应用**：数据流 pub/sub 实现流式处理，无状态函数并行化实现批处理。
-- **微服务应用**：SpringBoot 迁移为函数服务，享受 Serverless 弹性。
+1. **创建（Create）**：用户通过SDK调用`.invoke()`，运行时向Proxy/Master发送创建请求，调度器选择节点，Agent启动Runtime进程
+2. **运行（Running）**：Runtime进程加载用户代码，通过`ReceiveRequestLoop`接收调用请求
+3. **弹性扩缩（Scale）**：Scaler根据负载自动增减实例数量，支持min/max实例数限制
+4. **迁移（Migrate）**：MigrateController将实例从过载节点迁移到空闲节点，数据系统配合迁移实例状态
+5. **快照（Snapshot）**：SnapManager将实例状态保存为Checkpoint，支持后续恢复
+6. **恢复（Snapstart）**：从Checkpoint快速恢复实例，避免冷启动
+7. **终止（Terminate）**：用户调用`terminate()`或系统回收，Agent停止Runtime进程
 
-这种"一套架构支撑三类场景"的定位，比传统 FaaS 平台（主要面向事件驱动微服务）或分布式计算框架（如 Spark，主要面向批处理）的单一场景定位更具通用性。
+### 4.4 冷启动优化
 
----
+Serverless的核心痛点之一是冷启动延迟。元戎通过多重机制优化：
 
-## 6 向下：对设备与操作系统的诉求
-
-### 6.1 异构计算设备诉求
-
-openYuanrong 数据系统的异构对象能力直接依赖昇腾 NPU 的以下硬件特性：
-
-- **HBM（High Bandwidth Memory）**：NPU 卡内高带宽内存，作为异构对象的存储介质。openYuanrong 将 HBM 抽象为可编程对象，通过 `DevPublish/DevSubscribe` 在卡间共享。当前案例中 Qwen2.5-7B 推理实例的单卡 HBM 需求为 20GB（`vLLM_MODEL_MEMORY_USE_GB=20`）。
-- **HCCS（Huawei Cache Coherence System）/ RoCE（RDMA over Converged Ethernet）**：NPU 卡间互联协议。同节点内多卡通过 HCCS 互联，跨节点通过 RoCE 互联。openYuanrong 的 D2D 直通传输利用这些协议实现 NPU 间数据高速传递。
-- **HCCL（Huawei Collective Communication Library）**：华为集合通信库，openYuanrong 的异构对象传输自动协调 HCCL 收发顺序，实现卡间异步并发传输。P2P 传输负载均衡策略充分利用卡间链路带宽。
-
-在部署层面，容器需要映射 `/dev/davinci*`（NPU 设备）、`/dev/davinci_manager`、`/dev/devmm_svm`、`/dev/hisi_hdc` 等设备文件，并挂载 `/usr/local/dcmi`、`/usr/local/Ascend/driver/lib64/` 等驱动路径。这些要求意味着 openYuanrong 的异构对象能力只能在昇腾 NPU 环境中使用。
-
-当前版本未直接支持 GPU（CUDA/NVIDIA）的异构对象抽象，但架构设计（`HeteroClient` 的设备抽象层）预留了扩展空间。
-
-### 6.2 操作系统诉求
-
-openYuanrong 对操作系统的诉求体现在三个层面：
-
-**Linux 内核能力**：
-- **共享内存**：数据系统的 KV/object 接口基于共享内存（`shm`）实现免拷贝读写，依赖 POSIX 共享内存 API 和 `/dev/shm` 文件系统。K8s 部署中 Pod 需要挂载 `/dev/shm` 并配置足够的共享内存大小（如推理场景需 `--shm-size=64g`）。
-- **RDMA/UB**：数据系统文档标注"RDMA/UB 即将支持"，当前版本仅使用 TCP。RDMA 支持将依赖 `rdma-core` 库和内核 RDMA 子模块，是高性能跨节点传输的关键。
-- **进程管理**：`runtime_manager` 和 `function_agent` 需要创建和管理子进程，依赖 `fork/exec`、信号处理（`SIGTERM/SIGKILL`）、进程组管理等标准 POSIX 进程管理能力。
-
-**openEuler 发行版**：
-- openYuanrong 作为 openEuler 社区孵化的项目，其编译镜像基于 openEuler 22.03（`ci/openeuler/Dockerfile.x86_64`），运行时镜像基于 Ubuntu 22.04。openEuler 提供的昇腾驱动、HCCL 库和内核优化（如 eBPF、io_uring 等现代内核特性）是 openYuanrong 高性能运行的基础环境。
-- glibc 版本要求 2.34+（datasystem pip 安装前置条件），对应 openEuler 22.03 SP3+ 或 Ubuntu 22.04+。
-
-**Kubernetes 容器编排**：
-- openYuanrong 的生产部署依赖 K8s（Helm chart），核心组件分布为：function-master Deployment、function-proxy DaemonSet（`hostNetwork: true`）、function-agent+runtime-manager Deployment、frontend Deployment。
-- 关键 K8s 特性需求：`hostNetwork`（function-proxy 需要直接使用主机网络以减少 NAT 开销）、`hostPort`（数据系统 worker 和 function-proxy 的端口需要直接暴露）、`privileged`（sandbox 和 runtime_launcher 需要 Docker-in-Docker 能力）、Linux capabilities（`cap_net_admin/cap_net_raw` 用于 function-agent 的 iptables 操作，`cap_dac_override/cap_sys_admin/cap_kill/cap_setgid/cap_setuid` 用于 runtime_manager）。
-- etcd 作为集群管理的核心依赖，提供节点发现、健康检测、故障恢复和在线扩缩容。
-
-### 6.3 部署模型与资源诉求
-
-openYuanrong 提供三种部署模型，对底层环境的诉求递增：
-
-| 部署模型 | 最低环境 | 适用场景 |
-|----------|----------|----------|
-| 进程部署（`yr start`） | 单台 Linux 主机，etcd | 本地验证、轻量级场景 |
-| K8s Helm 部署 | K8s 集群 + etcd + Helm | 生产部署，完整控制面 |
-| Sandbox AIO | Docker + privileged | 开发测试、单机体验 |
-
-端口分配方面，控制面端口范围 10000-20000（function-master 22770/22668、ds-master 12123、etcd 32379），数据面端口范围 20000-40000（function-proxy 22772/22423、function-agent 58866、ds-worker 31501、frontend 8888）。
-
----
-
-## 7 讨论：局限与演进
-
-### 7.1 当前局限
-
-openYuanrong 仍处于 0.8.0.dev 版本，存在若干局限：
-
-**异构对象仅支持昇腾 NPU**。当前 D2D 直通传输依赖 HCCL 和昇腾 HBM 抽象，不支持 NVIDIA GPU/CUDA。跨硬件平台的异构对象抽象需要额外的适配层。
-
-**RDMA/UB 尾未闭环**。数据系统跨节点传输当前仅支持 TCP，RDMA 和 UB（Unified Bus）标注为"即将支持"。跨节点数据传输的延迟和吞吐仍有优化空间。
-
-**数据可靠性有限**。热点数据副本机制仅为性能优化（LRU 淘汰、不保障可靠性），真正的数据可靠性依赖 `write_through/write_back` 持久化策略和 etcd 元数据管理。在极端故障场景下（如节点同时故障），数据可能丢失。
-
-**安全与多租户**。当前支持 Casdoor/Keycloak 认证和 JWT/OAuth2 授权，但文档未详细描述网络隔离、资源硬隔离（如 cgroup 配额强制）等安全机制。多租户场景下的资源竞争和安全边界需要进一步强化。
-
-### 7.2 演进方向
-
-基于源码和文档的分析，openYuanrong 的演进方向包括：
-
-**跨硬件异构对象扩展**。`HeteroClient` 的设备抽象层预留了多硬件支持空间。CUDA GPU 的 HBM（如 NVIDIA H100 的 80GB HBM3）可作为下一个异构对象目标，需要适配 NCCL 集合通信库和 CUDA IPC 机制。
-
-**RDMA/UB 闭环**。数据系统的 worker 间 RDMA 传输将显著提升跨节点数据传输吞吐，对于大规模分布式训练和推理场景尤为关键。
-
-**Serverless 自动弹性**。当前弹性扩缩主要通过手动触发（如 `/scaleout` 接口），完整的 Serverless 体验需要基于负载指标的自动弹性策略（如基于 QPS 的自动扩缩、基于空闲时间的自动缩容）。
-
-**更完善的 BaaS 服务层**。数据系统的 KV 接口已覆盖部分 BaaS 能力（状态存储、发布订阅），但完整的 BaaS 还需要数据库服务、对象存储服务、认证服务等。openYuanrong 可通过数据系统扩展更多内置 BaaS 能力，减少对外部服务的依赖。
+1. **预热实例池**：Scaler维护预创建的实例池（配置`IS_PRESTART=1`），请求到达时直接分配池中实例
+2. **Checkpoint快照恢复**：Snapshot/Snapstart机制将实例状态保存为Checkpoint，恢复时无需重新初始化
+3. **代码预部署**：Agent的CodeDeployer预先将用户代码分发到节点，避免运行时下载
+4. **资源组绑定**：通过资源组预先锁定异构资源，实例创建时无需等待资源分配
 
 ---
 
-## 8 结论
+## 5. 数据系统：异构分布式多级缓存
 
-openYuanrong 以"函数"泛化抽象为核心，构建了一个三层子系统协同的 Serverless 分布式计算引擎。其架构原理的关键在于：(1) 将传统 Serverless 函数扩展为可表达任意分布式应用实例的通用编程单元；(2) 通过近计算共享内存和异构对象直通消解函数间数据传输瓶颈；(3) 通过两级调度和 runtime 快照恢复减轻冷启动开销；(4) 通过数据对象 Future 引用和数据流 pub/sub 简化分布式编程体验。
+### 5.1 数据系统架构
 
-向上，openYuanrong 对 Serverless 范式的支撑价值体现在三个维度：消解数据传输瓶颈（10 倍加速实测）、减轻冷启动开销（有状态函数避免重复初始化 + 异构对象热复制）、简化编程体验（类单机编程接口）。向下，其对昇腾 NPU（HBM/HCCS/RoCE/HCCL）的依赖使异构对象能力只能在特定硬件上实现，对操作系统（共享内存、RDMA、K8s hostNetwork/privileged）的诉求使部署环境有明确门槛。
+数据系统是元戎的高性能数据共享引擎，其架构由三层组成：
 
-openYuanrong 仍处于早期阶段，异构对象跨硬件支持、RDMA 闭环、自动弹性策略等演进方向将决定其能否从"openEuler 社区项目"成长为"通用 Serverless 分布式底座"。
+```
+┌──────────────────────────────────────┐
+│           多语言SDK层                   │
+│  Python SDK │ C++ SDK │ Go SDK │ ...  │
+│  ┌─────────┬───────┬──────────┐      │
+│  │HeteroObj│  KV   │  Object  │      │
+│  │(HBM)    │(DRAM) │(DRAM/SSD)│      │
+│  └─────────┴───────┴──────────┘      │
+├──────────────────────────────────────┤
+│           Worker层                     │
+│  元数据管理 │ 内存管理 │ SSD管理 │       │
+│  分布式协议 │ 一致性模型 │ 持久化策略 │  │
+├──────────────────────────────────────┤
+│           集群管理层                    │
+│  ETCD：节点发现 │ 健康检测 │ 扩缩容    │
+└──────────────────────────────────────┤
+```
+
+### 5.2 三类数据接口
+
+#### 5.2.1 Heterogeneous Object（异构对象）
+
+异构对象是元戎最具创新性的数据抽象——它将NPU的HBM（高带宽内存）抽象为可编程的数据对象：
+
+```python
+# 将数据写入NPU HBM
+client.hetero().dev_mset(key_list, in_data_blob_list)
+
+# 从NPU HBM读取数据
+client.hetero().dev_mget(key_list, out_data_blob_list, timeout_ms)
+
+# NPU间直接传输
+client.hetero().dev_publish(keys, blob2dList, futureVec)
+client.hetero().dev_subscribe(keys, blob2dList, futureVec)
+
+# 删除异构对象
+client.hetero().dev_delete(key_list)
+```
+
+异构对象的核心能力：
+- **HBM直通**：数据直接在NPU HBM间传输，无需经CPU中转
+- **H2D/D2H高速迁移**：DRAM与HBM间快速数据搬运
+- **卡间P2P传输**：NPU卡间通过HCCS/RoCE直通传输，自动协调HCCL收发顺序
+- **多路径负载均衡**：P2P传输支持多路径负载均衡策略，充分利用卡间链路带宽
+
+#### 5.2.2 KV（键值存储）
+
+KV接口提供类Redis的分布式键值存储：
+
+```python
+client.kv().set(key, value)
+client.kv().get([key])
+client.kv().delete([key])
+```
+
+KV的核心特性：
+- **共享内存免拷贝**：SDK与Worker通过共享内存通信，读写DRAM数据无需拷贝
+- **TTL与LRU淘汰**：支持设置数据存活时间与自动淘汰策略
+- **write_through/write_back持久化**：数据可持久化到SSD二级缓存
+- **Causal/PRAM一致性**：支持两种一致性模型，性能与一致性可按需权衡
+- **热点数据多副本**：跨节点读取时自动在本地保存副本
+
+#### 5.2.3 Object（对象缓存）
+
+Object接口提供基于引用计数的分布式对象缓存：
+
+```python
+client.object().g_increase_ref([key])     # 增加全局引用
+buf = client.object().create(key, size)   # 创建共享内存缓冲区
+buf.memory_copy(value)                     # 拷贝数据到共享内存
+buf.publish()                              # 发布对象
+data = client.get([key], True)             # 获取对象
+client.object().g_decrease_ref([key])      # 减少引用（可能触发回收）
+```
+
+Object接口是"Distributed Futures"编程模型的数据支撑——函数间的数据传递通过ObjectRef（对象的轻量级引用）完成，实际数据存储在数据系统的共享内存中。
+
+### 5.3 数据系统关键场景
+
+数据系统的README列出了五大适用场景，每个场景都揭示了元戎的独特设计动机：
+
+1. **LLM长序列推理KVCache**：基于异构对象构建分布式多级KVCache（HBM/DRAM/SSD），Prefill阶段KVCache缓存 + Prefill/Decode实例间KVCache快速传递
+2. **模型推理M→N弹性**：利用异构对象的卡间直通及P2P数据分发实现模型参数快速复制，支撑推理实例弹性扩缩
+3. **强化学习参数重排**：利用卡间直通将训练侧模型参数快速同步到推理侧
+4. **训练Checkpoint快存快载**：KV接口快速写Checkpoint + 异构对象卡间分发快速恢复
+5. **微服务状态快读写**：KV接口内存级读写 + SSD持久化保障可靠性
+
+---
+
+## 6. 三层协同的Serverless运行原理
+
+### 6.1 一次函数调用的完整流程
+
+以`@yr.invoke`装饰的Python函数调用为例，追踪从用户代码到最终返回的完整路径：
+
+```
+用户代码: add.invoke(1, 2)
+    │
+    ▼
+Python SDK (apis.py)
+    │ FunctionProxy.invoke() → 生成ObjectRef作为返回值标识
+    │ 构造InvokeSpec：函数元信息 + 参数 + 调用选项
+    ▼
+Libruntime (C++核心)
+    │ InvokeByFunctionName() → 向函数系统发起调用请求
+    │ DependencyResolver: 如果参数包含ObjectRef，解析数据依赖
+    │ InvokeAdaptor: 根据配置选择通信方式（gRPC/HTTP/WebSocket/DomainSocket）
+    ▼
+函数系统 Proxy
+    │ LocalScheduler: 选择本节点可用实例，或向上请求Master调度
+    │ 如果本节点有可用实例 → 直接路由到该实例的Runtime进程
+    │ 如果本节点无实例 → 向Master请求跨节点调度
+    ▼
+函数系统 Master
+    │ SchedulerFramework: Prefilter → Filter → Score → 绑定节点
+    │ 赃度决策考虑: 资源余量、亲和性、数据局部性、优先级
+    ▼
+函数系统 Agent (目标节点)
+    │ 如果实例已存在 → 转发调用请求到Runtime进程
+    │ 如果实例不存在 → 启动Runtime进程 + 部署代码 + 加载函数
+    ▼
+Runtime进程 (目标节点)
+    │ ReceiveRequestLoop: 接收调用请求
+    │ Executor: 执行用户函数 add(1, 2)
+    │ 序列化结果 → yr.put() 将结果存入数据系统
+    ▼
+数据系统 Worker (目标节点)
+    │ 共享内存写入结果数据
+    │ 如果结果较大 → 通过DRAM/SSD多级缓存存储
+    ▼
+调用方 Libruntime
+    │ Wait(): 等待结果ObjectRef就绪
+    │ Get(): 从数据系统读取结果数据（共享内存免拷贝）
+    │ Python SDK: yr.get(ref) → 反序列化 → 返回Python对象 3
+```
+
+### 6.2 数据驱动的函数调用链
+
+元戎支持函数间通过ObjectRef传递数据，形成分布式调用链：
+
+```python
+@yr.invoke
+def step1(input_data):
+    # 处理输入
+    return processed_data
+
+@yr.invoke
+def step2(ref_from_step1):
+    # ref_from_step1是ObjectRef，自动解析为实际数据
+    data = yr.get(ref_from_step1)
+    return final_result
+
+# 用户代码
+ref1 = step1.invoke(raw_data)
+ref2 = step2.invoke(ref1)     # ObjectRef作为参数传递
+result = yr.get(ref2)
+```
+
+内部原理：
+1. `step2.invoke(ref1)`时，DependencyResolver检测到参数包含ObjectRef
+2. 调用请求被挂起，直到ref1对应的数据就绪
+3. 数据就绪后，调用请求被激活，数据通过共享内存传递到step2实例
+4. 如果step1和step2在同一节点，数据通过共享内存免拷贝传递
+5. 如果在不同节点，数据系统自动跨节点传输
+
+### 6.3 有状态实例的运行原理
+
+`@yr.instance`的运行机制与`@yr.invoke`有本质区别：
+
+```
+@yr.instance → StatefulInstanceCreator
+    │ .invoke() → 创建持久实例
+    │ 返回InstanceProxy（实例代理）
+    │
+InstanceProxy
+    │ .method.invoke() → 通过InstanceId调用特定实例
+    │ 多次调用共享同一实例状态
+    │ 实例状态保存在Runtime进程内存中
+    │ 支持save_state/load_state保存/恢复状态
+    │ 支持Snapshot/Snapstart快照/恢复
+    │ .terminate() → 终止实例
+```
+
+关键区别：
+- 无状态函数（`@yr.invoke`）：每次调用可能调度到不同实例，函数内部无状态保持
+- 有状态实例（`@yr.instance`）：创建后持久存在，所有方法调用路由到同一实例，状态在多次调用间保持
+
+---
+
+## 7. 向上：对用户Serverless的支撑与价值
+
+### 7.1 消除分布式复杂性
+
+元戎向上对用户的核心价值是**将分布式编程体验降维到单机编程水平**：
+
+| 分布式问题 | 传统方案 | 元戎方案 |
+|-----------|---------|---------|
+| 函数调度 | 用户手动部署到指定节点 | `@yr.invoke`自动调度 |
+| 数据传递 | 手动序列化+RPC/消息队列 | `yr.put/get` + ObjectRef自动传递 |
+| 并发控制 | 手动线程池/异步框架 | FiberPool协程自动并发 |
+| 结果等待 | 手动Future/Promise | `yr.wait`自动等待多个结果 |
+| 异构资源 | 手动GPU/NPU分配 | ResourceGroup自动绑定异构资源 |
+| 状态管理 | 手动Redis/数据库 | `@yr.instance`内置状态 + KV接口 |
+| 弹性扩缩 | 手动K8s HPA/VPA | 函数系统自动弹性 |
+
+### 7.2 FaaS能力支撑
+
+元戎为用户提供完整的FaaS能力：
+
+1. **事件触发**：通过Frontend网关支持HTTP/WebSocket触发函数执行
+2. **按需执行**：函数实例按请求创建，空闲时回收，零请求零资源消耗
+3. **自动弹性**：函数系统根据负载自动扩缩实例数量
+4. **多语言支持**：同一套SDK接口支持Python/Java/C++/Go/Rust
+5. **跨语言调用**：Python函数可以调用Java/C++/Go函数（`java_function`/`cpp_function`/`go_function`）
+
+### 7.3 BaaS能力支撑
+
+元戎提供三类BaaS能力：
+
+1. **数据BaaS**：数据系统的KV/Object/Stream/HeteroObj接口，覆盖从内存缓存到异构设备存储的全栈数据服务
+2. **调度BaaS**：函数系统的自动调度、弹性扩缩、跨节点迁移、Checkpoint管理
+3. **编排BaaS**：函数组的创建、等待、终止，支持复杂分布式任务的编排
+
+### 7.4 Serverless必要性论证
+
+为什么用户需要元戎这样的Serverless引擎，而非直接使用Kubernetes或手动部署？
+
+1. **效率**：Serverless消除运维负担，开发者从"管服务器"转向"管业务"
+2. **弹性**：传统部署需要预留资源应对峰值，Serverless按需分配，峰值后自动回收
+3. **成本**：零调用零成本，按使用计费，避免资源浪费
+4. **简化**：分布式编程降维到单机编程水平，降低开发门槛
+5. **性能**：元戎通过共享内存免拷贝、异构对象直通等机制，让Serverless不再牺牲性能
+
+---
+
+## 8. 向下：对设备和操作系统的诉求
+
+### 8.1 对硬件设备的诉求
+
+元戎要实现其高性能Serverless目标，对硬件设备有明确诉求：
+
+#### 8.1.1 NPU/GPU异构加速器
+
+- **HBM高速内存**：异构对象依赖NPU的HBM存储，要求HBM容量足够（如Ascend 910B的64GB HBM）
+- **HCCS/RoCE卡间直通**：NPU间数据直通传输依赖HCCS（Huawei Cache Coherence System）或RoCE（RDMA over Converged Ethernet）高速互联
+- **HCCL通信库**：卡间数据传输依赖HCCL（Huawei Collective Communication Library）协调收发顺序
+
+#### 8.1.2 RDMA网络
+
+- **RDMA/UB传输**：数据系统的Worker间数据传输当前仅支持TCP，但RDMA/UB（Unified Bus）即将支持——这将大幅降低跨节点数据传输延迟
+- **P2P负载均衡**：需要多路径RDMA网络支撑P2P传输负载均衡策略
+
+#### 8.1.3 内存与存储
+
+- **大容量DRAM**：数据系统的多级缓存依赖节点DRAM容量，要求足够大的共享内存空间
+- **NVMe SSD**：二级缓存（L2 Cache）依赖NVMe SSD提供持久化与扩展存储容量
+- **共享内存机制**：SDK与Worker通过共享内存免拷贝通信，要求操作系统支持高效的POSIX共享内存
+
+### 8.2 对操作系统的诉求
+
+#### 8.2.1 Linux内核能力
+
+元戎的运行依赖多项Linux内核能力：
+
+- **POSIX共享内存（shmget/shmat）**：SDK与Worker间免拷贝数据传递的核心机制
+- **进程管理（fork/exec/signal）**：Agent管理Runtime进程的创建、监控、终止
+- **Domain Socket**：Runtime与RuntimeManager间的高效本地通信
+- **cgroup资源隔离**：函数实例的资源限制（CPU/内存）依赖cgroup
+- **namespace隔离**：函数实例的进程/网络/文件系统隔离依赖Linux namespace
+
+#### 8.2.2 openEuler生态诉求
+
+元戎是openEuler社区的旗舰项目，其诉求与openEuler的战略方向高度契合：
+
+- **内核优化**：共享内存性能优化、RDMA内核驱动、cgroup v2支持
+- **容器运行时**：Docker/containerd运行时支持、Kubernetes集成
+- **安全机制**：mTLS认证、JWT鉴权、POSIX权限控制
+- **观测性**：内核级性能观测（eBPF）、分布式追踪（OpenTelemetry集成）
+- **异构驱动**：NPU驱动管理、HCCL库集成
+
+#### 8.2.3 Kubernetes集成诉求
+
+元戎支持两种部署模式：
+
+1. **进程部署**：直接在Linux节点上启动Worker/Proxy/Master等进程
+2. **Kubernetes部署**：通过Helm Chart以DaemonSet/Deployment方式部署
+
+K8s部署诉求：
+- **DaemonSet**：Worker需要在每个节点运行（数据局部性要求）
+- **Pod间共享内存**：需要配置Pod间共享内存机制
+- **NPU设备插件**：需要K8s NPU设备插件（类似GPU设备插件）将NPU资源注册到K8s
+- **网络策略**：需要配置Pod间gRPC/RDMA通信网络策略
+- **存储类**：需要配置本地SSD存储类供二级缓存使用
+
+### 8.3 诉求层级图
+
+```
+┌─────────────────────────────────────┐
+│  应用层诉求                           │
+│  多语言SDK │ 分布式编程 │ Serverless   │
+├─────────────────────────────────────┤
+│  中间件层诉求                         │
+│  ETCD │ Kubernetes │ Docker │ HCCL    │
+├─────────────────────────────────────┤
+│  操作系统层诉求                       │
+│  共享内存 │ cgroup │ namespace │ RDMA │
+│  DomainSocket │ eBPF │ cgroup v2     │
+├─────────────────────────────────────┤
+│  硬件层诉求                           │
+│  NPU(HBM+HCCS) │ RDMA │ NVMe SSD    │
+│  大容量DRAM │ 多路径网络              │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 9. 与主流Serverless平台的对比分析
+
+### 9.1 与AWS Lambda等云函数平台的对比
+
+| 维度 | AWS Lambda | Azure Functions | 元戎 |
+|------|-----------|----------------|------|
+| 架构 | 云托管，用户不可控 | 云托管 | 开源，用户自建集群 |
+| 调度 | 区域级调度 | 区域级调度 | 集群级+节点级双层调度 |
+| 数据传递 | 参数序列化（≤6MB） | 参数序列化 | ObjectRef+共享内存免拷贝 |
+| 异构支持 | 无（仅CPU） | 无 | NPU/GPU异构对象 |
+| 状态 | 无状态 | Durable Functions | @yr.instance有状态实例 |
+| 冷启动 | 100ms-数秒 | 100ms-数秒 | 预热池+Checkpoint快照恢复 |
+| 多级缓存 | 无 | 无 | DRAM/SSD/HBM三级缓存 |
+| 跨语言 | 单语言 | 单语言 | Python/Java/C++/Go互调 |
+| 定价 | 按调用+时长计费 | 按调用+时长计费 | 自建集群，资源成本自控 |
+
+### 9.2 与Ray的对比
+
+Ray是另一个面向AI/ML的分布式计算框架，与元戎有相似的定位但设计路径不同：
+
+| 维度 | Ray | 元戎 |
+|------|-----|------|
+| 核心抽象 | Remote Function + Actor | StatelessFunction + StatefulInstance |
+| 数据传递 | ObjectRef | ObjectRef（名称相同，机制相似） |
+| 调度 | 全局调度器+本地调度器 | Master全局+Proxy本地+Domain领域 |
+| 异构支持 | GPU支持 | NPU/GPU异构对象直通 |
+| 多级缓存 | Plasma共享内存 | DRAM/SSD/HBM三级缓存 |
+| 弹性扩缩 | Autoscaler | 函数系统Scaler+迁移 |
+| 状态管理 | Actor状态 | Instance状态+KV+save_state/load_state |
+| 运行时 | Python为主 | Python/Java/C++/Go/Rust多语言 |
+
+### 9.3 元戎的独特创新
+
+元戎相对于其他Serverless/RPC框架的独特创新点：
+
+1. **异构对象抽象**：将NPU HBM抽象为可编程数据对象，支持卡间直通传输——这是AI推理场景的关键能力，其他平台均不具备
+2. **三层解耦架构**：运行时、调度、数据三个子系统独立部署、按需组合——灵活性远高于一体化架构
+3. **领域调度器**：允许不同业务域定制调度策略——AI推理的NPU亲和性与微服务的延迟优先可以并存
+4. **Distributed Futures + 共享内存**：ObjectRef编程模型+共享内存免拷贝——兼顾编程简洁性与数据传递性能
+5. **资源组异构打包**：CPU+NPU+内存打包调度——确保相关函数实例的拓扑协同放置
+
+---
+
+## 10. 总结与展望
+
+### 10.1 核心结论
+
+openYuanrong（元戎）是一个面向分布式智能场景的Serverless计算引擎，其核心价值链可以总结为：
+
+**向上**：消除分布式编程复杂性，提供FaaS+BaaS全栈Serverless能力，让用户以单机编程体验驾驭分布式AI/大数据/微服务应用。
+
+**向下**：依赖Linux内核的共享内存/cgroup/namespace/RDMA等能力，依赖NPU的HBM/HCCS等异构特性，依赖Kubernetes的容器编排能力——这些诉求与openEuler操作系统生态的战略方向高度契合。
+
+**自身**：三层解耦架构（运行时+调度+数据）是元戎的技术核心，异构对象抽象是其最大创新，Distributed Futures编程模型是其用户体验基石。
+
+### 10.2 未来展望
+
+元戎当前版本（0.8.0.dev）仍在快速迭代，从源码和文档可以看到明确的发展方向：
+
+1. **RDMA/UB传输支持**：数据系统Worker间即将支持RDMA传输，大幅降低跨节点数据延迟
+2. **更多语言SDK**：当前支持Python/Java/C++/Go，Rust SDK已在开发中
+3. **更多NPU支持**：当前主要针对昇腾NPU，未来可能扩展到其他AI加速器
+4. **微服务治理**：Frontend网关的HTTP/WebSocket/JWT能力将持续增强
+5. **边缘计算**：LocalMode允许无函数系统的轻量级运行，为边缘场景奠定基础
+6. **生态集成**：与openEuler操作系统、Kubernetes生态、AI框架（MindSpore/PyTorch）的深度集成
+
+元戎的开源意义不仅在于提供一个Serverless引擎，更在于**为面向AI时代的操作系统定义了一套Serverless基础设施标准**——从编程接口到调度策略，从数据抽象到异构资源管理，它为openEuler乃至更广泛的Linux生态指明了演进方向。
 
 ---
 
 ## 参考文献
 
-[1] J. M. Hellerstein et al., "Serverless Computing: One Step Forward, Two Steps Back," *arXiv preprint arXiv:1812.03697*, 2018.
+1. openYuanrong README及官方文档：https://docs.openyuanrong.org
+2. openYuanrong源码仓库：https://atomgit.com/openeuler/yuanrong
+3. openYuanrong FunctionSystem源码：https://atomgit.com/openeuler/yuanrong-functionsystem
+4. openYuanrong DataSystem源码：https://atomgit.com/openeuler/yuanrong-datasystem
+5. openEuler社区：https://www.openeuler.org
+6. Serverless Computing: Recent Trends, Open Problems, and FaaS Offerings (IEEE TC 2022)
+7. Ray: A Distributed Framework for Emerging AI Applications (OSDI 2018)
+8. AWS Lambda Technical Overview (AWS Whitepaper)
+9. Knative: Serverless on Kubernetes (CNCF)
+10. Boost.Fiber Documentation: https://www.boost.org/doc/libs/release/libs/fiber
 
-[2] V. Shankar et al., "Serverless Data Processing," *CIDR 2023*, 2023.
+---
 
-[3] E. Jonas et al., "Cloud Programming Simplified: A Berkeley View on Serverless Computing," *arXiv preprint arXiv:1902.05862*, 2019.
+*本文基于openYuanrong 0.8.0.dev版本源码深度分析撰写，所有技术细节均来自源码实证。*
 
-[4] M. Rocklin, "Dask: Parallel Computation with Blocked Algorithms and Task Scheduling," *Proceedings of the 14th Python in Science Conference*, 2015.
-
-[5] I. E. Akkus et al., "SAND: Towards High-Performance Serverless Computing," *USENIX ATC 2018*, 2018.
-
-[6] A. Klimovic et al., "SEED: Accelerating Serverless Applications with Heterogeneous Storage," *IEEE Micro*, vol. 40, no. 4, pp. 42–49, 2020.
-
-[7] S. Wang et al., "Characterizing and Optimizing Serverless Cold Starts at Major Cloud Providers," *arXiv preprint arXiv:2006.09206*, 2020.
-
-[8] A. Agache et al., "Firecracker Lightweight Virtualization for Serverless Applications," *NSDI 2020*, 2020.
-
-[9] openYuanrong 项目, "词汇表 — openYuanrong 函数," https://docs.openyuanrong.org/zh-cn/latest/reference/glossary.html, 2025.
-
-[10] openYuanrong 项目, "推理实例模型加载速度 10 倍提升," https://docs.openyuanrong.org/zh-cn/latest/use_cases/accelerate_llm_instance_scaling.html, 2025.
-
-[11] openYuanrong 项目, "openYuanrong datasystem README," https://atomgit.com/openeuler/yuanrong-datasystem, 2025.
-
-[12] openYuanrong 项目, "Function-master 扩缩容运维接口," https://atomgit.com/openeuler/yuanrong-functionsystem, 2025.
-
-[13] openYuanrong 项目, "Sandbox 实现综述," yuanrong/docs/features/sandbox-implementation.md, 2025.
-
-[14] openYuanrong 项目, "Traefik HTTP Provider 设计," yuanrong-functionsystem/docs/traefik-http-provider-design.md, 2025.
-
-[15] openYuanrong 项目, "auto_init.cpp — SDK 自动集群发现," yuanrong/src/libruntime/auto_init.cpp, 2025.
-
-[16] openYuanrong 项目, "libruntime.proto — RuntimeRPC 定义," yuanrong/src/proto/libruntime.proto, 2025.
-
-[17] openYuanrong 项目, "fiber.h — FiberPool 并发模型," yuanrong/src/libruntime/fiber.h, 2025.
-
-[18] openYuanrong 项目, "gw_client.h — GwClient 网关客户端," yuanrong/src/libruntime/gwclient/gw_client.h, 2025.
-
-[19] openYuanrong 项目, "fm_client.h — FMClient Function Master 客户端," yuanrong/src/libruntime/fmclient/fm_client.h, 2025.
-
-[20] openYuanrong 项目, "MGetH2D/MSetD2H Multi-Buffer Python API 设计," yuanrong-datasystem/docs/design/mget_mset_multi_buffer_python_api.md, 2025.
+*License: 本文内容基于对Apache 2.0许可的openYuanrong源码的分析，遵循源码许可条款。*
