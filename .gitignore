@@ -6,4 +6,5 @@
 .opencode/
 
 .gemini/
+.pi/
 gha-creds-*.json
