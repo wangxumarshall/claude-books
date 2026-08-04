@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>openYuanrong 与 openJiuwen 架构深度剖析</title>
+<title>openYuanrong 核心源码与架构剖析</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -716,9 +716,9 @@
   <div class="cover-shell">
     <div class="cover-title-wrap">
       <div class="cover-badge" data-anim><span class="brand-mark" aria-hidden="true"></span></div>
-      <div class="kicker" data-anim>SERVERLESS COMPUTING / 2026</div>
-      <h1 class="h-hero" data-anim style="font-size: 4vw">openYuanrong与openJiuwen<br/>架构深度剖析</h1>
-      <p class="lead cover-subtitle" data-anim>从底层基建到上层智能体平台：分布式系统的极致解耦与单机化编程</p>
+      <div class="kicker" data-anim>SOURCE CODE DEEP DIVE / 2026</div>
+      <h1 class="h-hero" data-anim style="font-size: 3.8vw">openYuanrong 核心源码解析<br/>与架构深度剖析</h1>
+      <p class="lead cover-subtitle" data-anim>深入 UrmaManager、InvokeAdaptor 等底层 C++ 实现，解构 Serverless OS</p>
     </div>
     <div class="cover-visual" aria-hidden="true">
       <span class="orb red" style="width:6vw;height:6vw;right:10vw;top:3vh"></span>
@@ -727,7 +727,6 @@
       <span class="orb" style="width:5vw;height:5vw;right:26vw;top:8vh"></span>
     </div>
   </div>
-  <div class="cover-wave" aria-hidden="true"></div>
   <div class="cover-meta">
     <div>汇报人: 高级架构师</div>
     <div>部门: AI 基础软件研发部</div>
@@ -744,10 +743,10 @@
     </div>
     <div class="agenda-list">
       <div class="agenda-item" data-anim><div class="idx">01</div><div class="txt">Serverless 范式演进与 AI 时代的系统挑战</div></div>
-      <div class="agenda-item" data-anim><div class="idx">02</div><div class="txt">openYuanrong 核心架构：运行时、函数与数据系统剖析</div></div>
-      <div class="agenda-item" data-anim><div class="idx">03</div><div class="txt">向上价值：Serverless 抽象如何重塑开发者体验</div></div>
-      <div class="agenda-item" data-anim><div class="idx">04</div><div class="txt">向下诉求：对 Linux 内核与异构硬件的深度依赖</div></div>
-      <div class="agenda-item" data-anim><div class="idx">05</div><div class="txt">双栈协同：openJiuwen 与 openYuanrong 的架构映射关系</div></div>
+      <div class="agenda-item" data-anim><div class="idx">02</div><div class="txt">openYuanrong 源码架构：运行时、函数与数据系统剖析</div></div>
+      <div class="agenda-item" data-anim><div class="idx">03</div><div class="txt">向上支撑价值：Serverless 抽象的底层封装代码</div></div>
+      <div class="agenda-item" data-anim><div class="idx">04</div><div class="txt">向下硬件诉求：RDMA 与内核隔离级的源码实现</div></div>
+      <div class="agenda-item" data-anim><div class="idx">05</div><div class="txt">openJiuwen 与 openYuanrong 的协同与区别</div></div>
     </div>
   </div>
 </section>
@@ -764,7 +763,7 @@
     </div>
     <div class="red-panel" data-anim>
       <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
-      <h3 class="h-md" style="margin-top:2vh">传统的微服务架构已无法满足大规模 AI Agent 的极速弹性与高频状态交互诉求。</h3>
+      <h3 class="h-md" style="margin-top:2vh">传统 Kubernetes (IaaS/CaaS) 已无法满足大规模 AI Agent 的极速弹性与状态交互诉求。</h3>
     </div>
   </div>
 </section>
@@ -776,337 +775,200 @@
   <div style="padding-top:9vh;display:grid;gap:4vh">
     <div class="content-stack" data-anim>
       <div class="kicker">SERVERLESS EVOLUTION</div>
-      <h2 class="h-xl">从 IaaS 到 Serverless 的演进路径</h2>
+      <h2 class="h-xl">从 K8s 到 Serverless (FaaS/BaaS) 的演进</h2>
     </div>
     <div class="card flat" data-anim style="position:relative;max-width:72vw;margin:auto;padding:5vh 5vw">
       <span style="position:absolute;left:1.4vw;top:1.4vh;width:2.2vw;height:2px;background:var(--brand-red)"></span>
       <span style="position:absolute;left:1.4vw;top:1.4vh;width:2px;height:2.2vw;background:var(--brand-red)"></span>
       <span style="position:absolute;right:1.4vw;bottom:1.4vh;width:2.2vw;height:2px;background:var(--brand-red)"></span>
       <span style="position:absolute;right:1.4vw;bottom:1.4vh;width:2px;height:2.2vw;background:var(--brand-red)"></span>
-      <p class="body-copy" style="margin-bottom:1vh">云计算经历了 <strong>IaaS (虚拟机) -> CaaS (Kubernetes 容器) -> Serverless</strong> 的发展。Serverless 的核心由两部分组成：</p>
-      <p class="body-copy" style="margin-bottom:1vh">1. <strong>FaaS (Function as a Service)</strong>：按请求触发、毫秒级弹性计算。用户仅编写业务函数，零服务器运维。</p>
-      <p class="body-copy">2. <strong>BaaS (Backend as a Service)</strong>：对象存储、KV 数据库等状态托管系统。两者结合，使得开发者可以完全抛弃底层基础设施治理逻辑。</p>
+      <p class="body-copy" style="margin-bottom:1vh"><strong>痛点：</strong>构建多 Agent 协同系统时，开发者必须手写 gRPC 通信、维护 Redis 状态池、处理网络抖动带来的重试机制，业务代码被“隐形税”淹没。</p>
+      <p class="body-copy" style="margin-bottom:1vh"><strong>解决：</strong>Serverless 彻底解耦计算 (FaaS) 与状态 (BaaS)。</p>
+      <p class="body-copy">但在 AI 场景下，传统 FaaS 存在严重的<strong>“冷启动延迟”</strong>与<strong>“大对象（如 KV Cache）搬运耗时”</strong>。openYuanrong 正是为了在内核态和硬件层突破这些天花板而生。</p>
     </div>
   </div>
 </section>
 
-<!-- P05 H26 Metaphor Compare -->
-<section class="slide" data-layout="H26" data-animate="metaphor">
-  <div class="chrome"><div class="l"><span class="square"></span><span>业务挑战</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">CHALLENGE</div><h2 class="h-xl">智能时代：分布式开发的“隐形税”</h2></div>
-    <div class="grid-2" style="margin-top:5vh;align-items:end">
-      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--ink)">
-        <h3 class="h-md" style="margin-bottom:2vh">开发与调试的复杂度困境</h3>
-        <p class="body-copy">构建多 Agent 协同系统时，开发者必须手写 gRPC 通信、维护 Redis 状态池、处理网络抖动带来的重试与幂等。<br/><strong>业务逻辑被大量框架“粘合剂”代码淹没。</strong></p>
-      </div>
-      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--brand-red)">
-        <h3 class="h-md" style="margin-bottom:2vh">资源的低效与扩展延迟</h3>
-        <p class="body-copy">传统容器 (K8s Pod) 扩容需经历镜像拉取、进程启动，耗时在十秒到分钟级；同时，跨节点传递 LLM KV Cache 极大地消耗了带宽。<br/><strong>无法实现应对瞬时突发流量的“极速弹性”。</strong></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- P06 H03 Section 2 -->
+<!-- P05 H03 Section 2 -->
 <section class="slide" data-layout="H03" data-animate="section">
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div class="section-layout">
     <div data-anim>
       <div class="section-no">02</div>
-      <div class="kicker">OPENYUANRONG ARCHITECTURE</div>
-      <h2 class="h-xl" style="margin-top:1.8vh">元戎核心架构剖析</h2>
-      <p class="lead" style="margin-top:2vh">单机化编程，计算与数据极致解耦。</p>
+      <div class="kicker">CODEBASE DIVE</div>
+      <h2 class="h-xl" style="margin-top:1.8vh">openYuanrong 源码架构剖析</h2>
+      <p class="lead" style="margin-top:2vh">单机化编程体验，控制与数据分层解耦。</p>
     </div>
     <div class="red-panel" data-anim>
       <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
-      <h3 class="h-md" style="margin-top:2vh">元戎 (openYuanrong) 通过 Runtime、FunctionSystem、DataSystem 三层架构，重塑了 Serverless 底座。</h3>
+      <h3 class="h-md" style="margin-top:2vh">透视 Runtime、FunctionSystem (控制面) 与 DataSystem (数据面) 在 C++ 层的真实调度链。</h3>
     </div>
   </div>
 </section>
 
-<!-- P07 H17 Central Hub -->
+<!-- P06 H17 Central Hub -->
 <section class="slide" data-layout="H17" data-animate="hub">
   <div class="chrome"><div class="l"><span class="square"></span><span>架构总览</span></div><div></div></div>
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">OVERALL ARCHITECTURE</div><h2 class="h-xl">openYuanrong 三层解耦架构</h2></div>
+    <div class="content-stack" data-anim><div class="kicker">OVERALL ARCHITECTURE</div><h2 class="h-xl">三层解耦与底层依赖</h2></div>
     <div style="position:relative;height:52vh;margin-top:2vh" data-anim>
       <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:12vw;height:12vw;border-radius:999px;background:var(--brand-red);color:#fff;display:grid;place-items:center;font-weight:900;text-align:center;box-shadow:0 12px 24px rgba(210,10,46,0.2)">元戎<br/>Serverless<br/>底座</div>
-      <div style="position:absolute;left:14%;top:10%;width:22vw" class="card"><div class="card-title">Runtime (API 层)</div><p class="card-body">提供 Python/C++ 原生注解，暴露 <code>@yr.invoke</code> 与 <code>@yr.instance</code>，封装分布式路由。</p></div>
-      <div style="position:absolute;right:14%;top:10%;width:22vw" class="card"><div class="card-title">Function System (控制面)</div><p class="card-body">微秒级协程调度、实例生命周期管理、快照冷启动优化、弹性扩缩容。</p></div>
-      <div style="position:absolute;left:16%;bottom:4%;width:22vw" class="card"><div class="card-title">Data System (数据面)</div><p class="card-body">分布式 HeteroObj 池，透明处理进程间与跨节点数据零拷贝传输。</p></div>
-      <div style="position:absolute;right:16%;bottom:4%;width:22vw" class="card"><div class="card-title">OS 基建</div><p class="card-body">基于 openEuler/Linux 内核，依赖 cgroup, namespace, shm, RDMA。</p></div>
+      <div style="position:absolute;left:14%;top:10%;width:22vw" class="card"><div class="card-title">Runtime (API 层)</div><p class="card-body"><code>InvokeOrderManager</code>, <code>InvokeAdaptor</code>。提供 @yr.invoke/instance 注解及 Python/C++/Go 多语言 SDK 封装接口。</p></div>
+      <div style="position:absolute;right:14%;top:10%;width:22vw" class="card"><div class="card-title">Function System (控制面)</div><p class="card-body">Master / Node Proxy / Agent / Worker 分层。集成 CRIU 进程快照与 <code>Boost.Fiber</code> 微秒级协程调度。</p></div>
+      <div style="position:absolute;left:16%;bottom:4%;width:22vw" class="card"><div class="card-title">Data System (数据面)</div><p class="card-body"><code>UrmaManager</code>, <code>UcpEndpoint</code>。管理 <code>HeteroObj</code>（异构对象），支持跨节点 RDMA 互联与节点内 shm 零拷贝。</p></div>
+      <div style="position:absolute;right:16%;bottom:4%;width:22vw" class="card"><div class="card-title">OS 与硬件底座</div><p class="card-body">openEuler 容器化（namespace/cgroup v2），对 PCIe/RoCEv2 网卡及 NPU HBM 显存的直接调用。</p></div>
     </div>
   </div>
 </section>
 
-<!-- P08 H26 Metaphor Compare (API) -->
-<section class="slide" data-layout="H26" data-animate="metaphor">
-  <div class="chrome"><div class="l"><span class="square"></span><span>编程范式</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">RUNTIME ABSTRACTION</div><h2 class="h-xl">无状态调用 vs 有状态 Actor</h2></div>
-    <div class="grid-2" style="margin-top:5vh;align-items:end">
-      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--brand-red)">
-        <h3 class="h-md" style="margin-bottom:2vh">@yr.invoke (FaaS 任务)</h3>
-        <p class="body-copy"><strong>场景</strong>：文本处理、图片压缩、推理算子<br/><strong>特性</strong>：每次调用都在隔离沙箱中执行，完毕后立即回收或进入休眠池。完全无状态，可支撑每秒百万级极速横向扩展。<br/><em>——“用完即毁，零维护负担”</em></p>
-      </div>
-      <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--ink)">
-        <h3 class="h-md" style="margin-bottom:2vh">@yr.instance (Actor 模型)</h3>
-        <p class="body-copy"><strong>场景</strong>：LLM KV Cache、游戏战斗服、长会话 Agent<br/><strong>特性</strong>：实例具有持久化生命周期与内存状态。客户端针对特定实例的调用，系统会自动路由至该实例所在的物理节点，实现<strong>算力与数据的亲和度调度</strong>。<br/><em>——“状态就近，消除网络搬迁”</em></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- P09 H08 Process Arrow -->
+<!-- P07 H08 Process Arrow -->
 <section class="slide" data-layout="H08" data-animate="process">
   <div class="chrome"><div class="l"><span class="square"></span><span>调度闭环</span></div><div></div></div>
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div style="padding-top:8vh">
     <div class="content-stack" data-anim>
       <div class="kicker">DATA/CONTROL DECOUPLING</div>
-      <h2 class="h-xl">控制与数据解耦的调用生命周期</h2>
+      <h2 class="h-xl">数据与控制解耦：<code>InvokeSpec</code> 源码流转</h2>
     </div>
     <div class="process" style="margin-top:7vh">
       <div class="process-step" data-anim>
         <div class="num-pill">01</div>
-        <div class="card-title">数据存入底座</div>
-        <p class="card-body">用户发起 <code>invoke(data)</code>。庞大的 payload 直接写入 DataSystem，生成一个 <code>ObjectRef</code> (引用)。</p>
+        <div class="card-title">Payload 落地</div>
+        <p class="card-body">用户发起 <code>@yr.invoke</code>，大载荷数据写入 DataSystem 生成 ObjectRef。随后调用 <code>InvokeAdaptor::PushInvokeSpec</code>。</p>
       </div>
       <div class="process-step" data-anim>
         <div class="num-pill">02</div>
-        <div class="card-title">轻量级控制流</div>
-        <p class="card-body">仅将几十字节的 <code>ObjectRef</code> 和控制指令经 FunctionSystem 路由分发给合适的 Worker 节点。</p>
+        <div class="card-title">控制指令分发</div>
+        <p class="card-body">仅数十字节的 <code>InvokeSpec</code> (含 ObjectRef) 经 FunctionSystem 路由至适合的 Worker 节点，极速下发。</p>
       </div>
       <div class="process-step" data-anim>
         <div class="num-pill">03</div>
-        <div class="card-title">计算层按需拉取</div>
-        <p class="card-body">Worker 拿到引用后，向本机的 DataSystem 发起请求，通过共享内存实现数据零拷贝拉取。</p>
+        <div class="card-title">Worker 拉取</div>
+        <p class="card-body">Worker 收到指令，通过 <code>UcpWorker::WriteDirect</code> 等底层方法从 DataSystem 零拷贝拉取数据计算。</p>
       </div>
       <div class="process-step" data-anim>
         <div class="num-pill">04</div>
-        <div class="card-title">Future 异步唤醒</div>
-        <p class="card-body">计算结果写入存储池。调用方通过 <code>Distributed Future</code> 机制异步拉取结果，完成闭环。</p>
+        <div class="card-title">异步回调</div>
+        <p class="card-body">执行结果存回 DataSystem，并通过 <code>InvokeOrderManager::NotifyInvokeSuccess</code> 唤醒客户端的 Future 对象。</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- P10 H23 Gear Process -->
-<section class="slide" data-layout="H23" data-animate="gear-process">
-  <div class="chrome"><div class="l"><span class="square"></span><span>函数系统</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">FUNCTION SYSTEM</div><h2 class="h-xl">多级分层调度机制剖析</h2></div>
-    <div class="grid-4" style="margin-top:6vh;align-items:center">
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="globe"></i></div><div class="card-title">Master 集群级</div><p class="card-body">集群大脑。负责租户级隔离、粗粒度资源分配、全局状态监控与容错迁移。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="server"></i></div><div class="card-title">Node Proxy</div><p class="card-body">节点内守护进程。管理本节点的资源池，处理外部请求路由，并拉起 Agent 沙箱。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="shield"></i></div><div class="card-title">Agent 隔离级</div><p class="card-body">沙箱进程。负责加载特定语言（Python/C++）运行时，确保多租户安全边界。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="zap"></i></div><div class="card-title">Worker 协程级</div><p class="card-body">集成 <code>Boost.Fiber</code>。在同一沙箱内开启大量极轻量用户态线程并发处理函数，将上下文切换压至百纳秒级。</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- P11 H15 KPI Dashboard -->
-<section class="slide" data-layout="H15" data-animate="kpi-dashboard">
-  <div class="chrome"><div class="l"><span class="square"></span><span>极致冷启动</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div class="grid-12" style="padding-top:9vh;align-items:end">
-    <div class="span-7 card" data-anim>
-      <div class="kicker">COLD START OPTIMIZATION</div>
-      <div style="height:42vh;display:flex;align-items:end;gap:1.2vw;margin-top:4vh;border-bottom:1px solid var(--line)">
-        <div style="height:90%;width:4vw;background:#d8dde4;position:relative"><span style="position:absolute;top:-3vh;font-size:1vw">K8s Pod</span></div>
-        <div style="height:70%;width:4vw;background:#d8dde4;position:relative"><span style="position:absolute;top:-3vh;font-size:1vw">传统FaaS</span></div>
-        <div style="height:10%;width:4vw;background:var(--brand-red);position:relative"><span style="position:absolute;top:-3vh;font-size:1vw;color:var(--brand-red);font-weight:bold">元戎快照</span></div>
-      </div>
-    </div>
-    <div class="span-5 content-stack" data-anim>
-      <div class="stat-big">Ms 级</div>
-      <div class="card-title">基于 CRIU 的 Snapstart 机制</div>
-      <p class="lead">为了消灭 Python 解释器启动与 AI 模型加载导致的冷启动税，元戎深度集成 <strong>CRIU (进程快照)</strong> 技术。将初始化后的黄金状态 Dump 至 NVMe 磁盘，扩容时直接从磁盘将内存镜像 Map 回进程空间，真正实现毫秒级“热重载”。</p>
-      <div class="red-rule" style="width:10vw"></div>
-    </div>
-  </div>
-</section>
-
-<!-- P12 H20 Icon Matrix -->
-<section class="slide" data-layout="H20" data-animate="icon-matrix">
-  <div class="chrome"><div class="l"><span class="square"></span><span>数据系统</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">DATA SYSTEM</div><h2 class="h-xl">底层异构数据抽象 (DataSystem)</h2></div>
-    <div class="grid-3" style="margin-top:5vh">
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="cpu"></i></div><div class="card-title">HeteroObj 异构对象</div><p class="card-body">元戎的基石数据结构。无论是系统主存、SSD 磁盘，还是 NPU 的 HBM 显存，都被 DataSystem 抽象为统一的 <code>HeteroObj</code> 进行透明管理与引用。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="database"></i></div><div class="card-title">KV / Object 存储池</div><p class="card-body">向上暴露 Redis 风格的 KV 接口与 S3 风格的 Object 接口。用户无需额外部署第三方中间件即可完成状态读写，执行结束内存可自动垃圾回收。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="activity"></i></div><div class="card-title">Stream 流式数据</div><p class="card-body">专为大语言模型 (LLM) 推理设计的长连接流式通道，支持 Token 的极速逐字回传，极大提升终端用户的首字响应时间体验。</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- P13 H03 Section 3 -->
+<!-- P08 H03 Section 3 -->
 <section class="slide" data-layout="H03" data-animate="section">
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div class="section-layout">
     <div data-anim>
       <div class="section-no">03</div>
       <div class="kicker">UPWARD VALUE</div>
-      <h2 class="h-xl" style="margin-top:1.8vh">向上支撑：重塑开发者体验</h2>
-      <p class="lead" style="margin-top:2vh">将编写分布式集群程序的难度，降维到编写单机代码。</p>
+      <h2 class="h-xl" style="margin-top:1.8vh">向上支撑：开发范式降维打击</h2>
+      <p class="lead" style="margin-top:2vh">剥离分布式通信复杂性，将集群代码降维至单机代码。</p>
     </div>
     <div class="red-panel" data-anim>
       <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
-      <h3 class="h-md" style="margin-top:2vh">开发者只关注业务逻辑本身。弹性伸缩、状态缓存、容错路由全部交由元戎平台兜底。</h3>
+      <h3 class="h-md" style="margin-top:2vh">通过 Python/C++ 层面丰富的 Decorator，彻底屏蔽了底层调度、容错与负载均衡逻辑。</h3>
     </div>
   </div>
 </section>
 
-<!-- P14 H12 Media Report Split -->
+<!-- P09 H12 Media Report Split -->
 <section class="slide" data-layout="H12" data-animate="media-report">
-  <div class="chrome"><div class="l"><span class="square"></span><span>代码实例对比</span></div><div></div></div>
+  <div class="chrome"><div class="l"><span class="square"></span><span>API 抽象</span></div><div></div></div>
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div style="padding-top:8vh;display:grid;grid-template-columns:.92fr 1.08fr;gap:3vw;align-items:start">
     <div data-anim>
       <div class="card flat" style="background:#20242c;color:#a2adc0;padding:2vh;font-family:var(--mono);font-size:0.85vw;line-height:1.6;border-radius:8px;box-shadow:var(--shadow-soft)">
-<pre><code>// 传统 gRPC + Redis 伪代码
-<span style="color:#d20a2e">function</span> handleRequest(req) {
-  <span style="color:#d20a2e">if</span> (!redis.get(req.id)) {
-     redis.set(req.id, init());
-  }
-  <span style="color:#d20a2e">try</span> {
-     <span style="color:#d20a2e">return</span> grpcClient.call(req);
-  } <span style="color:#d20a2e">catch</span>(e) {
-     retryPolicy.execute();
-  }
-}</code></pre>
-      </div>
-      <div class="card flat" style="background:#20242c;color:#a2adc0;padding:2vh;font-family:var(--mono);font-size:0.85vw;line-height:1.6;border-radius:8px;box-shadow:var(--shadow-soft);margin-top:2vh;border-left:4px solid var(--brand-red)">
-<pre><code><span style="color:#80c680">// 元戎 Serverless 代码</span>
+<pre><code><span style="color:#80c680"># yr/decorator/function_proxy.py</span>
 <span style="color:#d20a2e">@yr.invoke</span>
-<span style="color:#d20a2e">def</span> process(data):
+<span style="color:#d20a2e">def</span> image_process(data):
+    <span style="color:#80c680"># 触发 InvokeAdaptor::PushInvokeSpec</span>
     <span style="color:#d20a2e">return</span> compute(data)
 
-<span style="color:#80c680"># 调用方直接使用</span>
-future = process.invoke_async(data)
-result = future.get()</code></pre>
+<span style="color:#80c680"># 无状态 FaaS 任务：</span>
+<span style="color:#80c680"># 每次由 FunctionSystem 拉起干净的沙箱</span>
+future = image_process.invoke_async(data)</code></pre>
+      </div>
+      <div class="card flat" style="background:#20242c;color:#a2adc0;padding:2vh;font-family:var(--mono);font-size:0.85vw;line-height:1.6;border-radius:8px;box-shadow:var(--shadow-soft);margin-top:2vh;border-left:4px solid var(--brand-red)">
+<pre><code><span style="color:#80c680"># yr/decorator/instance_proxy.py</span>
+<span style="color:#d20a2e">@yr.instance</span>
+<span style="color:#d20a2e">class</span> LlmAgentActor:
+    <span style="color:#d20a2e">def</span> __init__(self):
+        self.kv_cache = []
+        
+    <span style="color:#d20a2e">def</span> generate(self, token):
+        <span style="color:#80c680"># 触发 InvokeAdaptor::InvokeInstanceFunction</span>
+        self.kv_cache.append(token)
+
+<span style="color:#80c680"># 有状态 Actor 任务：</span>
+<span style="color:#80c680"># 调用强制亲和路由至特定 Worker</span>
+actor = LlmAgentActor()
+actor.generate(t)</code></pre>
       </div>
     </div>
     <div class="content-stack" data-anim>
-      <div class="kicker">DEVELOPER EXPERIENCE</div>
-      <h2 class="h-xl">降维打击：侵入性代码清零</h2>
-      <div class="card flat"><p class="body-copy">传统架构中，非功能性需求（缓存、路由、降级）的实现代码往往超过了核心业务代码。而在元戎中，开发者仅需使用一行 Decorator 注解即可完成服务的分布式暴露。</p></div>
-      <div class="grid-3">
-        <div><div class="num-pill">01</div><p class="card-body">自动网络路由与负载均衡</p></div>
-        <div><div class="num-pill">02</div><p class="card-body">自动对接 DataSystem 存储池</p></div>
-        <div><div class="num-pill">03</div><p class="card-body">高可用容错与失败自动重试</p></div>
+      <div class="kicker">RUNTIME ABSTRACTION</div>
+      <h2 class="h-xl">无状态 (invoke) vs 有状态 (instance)</h2>
+      <div class="card flat"><p class="body-copy">源码中，Runtime 会根据是 <code>FunctionProxy</code> 还是 <code>MethodProxy</code> 来决定走哪种调度逻辑。业务层只需挂载注解，底层的 <code>ContextInvokeParams</code> 会自动绑定会话 ID 并路由状态。</p></div>
+      <div class="grid-2">
+        <div><div class="num-pill">01</div><p class="card-body" style="font-size:1vw"><strong>@yr.invoke</strong><br/>高吞吐 FaaS<br/>用完即毁，零维护负担</p></div>
+        <div><div class="num-pill">02</div><p class="card-body" style="font-size:1vw"><strong>@yr.instance</strong><br/>长会话 BaaS Actor<br/>消除 KV Cache 网络搬迁</p></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- P15 H04 Title Body -->
-<section class="slide" data-layout="H04" data-animate="body">
-  <div class="chrome"><div class="l"><span class="square"></span><span>必然性</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="height:100%;display:grid;grid-template-rows:auto 1fr;gap:4.8vh;padding-top:7vh">
-    <div class="content-stack" data-anim>
-      <div class="kicker">CONCLUSION</div>
-      <h2 class="h-xl">采用元戎基础架构的必然性</h2>
-      <div class="red-rule" style="width:8vw"></div>
-    </div>
-    <div class="grid-2" style="align-items:start">
-      <div class="card flat" data-anim>
-        <p class="body-copy">如果 Kubernetes 解决了应用“如何部署”的问题，那么 Serverless 引擎元戎，则是解决应用“如何开发与运行”的终极方案。只有彻底剥离底层的资源管理负担，企业才能在爆发的 AI 时代实现敏捷的业务迭代。</p>
-      </div>
-      <div class="card" data-anim>
-        <div class="card-title">极致的 TCO (总拥有成本) 收益</div>
-        <p class="card-body">元戎的 FaaS 特性实现了真正的“0请求0消耗”。配合底层高密度的沙箱部署与协程复用，极大地推高了云数据中心的物理资源综合利用率。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- P16 H03 Section 4 -->
+<!-- P10 H03 Section 4 -->
 <section class="slide" data-layout="H03" data-animate="section">
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div class="section-layout">
     <div data-anim>
       <div class="section-no">04</div>
       <div class="kicker">DOWNWARD DEPENDENCY</div>
-      <h2 class="h-xl" style="margin-top:1.8vh">设备与操作系统诉求</h2>
-      <p class="lead" style="margin-top:2vh">元戎的强悍性能，必须建立在先进的 Linux 内核特性与异构硬件底座之上。</p>
+      <h2 class="h-xl" style="margin-top:1.8vh">向下诉求：深入 OS 内核与硬件层</h2>
+      <p class="lead" style="margin-top:2vh">软硬协同是突破 Serverless 性能天花板的唯一路径。</p>
     </div>
     <div class="red-panel" data-anim>
       <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
-      <h3 class="h-md" style="margin-top:2vh">软硬协同是突破系统性能天花板的唯一路径。</h3>
+      <h3 class="h-md" style="margin-top:2vh">剖析 DataSystem 的 UrmaManager 如何压榨 RDMA 极限，以及 FunctionSystem 如何依赖 CRIU。</h3>
     </div>
   </div>
 </section>
 
-<!-- P17 H20 Icon Matrix -->
-<section class="slide" data-layout="H20" data-animate="icon-matrix">
-  <div class="chrome"><div class="l"><span class="square"></span><span>内核依赖</span></div><div></div></div>
+<!-- P11 H23 Gear Process -->
+<section class="slide" data-layout="H23" data-animate="gear-process">
+  <div class="chrome"><div class="l"><span class="square"></span><span>内核与硬件隔离</span></div><div></div></div>
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">KERNEL DEPS</div><h2 class="h-xl">对 openEuler / Linux 内核的刚性需求</h2></div>
-    <div class="grid-4" style="margin-top:5vh">
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="layers"></i></div><div class="card-title">POSIX 共享内存 (shm)</div><p class="card-body">DataSystem 强依赖 <code>/dev/shm</code> (mmap)。同物理机的 Agent 与 Worker 之间传递几百 MB 的张量数据，必须通过共享内存实现 100% 零拷贝，否则序列化会导致服务瘫痪。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="shield"></i></div><div class="card-title">Namespace & cgroup v2</div><p class="card-body">需要操作系统提供极轻量级的虚拟化隔离（容器化），在保证多租户安全（隔离文件/网络栈）的同时，精准限制 CPU 和内存资源的使用配额。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="save"></i></div><div class="card-title">内核级进程快照支持</div><p class="card-body">执行 Snapstart 时，需要内核暴露 <code>ptrace</code> 与特定的 <code>procfs</code> 接口供 CRIU 读取，且能够将 socket/fd 等内核态资源无损序列化并恢复。</p></div>
-      <div class="card" data-anim><div class="icon-disc"><i data-lucide="activity"></i></div><div class="card-title">高效线程调度模型</div><p class="card-body">Boost.Fiber 的微秒级用户态协程，极其依赖宿主内核 CPU 调度的公平性与实时性，以防止阻塞操作饿死整个线程。</p></div>
+    <div class="content-stack" data-anim><div class="kicker">OS & HARDWARE</div><h2 class="h-xl">底层核心依赖树</h2></div>
+    <div class="grid-4" style="margin-top:6vh;align-items:center">
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="layers"></i></div><div class="card-title">POSIX (shm) 零拷贝</div><p class="card-body">同物理机的 Agent 与 Worker 之间传递几百 MB 的张量，DataSystem 强依赖 <code>mmap</code> 及 <code>/dev/shm</code>，彻底消除序列化与拷贝开销。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="network"></i></div><div class="card-title">RDMA (UrmaManager)</div><p class="card-body">跨节点 Object 的传输，源码中直接使用 <code>UrmaManager</code> 与 <code>UrmaResource</code>，封装 RoCEv2 的 GPUDirect RDMA，消灭网络 CPU 中断。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="save"></i></div><div class="card-title">CRIU 快照热重载</div><p class="card-body">FunctionSystem 需要 Linux 内核暴露 <code>ptrace</code> 与 <code>procfs</code>，通过 CRIU 将进程初始态 Dump 到 NVMe，实现毫秒级 Snapstart 扩容。</p></div>
+      <div class="card" data-anim><div class="icon-disc"><i data-lucide="shield"></i></div><div class="card-title">cgroup v2 沙箱隔离</div><p class="card-body">要求 OS 提供轻量级虚拟化隔离（Namespace），确保多租户代码安全，同时精准限制 NPU/CPU 和内存资源的使用配额。</p></div>
     </div>
   </div>
 </section>
 
-<!-- P18 H05 Three Cards -->
-<section class="slide" data-layout="H05" data-animate="cards">
-  <div class="chrome"><div class="l"><span class="square"></span><span>硬件支持</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="padding-top:8vh">
-    <div class="content-stack" data-anim>
-      <div class="kicker">HARDWARE REQ</div>
-      <h2 class="h-xl">针对异构计算的硬件设施要求</h2>
-    </div>
-    <div class="grid-3" style="margin-top:6vh">
-      <div class="card" data-anim>
-        <div class="icon-disc"><i data-lucide="cpu"></i></div>
-        <div class="card-title">NPU / GPU 算力直通与 HBM 纳管</div>
-        <p class="card-body">元戎需要直接与驱动栈交互。不仅要调度异构算力，DataSystem 还需要管理大模型加载在 GPU HBM（显存）上的 KV Cache 张量，支持显存级别的零拷贝引用。</p>
-      </div>
-      <div class="card" data-anim>
-        <div class="icon-disc"><i data-lucide="network"></i></div>
-        <div class="card-title">RDMA 高速互联 (RoCEv2)</div>
-        <p class="card-body">跨节点 Object 的延迟被极致压缩。传统 TCP/IP 协议栈开销过大，DataSystem 强依赖 RDMA 网卡进行内核旁路的直接显存传 (GPUDirect RDMA)，消灭网络 CPU 中断。</p>
-      </div>
-      <div class="card" data-anim>
-        <div class="icon-disc"><i data-lucide="hard-drive"></i></div>
-        <div class="card-title">极速 NVMe SSD 存储池</div>
-        <p class="card-body">CRIU 进程快照会在冷启动唤醒时从磁盘向内存倒灌数以 GB 计的镜像文件。底层存储设施必须配备极致性能的 NVMe I/O 池来支撑瞬时迸发的 IOPS。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- P19 H03 Section 5 -->
+<!-- P12 H03 Section 5 -->
 <section class="slide" data-layout="H03" data-animate="section">
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div class="section-layout">
     <div data-anim>
       <div class="section-no">05</div>
       <div class="kicker">DUAL ENGINE SYNERGY</div>
-      <h2 class="h-xl" style="margin-top:1.8vh">openJiuwen 与 openYuanrong 的协同演进</h2>
-      <p class="lead" style="margin-top:2vh">AI Agent 平台层与基础算力底座的相互成就。</p>
+      <h2 class="h-xl" style="margin-top:1.8vh">openJiuwen 与 openYuanrong 协同架构</h2>
+      <p class="lead" style="margin-top:2vh">AI Agent 应用层与基础算力底座的完美映射与相互成就。</p>
     </div>
     <div class="red-panel" data-anim>
       <div class="kicker" style="color:rgba(255,255,255,.72)">KEY MESSAGE</div>
-      <h3 class="h-md" style="margin-top:2vh">九问 (openJiuwen) 基于元戎底座构建，验证了元戎大模型时代 Serverless 引擎的核心价值。</h3>
+      <h3 class="h-md" style="margin-top:2vh">九问 (openJiuwen) 基于元戎底座构建，验证了元戎在 Agentic Workflow 场景下的核心价值。</h3>
     </div>
   </div>
 </section>
 
-<!-- P20 H26 Metaphor Compare -->
+<!-- P13 H26 Metaphor Compare -->
 <section class="slide" data-layout="H26" data-animate="metaphor">
   <div class="chrome"><div class="l"><span class="square"></span><span>定位区别</span></div><div></div></div>
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
@@ -1115,74 +977,40 @@ result = future.get()</code></pre>
     <div class="grid-2" style="margin-top:5vh;align-items:end">
       <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--ink)">
         <h3 class="h-md" style="margin-bottom:2vh">openJiuwen (九问 AI 平台)</h3>
-        <p class="body-copy"><strong>核心模块</strong>：Agent-core (开发库), Agent-runtime, Memory (长期记忆), Swarm (群体智能), MCP/A2A (通信协议)。<br/><strong>解决问题</strong>：构建、编排大模型智能体，管理 RAG 知识检索逻辑与工作流交互。<br/><strong>面向群体</strong>：AI 应用开发者。</p>
+        <p class="body-copy"><strong>源码模块</strong>：<code>agent-core</code>, <code>agent-runtime</code>, <code>agent-memory</code>, MCP/A2A 通信协议。<br/><strong>业务聚焦</strong>：构建、编排大模型智能体，管理 RAG 知识检索与 Swarm 多智能体群体智能编排。<br/><strong>面向群体</strong>：AI 应用开发者。</p>
       </div>
       <div class="card" data-anim style="text-align:center;padding:5vh 2vw;border-top:4px solid var(--brand-red)">
-        <h3 class="h-md" style="margin-bottom:2vh">openYuanrong (元戎引擎)</h3>
-        <p class="body-copy"><strong>核心模块</strong>：FunctionSystem, DataSystem, Runtime API。<br/><strong>解决问题</strong>：进程调度、沙箱生命周期管理、共享内存对象分配、跨节点 RPC 与容错隔离。<br/><strong>面向群体</strong>：集群系统架构师、底层资源运维方。</p>
+        <h3 class="h-md" style="margin-bottom:2vh">openYuanrong (元戎 Serverless 引擎)</h3>
+        <p class="body-copy"><strong>源码模块</strong>：<code>yuanrong-functionsystem</code>, <code>yuanrong-datasystem</code>, <code>yuanrong</code>。<br/><strong>业务聚焦</strong>：进程调度、沙箱隔离、共享内存 HeteroObj 交换、跨节点 RPC 路由与硬件纳管。<br/><strong>面向群体</strong>：集群系统架构师、底层资源运维方。</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- P21 H24 Arrow Timeline -->
+<!-- P14 H24 Arrow Timeline -->
 <section class="slide" data-layout="H24" data-animate="arrow-timeline">
   <div class="chrome"><div class="l"><span class="square"></span><span>逻辑映射</span></div><div></div></div>
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div style="padding-top:8vh">
-    <div class="content-stack" data-anim><div class="kicker">ARCHITECTURE MAPPING</div><h2 class="h-xl">Agent 业务向底层资源池的下沉降维</h2></div>
+    <div class="content-stack" data-anim><div class="kicker">ARCHITECTURE MAPPING</div><h2 class="h-xl">Agent 业务逻辑向底层资源池的降维映射</h2></div>
     <div class="arrow-timeline" data-anim>
       <div class="arrow-timeline-line"></div>
       <div class="arrow-timeline-head"></div>
-      <div class="card arrow-timeline-card top" style="left:6%;width:22vw"><div class="num-pill">01</div><h4 class="card-title">独立 Agent 映射沙箱</h4><p class="card-body">九问中的每一个智能体进程，都会被元戎包装为一个独立的沙箱隔离运行实例 (Instance)，享受独立的生命周期。</p></div>
-      <div class="card arrow-timeline-card bottom" style="left:34%;width:22vw"><div class="num-pill">02</div><h4 class="card-title">Swarm 协同映射 Future 通信</h4><p class="card-body">九问中多 Agent 的对话、辩论与工作流扭转，在底层通过元戎的 Distributed Futures 和 HeteroObj 进行极低延迟数据交换。</p></div>
-      <div class="card arrow-timeline-card top" style="left:62%;width:22vw"><div class="num-pill">03</div><h4 class="card-title">Memory 映射 DataSystem</h4><p class="card-body">大模型复杂的对话记忆、检索的文档向量，无缝持久化进元戎内置的 KV 和 Object 存储池，彻底避免第三方数据库性能瓶颈。</p></div>
+      <div class="card arrow-timeline-card top" style="left:6%;width:22vw"><div class="num-pill">01</div><h4 class="card-title">独立 Agent -> Instance</h4><p class="card-body">九问中的每一个智能体生命周期，在底层会被映射为一个具备独立持久态内存的 <code>@yr.instance</code> 沙箱隔离实例。</p></div>
+      <div class="card arrow-timeline-card bottom" style="left:34%;width:22vw"><div class="num-pill">02</div><h4 class="card-title">Swarm 协同 -> Future 通信</h4><p class="card-body">多 Agent 之间的对话和辩论，利用元戎的 <code>InvokeOrderManager</code> 及 Distributed Futures 执行亚毫秒级的数据交换。</p></div>
+      <div class="card arrow-timeline-card top" style="left:62%;width:22vw"><div class="num-pill">03</div><h4 class="card-title">Agent Memory -> DataSystem</h4><p class="card-body">长会话记忆、RAG 向量，透明且无缝地下沉至元戎的 <code>HeteroObj</code> 异构存储池中，摒弃第三方 DB 的网络消耗。</p></div>
     </div>
   </div>
 </section>
 
-<!-- P22 H08 Process Arrow -->
-<section class="slide" data-layout="H08" data-animate="process">
-  <div class="chrome"><div class="l"><span class="square"></span><span>算力亲和加速</span></div><div></div></div>
-  <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
-  <div style="padding-top:8vh">
-    <div class="content-stack" data-anim>
-      <div class="kicker">AI WORKLOAD OPTIMIZATION</div>
-      <h2 class="h-xl">KV Cache 就近路由的极致体验</h2>
-    </div>
-    <div class="process" style="margin-top:7vh">
-      <div class="process-step" data-anim>
-        <div class="num-pill">01</div>
-        <div class="card-title">九问发出请求</div>
-        <p class="card-body">Agent 处理长会话任务，向下发起携带海量 Prompt Context 的推理请求。</p>
-      </div>
-      <div class="process-step" data-anim>
-        <div class="num-pill">02</div>
-        <div class="card-title">元戎状态锁定</div>
-        <p class="card-body">元戎 DataSystem 解析请求，识别出该会话对应的历史 KV Cache 张量存留在节点 A 的 NPU 显存上。</p>
-      </div>
-      <div class="process-step" data-anim>
-        <div class="num-pill">03</div>
-        <div class="card-title">路由算力而非数据</div>
-        <p class="card-body">FunctionSystem 不走网络去搬运几十GB的显存数据，而是直接将推断计算任务调度至节点 A 执行 (算力亲和)。</p>
-      </div>
-      <div class="process-step" data-anim>
-        <div class="num-pill">04</div>
-        <div class="card-title">消除 TTFT 尖峰</div>
-        <p class="card-body">避开网络与总线拥塞，首字生成时间 (TTFT) 大幅下降。使得九问平台在多并发压力下依然丝滑。</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- P23 H10 Closing -->
+<!-- P15 H10 Closing -->
 <section class="slide dark" data-layout="H10" data-animate="closing">
   <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"></span><span>HUAWEI</span></div>
   <div style="height:100%;display:grid;align-content:center;gap:3vh;max-width:62vw">
     <div class="cover-badge" data-anim><span class="brand-mark" aria-hidden="true"></span></div>
     <div class="kicker" data-anim>VISION & FUTURE</div>
     <h2 class="h-hero" data-anim style="font-size: 4.8vw">让业务回归业务<br/>让系统回归资源</h2>
-    <p class="lead" style="margin-top:2vh" data-anim>openYuanrong & openJiuwen —— 使能 Agentic Workflow 智能时代。</p>
+    <p class="lead" style="margin-top:2vh" data-anim>深入源码看本质：通过 openYuanrong 的极致解耦底座，使能 openJiuwen 在 Agentic 时代的极速腾飞。</p>
   </div>
 </section>
 
