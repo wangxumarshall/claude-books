@@ -1,0 +1,43 @@
+08-Infra/sdc/cpu_architecture_survey.md
+  s_97290b0ffc3aee::t_ace2f75b638053 1-646
+08-Infra/sdc/cpu_architecture_survey.tex
+  s_97290b0ffc3aee::t_82686be8e8b54f 125-131
+  s_97290b0ffc3aee::t_478952941811df 629,635,637,639,641
+  s_97290b0ffc3aee::t_d93361cde4c2cb 1-124,132-166,174-235,240-288,293-376,381-481,483-485,489-548,556-604,612-628,630-634,636,638,640,642-929
+  s_97290b0ffc3aee::t_f81f3024f964fd 482,486-488
+  s_97290b0ffc3aee::t_e051640f273925 236-239
+  s_97290b0ffc3aee::t_b6d28df6283a33 605-611
+  s_97290b0ffc3aee::t_2b4d7ef6ba7b07 289-292
+  s_97290b0ffc3aee::t_656ada73f747e8 377-380
+  s_97290b0ffc3aee::t_9c5236bfb7af1d 167-173
+  s_97290b0ffc3aee::t_77d41442cdc52e 549-555
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "8afb2557a6d42df1d32f5bde0de0ac0a9688d323",
+  "prompts": {},
+  "sessions": {
+    "s_97290b0ffc3aee": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7ebad625a44bedcc5ccdc0",
+        "model": "DeepSeek-V4-Flash"
+      },
+      "human_author": "wangxumarshall <wangxumarshall@qq.com>",
+      "custom_attributes": {
+        "tool_use_id": "6a8428a225a44bedcc5ccf66",
+        "external_session_id": "6a7ebad625a44bedcc5ccdc0",
+        "edit_kind": "file_edit",
+        "session_id": "6a7ebad625a44bedcc5ccdc0",
+        "source_scene": "agent",
+        "client_type": "ide",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "dedupe_key": "6a7ebad625a44bedcc5ccdc0:6a8428a225a44bedcc5ccf66:afterEdit:97957bb3",
+        "operation_id": "6a8428a225a44bedcc5ccf66",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_type": "builtin"
+      }
+    }
+  }
+}
