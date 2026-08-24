@@ -1,0 +1,56 @@
+{
+  "diagnosis_id": "SDC-20260810-081930",
+  "timestamp": "2026-08-10T08:19:30.958712+00:00",
+  "server_info": {
+    "hostname": "localhost.localdomain",
+    "ip": "123.60.114.33",
+    "cpu_model": "Kunpeng 920",
+    "architecture": "ARM64",
+    "core_count": 192,
+    "smt_enabled": false,
+    "kunpeng_model": "920",
+    "features": "fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma dcpop asimddp asimdfhm ssbs"
+  },
+  "verdict": {
+    "conclusion": "OBSERVE",
+    "sdc_probability": 20,
+    "confidence_level": "LOW",
+    "confidence_interval": {
+      "lower": 10,
+      "upper": 30
+    }
+  },
+  "rules_hit": {
+    "positive_rules": [
+      {
+        "rule_id": "P3",
+        "rule_name": "非计划重启频率异常",
+        "weight": 10,
+        "is_iron_rule": false,
+        "evidence": "5 次重启(观察窗口≈4天, 30天外推≈38次) ≥ 通用阈值6 → P3候选 (NOTE: 计划/非计划未确认, 窗口<30天)",
+        "auto": true
+      }
+    ],
+    "negative_rules": []
+  },
+  "scoring": {
+    "p_score": 10,
+    "n_score": 0,
+    "net_score": 10,
+    "data_completeness": 70
+  },
+  "evidence_summary": {
+    "ras_records": "EDAC: /sys/devices/system/edac/mc/mc0/ce_count: 0 /sys/devices/system/edac/mc/mc0/ue_count: 0 ",
+    "core_concentration": "分布={}, 总计=0",
+    "exception_types": {},
+    "reboot_history": "5 次(窗口≈4天, 30天外推≈38次)",
+    "repair_history": "未提供维修历史",
+    "pmu_deviation": "\n Performance counter stats for 'sleep 10':\n\n            510821      armv8_pmuv3_0/inst_retired/                                           \n            997327      armv8_pmuv3_0/cpu_cycles/           ",
+    "vector_test_results": "8核跨NUMA FP一致性主动探测(各核=-3477.58248354827)全部位级一致，无P12信号"
+  },
+  "recommendations": [
+    "维持生产运行，提高监控频率",
+    "监控CE计数器趋势与PMU事件偏差",
+    "连续测试重访周期≤30天(新架构首季≤15天)"
+  ]
+}
