@@ -1,34 +1,3 @@
-The user wants English example sentences for a 6-year-old who likes toy cars and wants to learn English. They want various combinations related to "喜欢玩车模/喜欢玩具汽车/喜欢汽车" - each combination one sentence, to maximize learning of different English expressions.
-
-Let me create a comprehensive list with different sentence structures, verbs, and phrases to help the child learn varied English expressions.
-
-I should organize by categories with varied sentence structures, verbs, adjectives, and natural child-friendly English. Let me make each sentence slightly different in structure.
-
-Let me create many variations:
-1. I like to play with toy cars.
-2. I love playing with car models.
-3. I enjoy collecting die-cast cars.
-4. Toy cars are my favorite toys.
-5. I'm crazy about model cars.
-6. My favorite thing to do is play with toy cars.
-7. I have lots of toy cars at home.
-8. Playing with toy cars makes me happy.
-9. I like to zoom my toy cars on the floor.
-10. I want a new toy car for my birthday.
-... etc.
-
-Let me make a well-organized, rich list with different structures: verbs (like/love/enjoy/fancy/adore), structures (I like..., My favorite..., I'm into..., ...makes me happy, I want..., I have...), and varied vocabulary.
-
-I'll group them to help learning:
-- 喜欢类动词表达
-- 收藏/拥有类
-- 玩耍动作类
-- 感受类
-- 愿望类
-- 品牌/车型类
-
-This is a general language question, no tools needed. Let me write it directly.
-
 
 ---
 
@@ -135,3 +104,36 @@ This is a general language question, no tools needed. Let me write it directly.
    - 答：*My favorite toy is a toy car.*
 
 这样小朋友既能学到"喜欢玩车"的各种说法，又能接触到英语里不同的句型和词汇！🚗
+
+
+---
+The user wants English example sentences for a 6-year-old who likes toy cars and wants to learn English. They want various combinations related to "喜欢玩车模/喜欢玩具汽车/喜欢汽车" - each combination one sentence, to maximize learning of different English expressions.
+
+Let me create a comprehensive list with different sentence structures, verbs, and phrases to help the child learn varied English expressions.
+
+I should organize by categories with varied sentence structures, verbs, adjectives, and natural child-friendly English. Let me make each sentence slightly different in structure.
+
+Let me create many variations:
+1. I like to play with toy cars.
+2. I love playing with car models.
+3. I enjoy collecting die-cast cars.
+4. Toy cars are my favorite toys.
+5. I'm crazy about model cars.
+6. My favorite thing to do is play with toy cars.
+7. I have lots of toy cars at home.
+8. Playing with toy cars makes me happy.
+9. I like to zoom my toy cars on the floor.
+10. I want a new toy car for my birthday.
+... etc.
+
+Let me make a well-organized, rich list with different structures: verbs (like/love/enjoy/fancy/adore), structures (I like..., My favorite..., I'm into..., ...makes me happy, I want..., I have...), and varied vocabulary.
+
+I'll group them to help learning:
+- 喜欢类动词表达
+- 收藏/拥有类
+- 玩耍动作类
+- 感受类
+- 愿望类
+- 品牌/车型类
+
+This is a general language question, no tools needed. Let me write it directly.
